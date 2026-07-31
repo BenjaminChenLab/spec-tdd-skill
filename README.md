@@ -1,10 +1,20 @@
 # spec-tdd — test-first development skills for Claude Code
 
-A family of [Claude Code](https://claude.com/claude-code) skills for **test-first feature development delegated to a subagent**, built around one core idea:
+A family of [Claude Code](https://claude.com/claude-code) skills for test-first feature development delegated to a subagent.
 
-> **The acceptance test is the spec. It is written by the orchestrator *before* any implementation exists, in a *different context* than the implementer — so it cannot mirror the implementation. "Must be RED first" is the built-in green-lie detector.**
+## The problem: the green lie
 
-This structurally prevents *green lies* — tests that pass only because they were written by the same agent (or in the same context) that wrote the code, mirroring its assumptions. Single-agent TDD defends against this only with timing and discipline; splitting spec-authoring and implementation across the agent boundary turns it into a structural guarantee.
+Let one agent write both the tests and the code and you get the **green lie** — tests that pass only because the same mind wrote both, so they mirror the implementation's assumptions, skip the edges it forgot, and assert tautologies. The suite goes green; the code is still wrong. **You let the same brain be both referee and player.**
+
+Most TDD guidance fights this with *prompting* — exhorting the agent to stay objective. Same agent, same context, trying not to fool itself. Under pressure, it loses.
+
+## The fix: an agent boundary
+
+`spec-tdd` doesn't persuade; it changes the **structure**. One agent (the orchestrator) writes the acceptance test — the spec — *before any implementation exists*, then hands it to a *different* agent (the implementer) as the contract. Written before the impl, by a different context, the test cannot mirror it:
+
+> **"Must be RED first" is the built-in green-lie detector.**
+
+This isn't a new religion — it's established software engineering (black-box testing, contract / seam-driven design, independent verification) ported to agent orchestration. The agent boundary turns "don't fool yourself" from a discipline into a structural guarantee.
 
 Each skill was authored and pressure-tested with the TDD-for-docs process (baseline a failure mode without the skill, then write the skill to counter it).
 
