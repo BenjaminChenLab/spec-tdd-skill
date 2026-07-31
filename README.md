@@ -8,6 +8,74 @@ This structurally prevents *green lies* — tests that pass only because they we
 
 Each skill was authored and pressure-tested with the TDD-for-docs process (baseline a failure mode without the skill, then write the skill to counter it).
 
+## Architecture & Agent Boundaries
+
+The anti-green-lie guarantee comes from **separating spec-authoring and implementation into different agent contexts**; `spec-tdd-adversarial` adds a third, independent context (an attacker) for critical paths. Two views — the core principle, then the complete flow.
+
+### Core — why the agent boundary matters
+
+```mermaid
+flowchart LR
+    subgraph O["Orchestrator context"]
+        A["Write acceptance test (the spec)"]
+        V["Re-run it to verify"]
+    end
+    subgraph I["Implementer subagent"]
+        W["Write impl to pass (GREEN)"]
+    end
+    A ==>|"hand off as contract; must be RED first"| W
+    W --> V
+    V --> D(("Done"))
+```
+
+The acceptance test is written in the orchestrator's context *before* the impl exists, then handed to a different context (the implementer) as the contract. Crossing that boundary is what stops the test from mirroring the impl — the whole point.
+
+### Complete flow
+
+```mermaid
+flowchart TD
+    subgraph F["grill-spec (front-end, optional)"]
+        GR["Grill requirement: business, edges, state, NFR, security"]
+    end
+
+    subgraph O["Orchestrator context"]
+        T["Write acceptance test (RED)"]
+        GT{"Gate: human OK on direction?"}
+        RT["Route to tier by stakes"]
+        V["Re-run acceptance test + adversarial read (+ gap-check)"]
+        P{"Pass and valid?"}
+    end
+
+    subgraph I["Implementer subagent"]
+        IM["Minimal impl + own unit tests"]
+        IC{"Green?"}
+        ERR(["STOP: ERR-01/02/03 + trace"])
+    end
+
+    subgraph ADV["Adversarial context (spec-tdd-adversarial)"]
+        ATK["Independent attacker: wrong-but-green impl + uncovered branches"]
+    end
+
+    GR --> T
+    T --> GT
+    GT -->|"approve / defer to PR"| RT
+    RT --> IM
+    IM --> IC
+    IC -->|"no, repair"| IM
+    IC -.->|"3 failed"| ERR
+    IC -->|yes| V
+    V -.->|"adversarial tier only"| ATK
+    ATK -->|"harden test / add cases"| T
+    V --> P
+    P -->|Yes| DONE(["Done"])
+    P -->|"spec-flawed"| T
+    P -->|"impl-flawed"| RT
+```
+
+- **Orchestrator → Implementer** is the delegation handoff (acceptance test = contract); the **3-strike circuit breaker** caps the implementer's repair loop and tags `ERR-01 env · ERR-02 logic · ERR-03 syntax`.
+- **Verification is orchestrator-run** ("don't trust the subagent's self-report") and **routed by root cause** on failure: spec-flawed → fix the test; impl-flawed → re-delegate.
+- **Context3 (attacker)** is `spec-tdd-adversarial` only. `grill-spec` adds the requirement grill *before* the acceptance test and routes to the matching tier (`spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`).
+
 ## The family
 
 Four skills, organized as **a verification ladder + a grilling front-end**:
