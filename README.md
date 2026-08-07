@@ -1,5 +1,7 @@
 # spec-tdd — test-first development skills for Claude Code
 
+**Version 1.0.0** · [Changelog](CHANGELOG.md) · [License](LICENSE)
+
 A family of [Claude Code](https://claude.com/claude-code) skills for test-first feature development delegated to a subagent.
 
 ## The problem: the green lie

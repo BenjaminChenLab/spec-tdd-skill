@@ -23,6 +23,8 @@ spec-tdd-coverage, plus: an **independent adversarial subagent** — a *third* c
 ## The 3 Phases (delta vs spec-tdd-coverage in **bold**)
 
 ### Phase 1 — Orchestrator writes the acceptance test
+> **Arrived from `grill-spec`?** The acceptance test is already written and RED — skip to Phase 2, but ENSURE the mandatory property/differential tests below exist (add them if grill-spec didn't).
+
 As spec-tdd-coverage: ground it, behavioral black-box, MUST be RED, note the branch/exception surface. PLUS:
 - **Property/invariant tests are MANDATORY** (money conservation, net-zero, monotonicity, no-silent-loss). Where an unbiased oracle exists (e.g. `BigInteger` for integer money), write a **differential property test**: random inputs, assert your result equals the oracle's. Oracles catch bugs hand-written cases miss.
 - **Seed the attacker**: list the wrong-but-plausible impls you most fear ("silently wraps on overflow," "skips nulls and nets the rest," "accepts mixed currency"). Drives Phase 3.
