@@ -1,0 +1,7 @@
+# Normalize all text files to LF line endings — in the repo and on checkout.
+# Overrides core.autocrlf so Windows checkouts don't get CRLF (silences the
+# "LF will be replaced by CRLF" warnings on these markdown skill files).
+* text=auto eol=lf
+
+# Markdown is the bulk of this repo — be explicit.
+*.md text eol=lf

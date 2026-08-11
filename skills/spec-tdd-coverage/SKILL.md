@@ -20,7 +20,7 @@ spec-tdd's handoff says *"add your own unit tests"* — no case-list, no coverag
 ## The 3 Phases (delta vs spec-tdd in **bold**)
 
 ### Phase 1 — Orchestrator writes the acceptance test
-> **Arrived from `grill-spec`?** The acceptance test is already written and RED — skip to Phase 2 (still note the branch/exception surface for your gap-check).
+> **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip to Phase 2 (still note the branch/exception surface for your gap-check).
 
 As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED**. **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
 

@@ -18,7 +18,7 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 ## The 3 Phases
 
 ### Phase 1 — Orchestrator writes the acceptance test
-> **Arrived from `grill-spec`?** The acceptance test is already written and RED — skip this phase, go straight to Phase 2.
+> **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip this phase, go straight to Phase 2.
 
 1. Requirement unclear? **Ask, don't guess.** (Can't write the test = the spec is unclear — that's the signal, surfaced before coding.)
 2. **Ground it**: read relevant entities/services/repos/existing patterns first; the test must fit the real architecture.

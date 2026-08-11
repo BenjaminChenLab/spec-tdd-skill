@@ -1,6 +1,6 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.0.0** · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.1.0** · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
 A family of [Claude Code](https://claude.com/claude-code) skills for test-first feature development delegated to a subagent.
 
@@ -46,8 +46,9 @@ The acceptance test is written in the orchestrator's context *before* the impl e
 
 ```mermaid
 flowchart TD
-    subgraph F["grill-spec (front-end, optional)"]
-        GR["Grill requirement: business, edges, state, NFR, security"]
+    subgraph F["Front-ends (optional)"]
+        GR["grill-spec-tdd — grill requirement: business, edges, state, NFR, security"]
+        ES["spec-tdd-escalate — route settled req by stakes (no grill, no gate)"]
     end
 
     subgraph O["Orchestrator context"]
@@ -71,6 +72,7 @@ flowchart TD
     GR --> T
     T --> GT
     GT -->|"approve / defer to PR"| RT
+    ES --> RT
     RT --> IM
     IM --> IC
     IC -->|"no, repair"| IM
@@ -86,36 +88,41 @@ flowchart TD
 
 - **Orchestrator → Implementer** is the delegation handoff (acceptance test = contract); the **3-strike circuit breaker** caps the implementer's repair loop and tags `ERR-01 env · ERR-02 logic · ERR-03 syntax`.
 - **Verification is orchestrator-run** ("don't trust the subagent's self-report") and **routed by root cause** on failure: spec-flawed → fix the test; impl-flawed → re-delegate.
-- **Context3 (attacker)** is `spec-tdd-adversarial` only. `grill-spec` adds the requirement grill *before* the acceptance test and routes to the matching tier (`spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`).
+- **Context3 (attacker)** is `spec-tdd-adversarial` only. `grill-spec-tdd` adds the requirement grill *before* the acceptance test and routes to the matching tier; `spec-tdd-escalate` is the no-grill sibling — it routes a settled requirement straight to the matching tier, and that tier writes the test in its own Phase 1.
 
 ## The family
 
-Four skills, organized as **a verification ladder + a grilling front-end**:
+Five skills, organized as **a verification ladder + two front-ends** — `grill-spec-tdd` (grill a fuzzy requirement, then route) and `spec-tdd-escalate` (route a settled requirement, no grilling):
 
 | Skill | Role |
 |---|---|
 | [`spec-tdd`](skills/spec-tdd/SKILL.md) | The base. Orchestrator writes the acceptance test (RED), delegates to one subagent, verifies by running it. |
 | [`spec-tdd-coverage`](skills/spec-tdd-coverage/SKILL.md) | `spec-tdd` + **coverage evidence**: the subagent declares a case-list *before* impl and reports per-class branch %; the orchestrator gap-checks. |
 | [`spec-tdd-adversarial`](skills/spec-tdd-adversarial/SKILL.md) | `spec-tdd-coverage` + an **independent attacker** (a third agent context) that tries to write a wrong-but-green impl and hunts uncovered branches. Top tier — critical paths only. |
-| [`grill-spec`](skills/grill-spec/SKILL.md) | A **front-end**: interrogate a fuzzy/high-stakes requirement ("grill"), write the acceptance test, gate it, *then route* to whichever verification tier fits. |
+| [`grill-spec-tdd`](skills/grill-spec-tdd/SKILL.md) | A **front-end**: interrogate a fuzzy/high-stakes requirement ("grill"), write the acceptance test, gate it, *then route* to whichever verification tier fits. |
+| [`spec-tdd-escalate`](skills/spec-tdd-escalate/SKILL.md) | A **front-end** for SETTLED requirements: skips grilling and auto-routes to whichever verification tier fits the stakes — full-auto, no gate. |
 
-The ladder inherits upward: `spec-tdd` → `spec-tdd-coverage` → `spec-tdd-adversarial`. `grill-spec` is orthogonal — a Phase-1 front-end that composes with any tier, so `grill × {spec-tdd, coverage, adversarial}` are all reachable **without** duplicating skills into monolithic combos.
+The ladder inherits upward: `spec-tdd` → `spec-tdd-coverage` → `spec-tdd-adversarial`. `grill-spec-tdd` and `spec-tdd-escalate` are orthogonal front-ends: `grill-spec-tdd` grills a fuzzy requirement then routes; `spec-tdd-escalate` routes a settled one with no grilling. Both compose with any tier, so `{grill, escalate} × {spec-tdd, coverage, adversarial}` are all reachable **without** duplicating skills into monolithic combos.
 
 Every tier's handoff carries a **3-strike circuit breaker** (stop after 3 repair attempts; tag the failure `ERR-01` env/dep · `ERR-02` logic · `ERR-03` syntax, with a truncated trace) and **dual-track failure routing** (spec-flawed → fix the test; impl-flawed → re-delegate with the error tag).
 
 ## When to use which
 
 ```
+Requirement SETTLED and you want the tier picked for you?
+  yes → spec-tdd-escalate   (auto-routes by stakes; no grilling, no gate)
+
+Otherwise pick the tier yourself:
 Correctness-CRITICAL? (money movement / auth-permissions / data-loss)
   yes → spec-tdd-adversarial
   no  → Need branch-coverage EVIDENCE? (large/subtle branch surface, weak tests, compliance)
           yes → spec-tdd-coverage
           no  → Requirement FUZZY or high-stakes?
-                  yes → grill-spec   (grills, then routes to the right tier)
+                  yes → grill-spec-tdd   (grills, then routes to the right tier)
                   no  → spec-tdd      (the cheap default)
 ```
 
-Rule of thumb: unsure? Start with `grill-spec` — it grills the requirement and routes to the matching tier for you.
+Rule of thumb: requirement already settled and you just want it routed? Use `spec-tdd-escalate`. Fuzzy, or you want to interrogate it first? Start with `grill-spec-tdd` — it grills and routes to the matching tier for you.
 
 ## How it relates to the `superpowers` plugin
 
@@ -138,26 +145,27 @@ cp -r skills/* ~/.claude/skills/
 Then invoke in Claude Code with `/<skill-name> <feature>`, e.g.:
 
 ```
-/grill-spec add coupon discounts to checkout (Java/Spring, Order at src/main/.../Order.java)
+/grill-spec-tdd add coupon discounts to checkout (Java/Spring, Order at src/main/.../Order.java)
 ```
 
 ## A quick walkthrough
 
-1. **Grill** — `grill-spec` interrogates every dimension in batches (business logic, boundaries, state transitions, NFRs, security/fraud) and forces an explicit decision on each.
+1. **Grill** — `grill-spec-tdd` interrogates every dimension in batches (business logic, boundaries, state transitions, NFRs, security/fraud) and forces an explicit decision on each.
 2. **Write the acceptance test** — behavioral, black-box; run it to confirm RED.
 3. **Gate** — the test + decisions surface for a quick human OK *before* delegating (the cheapest direction-check).
-4. **Route** — `grill-spec` picks the tier by stakes (e.g. money → `spec-tdd-adversarial`).
+4. **Route** — `grill-spec-tdd` picks the tier by stakes (e.g. money → `spec-tdd-adversarial`).
 5. **Delegate** — a subagent implements to green; the circuit breaker guards against runaway loops.
 6. **Verify** — the orchestrator runs the acceptance test itself, reads it adversarially, reports.
 
-For plain `spec-tdd`, skip the grill batch and route; the gate surfaces the test at verification time.
+For plain `spec-tdd`, skip the grill batch and route; the gate surfaces the test at verification time. For `spec-tdd-escalate`, skip the grill entirely — give it a settled requirement and it auto-routes to the right tier (no gate; the tier writes the test in its own Phase 1).
 
 ## Why it works
 
 - **Agent-boundary = anti-green-lie.** A test written before the impl exists, by a different context, can't mirror it.
 - **Coverage as evidence, not luck.** `spec-tdd-coverage` makes branch coverage a measured, reported artifact with a case-list to audit — not a hopeful side-effect of green tests.
 - **Independence for critical paths.** `spec-tdd-adversarial` adds a third context (an attacker) that a diligent same-context agent cannot give itself.
-- **Grill before you build.** `grill-spec` forces every requirement dimension explicit (incl. NFR + security) instead of collapsing to "sensible defaults" under pressure.
+- **Grill before you build.** `grill-spec-tdd` forces every requirement dimension explicit (incl. NFR + security) instead of collapsing to "sensible defaults" under pressure.
+- **Auto-route when decided.** `spec-tdd-escalate` picks the tier for you when the requirement is already settled — no grilling, no gate, route-only.
 
 ## License
 

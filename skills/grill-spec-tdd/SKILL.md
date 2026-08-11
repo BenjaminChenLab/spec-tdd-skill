@@ -1,9 +1,9 @@
 ---
-name: grill-spec
-description: Use when the user says "grill-spec", or wants to interrogate/grill requirements before a test-first delegated implementation — especially for fuzzy or high-stakes (money/auth/data) features. Triggers on requirement grilling before coding, spec-as-test, test-first-by-orchestrator, and avoiding wasted subagent runs on wrong-direction specs.
+name: grill-spec-tdd
+description: Use when the user says "grill-spec-tdd", or wants to interrogate/grill requirements before a test-first delegated implementation — especially for fuzzy or high-stakes (money/auth/data) features. Triggers on requirement grilling before coding, spec-as-test, test-first-by-orchestrator, and avoiding wasted subagent runs on wrong-direction specs.
 ---
 
-# grill-spec
+# grill-spec-tdd
 
 ## Overview
 **The requirement-grilling front-end for the `spec-tdd` family.** Interrogate the requirement until it's unambiguous ("grill"), write the acceptance test — the spec — before any implementation exists, gate it, THEN route to the verification tier that fits the stakes: `spec-tdd` (default), `spec-tdd-coverage`, or `spec-tdd-adversarial`. That tier carries the delegation handoff, circuit breaker, and failure routing.
@@ -13,9 +13,9 @@ description: Use when the user says "grill-spec", or wants to interrogate/grill 
 **Core principle (inherited from `spec-tdd`):** the acceptance test is authored before any impl, in a different context than the implementer — so it cannot mirror an implementation. **"Must be RED first"** is the green-lie detector.
 
 ## When to Use
-- User says `grill-spec <feature>`.
+- User says `grill-spec-tdd <feature>`.
 - Requirement is fuzzy, high-stakes (money / auth / data-loss), or a wrong-direction subagent run would be expensive.
-- For crisp, already-specified, low-stakes features, skip this and use `spec-tdd` directly.
+- For an already-settled requirement (no grilling needed), skip this: low-stakes and you know the tier → `spec-tdd` directly; want the tier auto-picked by stakes → `spec-tdd-escalate`.
 
 ## Phase 1 — Grill, write the acceptance test, gate
 1. **Grill in batches** — interrogate EVERY dimension, not just the obvious ones: business logic, boundary/edge cases, state transitions, **NFRs (perf / scale / cost)**, and **security / fraud / abuse**. Force an explicit decision on each. *If you can't state a decision for a dimension, you haven't grilled it.*
