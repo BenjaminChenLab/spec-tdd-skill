@@ -10,7 +10,7 @@ description: Use when the user says "grill-spec-tdd", or wants to interrogate/gr
 
 **Why a separate front-end:** under pressure, agents skip grilling and hand a subagent a fuzzy spec, or collapse it to "sensible defaults." Grilling first forces every dimension (incl. NFR + security) explicit and gets a human OK on direction before a subagent burns tokens on the wrong thing.
 
-**Core principle (inherited from `spec-tdd`):** the acceptance test is authored before any impl, in a different context than the implementer — so it cannot mirror an implementation. **"Must be RED first"** is the green-lie detector.
+**Core principle (inherited from `spec-tdd`):** the acceptance test is authored before any impl, in a different context than the implementer — so it cannot have been reverse-engineered to mirror an implementation (it can still be *wrong*; that's a different failure mode). **"Must be RED first"** is the green-lie detector.
 
 ## When to Use
 - User says `grill-spec-tdd <feature>`.
@@ -21,6 +21,7 @@ description: Use when the user says "grill-spec-tdd", or wants to interrogate/gr
 1. **Grill in batches** — interrogate EVERY dimension, not just the obvious ones: business logic, boundary/edge cases, state transitions, **NFRs (perf / scale / cost)**, and **security / fraud / abuse**. Force an explicit decision on each. *If you can't state a decision for a dimension, you haven't grilled it.*
    - **Grilling ≠ silent defaults.** Deciding deliberately after interrogating every dimension is the grill; collapsing to "sensible defaults" without hitting NFR/security is the failure mode. A missed dimension isn't a design decision — it's an absent one (e.g. coupon fraud, lockout-DoS).
    - **The grill is self-directed.** Stakeholders unreachable tonight? You still grill — you interrogate and decide. Their reachability affects the *gate* (step 6), not the grill.
+   - **STOP GRILLING when remaining open questions cannot materially change** observable behavior, state transitions, failure semantics, data integrity, security/authorization, compatibility, or explicit NFRs. The grill is bounded by *materiality*, not by asking until exhausted — a question that wouldn't change any of those is bureaucracy, not grilling. Note it and move on; don't let the grill devolve into an endless question loop.
 2. **Ground it**: read the relevant entities/services/repos/patterns first; the test must fit the real architecture.
 3. **Write BEHAVIORAL acceptance tests** — black-box, input→output/state. Test WHAT, not HOW; don't couple to internal method shapes.
 4. (Domain logic only) add 1–3 **property/invariant tests** (e.g. money conservation). Properties can't become green lies.
@@ -44,6 +45,7 @@ When the tier loads:
 - "The failure mode isn't a wrong design decision, so I'll skip grilling."
 - "I'll just pick sensible defaults and note them." (did you hit NFR + security?)
 - "No one's reachable tonight, so I'll skip the grill/gate." (grill is self-directed)
+- "I still have more questions to ask." — but none would change behavior, state, failure semantics, data, security, compatibility, or NFRs. (STOP GRILLING — materiality bounds the grill, not exhaustion)
 - "My tests encode my assumptions, so I don't need a human OK before delegating." (tests catch logic, not direction)
 
 ## Common Mistakes

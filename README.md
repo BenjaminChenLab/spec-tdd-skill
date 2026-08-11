@@ -1,8 +1,8 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.1.0** · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.2.0** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
-A family of [Claude Code](https://claude.com/claude-code) skills for test-first feature development delegated to a subagent.
+A family of [Claude Code](https://claude.com/claude-code) skills enforcing **a protocol for preventing correlated test/implementation failure in AI-generated software** (the technical name for the *green lie*). Executable specifications, agent-boundary isolation, and independent verification for agentic TDD.
 
 ## The problem: the green lie
 
@@ -12,11 +12,11 @@ Most TDD guidance fights this with *prompting* — exhorting the agent to stay o
 
 ## The fix: an agent boundary
 
-`spec-tdd` doesn't persuade; it changes the **structure**. One agent (the orchestrator) writes the acceptance test — the spec — *before any implementation exists*, then hands it to a *different* agent (the implementer) as the contract. Written before the impl, by a different context, the test cannot mirror it:
+`spec-tdd` doesn't persuade; it changes the **structure**. One agent (the orchestrator) writes the acceptance test — the spec — *before any implementation exists*, then hands it to a *different* agent (the implementer) as the contract. Written before the impl, by a different context, the test cannot have been reverse-engineered to mirror it (it can still be *wrong* — see below):
 
 > **"Must be RED first" is the built-in green-lie detector.**
 
-This isn't a new religion — it's established software engineering (black-box testing, contract / seam-driven design, independent verification) ported to agent orchestration. The agent boundary turns "don't fool yourself" from a discipline into a structural guarantee.
+This isn't a new religion — it's established software engineering (black-box testing, contract / seam-driven design, independent verification) ported to agent orchestration. The agent boundary turns "don't fool yourself" from a discipline into a structural guarantee **against the green lie** — the test cannot have been reverse-engineered to mirror the impl. It does not guarantee the spec is *right* (a misread requirement still makes a bad test); that failure mode is handled by other mechanisms — RED-first, the Phase-3 adversarial read, the grill, and the independent attacker.
 
 Each skill was authored and pressure-tested with the TDD-for-docs process (baseline a failure mode without the skill, then write the skill to counter it).
 
@@ -82,12 +82,13 @@ flowchart TD
     ATK -->|"harden test / add cases"| T
     V --> P
     P -->|Yes| DONE(["Done"])
-    P -->|"spec-flawed"| T
-    P -->|"impl-flawed"| RT
+    P -->|"SPEC (re-open req)"| T
+    P -->|"TEST (fix test)"| T
+    P -->|"IMPL (re-delegate)"| RT
 ```
 
-- **Orchestrator → Implementer** is the delegation handoff (acceptance test = contract); the **3-strike circuit breaker** caps the implementer's repair loop and tags `ERR-01 env · ERR-02 logic · ERR-03 syntax`.
-- **Verification is orchestrator-run** ("don't trust the subagent's self-report") and **routed by root cause** on failure: spec-flawed → fix the test; impl-flawed → re-delegate.
+- **Orchestrator → Implementer** is the delegation handoff (acceptance test = contract); the **circuit breaker** caps the implementer's repair loop — STOP after 3 attempts OR the same root cause on any two attempts — and tags `ERR-01 env · ERR-02 logic · ERR-03 syntax`.
+- **Verification is orchestrator-run** ("don't trust the subagent's self-report"): it re-hashes the acceptance test to prove the implementer didn't edit it (**SPEC-INTEGRITY**), then **routes by root cause** — three buckets: SPEC (re-open the requirement) → rewrite the test; TEST (requirement right, test weak/incomplete) → strengthen the test; IMPL (code wrong) → re-delegate.
 - **Context3 (attacker)** is `spec-tdd-adversarial` only. `grill-spec-tdd` adds the requirement grill *before* the acceptance test and routes to the matching tier; `spec-tdd-escalate` is the no-grill sibling — it routes a settled requirement straight to the matching tier, and that tier writes the test in its own Phase 1.
 
 ## The family
@@ -104,7 +105,7 @@ Five skills, organized as **a verification ladder + two front-ends** — `grill-
 
 The ladder inherits upward: `spec-tdd` → `spec-tdd-coverage` → `spec-tdd-adversarial`. `grill-spec-tdd` and `spec-tdd-escalate` are orthogonal front-ends: `grill-spec-tdd` grills a fuzzy requirement then routes; `spec-tdd-escalate` routes a settled one with no grilling. Both compose with any tier, so `{grill, escalate} × {spec-tdd, coverage, adversarial}` are all reachable **without** duplicating skills into monolithic combos.
 
-Every tier's handoff carries a **3-strike circuit breaker** (stop after 3 repair attempts; tag the failure `ERR-01` env/dep · `ERR-02` logic · `ERR-03` syntax, with a truncated trace) and **dual-track failure routing** (spec-flawed → fix the test; impl-flawed → re-delegate with the error tag).
+Every tier's handoff carries a **circuit breaker** (STOP after 3 repair attempts OR the same root cause on any two attempts; tag the failure `ERR-01` env/dep · `ERR-02` logic · `ERR-03` syntax, with a truncated trace) and **three-bucket failure routing** — SPEC (re-open the requirement) → rewrite the test; TEST (requirement right, test incomplete) → strengthen the test; IMPL (code wrong) → re-delegate with the error tag.
 
 ## When to use which
 
@@ -161,7 +162,8 @@ For plain `spec-tdd`, skip the grill batch and route; the gate surfaces the test
 
 ## Why it works
 
-- **Agent-boundary = anti-green-lie.** A test written before the impl exists, by a different context, can't mirror it.
+- **Agent-boundary = anti-green-lie.** A test written before the impl exists, by a different context, can't have been reverse-engineered to mirror it (it can still be *wrong* — handled by the mechanisms below).
+- **Human validates WHAT, agent validates HOW.** The pipeline separates the two failure modes a same-agent flow conflates: a *wrong spec* is the human's call — caught by reviewing the **test** (the cheap, high-signal checkpoint) — and a *wrong implementation* is the agent's call — caught by **running** the test. Review the test, not the code.
 - **Coverage as evidence, not luck.** `spec-tdd-coverage` makes branch coverage a measured, reported artifact with a case-list to audit — not a hopeful side-effect of green tests.
 - **Independence for critical paths.** `spec-tdd-adversarial` adds a third context (an attacker) that a diligent same-context agent cannot give itself.
 - **Grill before you build.** `grill-spec-tdd` forces every requirement dimension explicit (incl. NFR + security) instead of collapsing to "sensible defaults" under pressure.

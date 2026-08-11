@@ -25,8 +25,10 @@ spec-tdd's handoff says *"add your own unit tests"* — no case-list, no coverag
 As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED**. **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
 
 ### Phase 2 — Delegate to subagent (extended handoff)
+**SPEC-INTEGRITY snapshot (before dispatch):** hash the acceptance test (`sha256sum <file>` / `certutil -hashfile <file> SHA256` / `git hash-object <file>`) and record it — the immutability baseline you verify in Phase 3.
+
 ```
-TASK: Implement {feature} so the acceptance test passes. Do NOT modify it;
+TASK: Implement {feature} so the acceptance test passes. Do NOT modify it — it is hashed and verified byte-for-byte on return;
 if it looks wrong, STOP and report — never silently weaken it.
 
 ACCEPTANCE TEST (RED): {file}
@@ -46,7 +48,7 @@ DO:
    a one-line justification (dead code / defensive / unreachable / SHOULD-test).
    Tools: Java → ./gradlew :Core:jacocoTestReport ;
    JS → node --test --experimental-test-coverage ; Python → pytest --cov
-CIRCUIT BREAKER: if the test still fails after 3 repair attempts, STOP. Report a short structured diagnosis — tag it env/dependency (ERR-01), logic violation (ERR-02), or syntax/compile (ERR-03) — with a TRUNCATED trace and expected-vs-actual. Don't keep retrying.
+CIRCUIT BREAKER: STOP if either fires — (a) the test still fails after 3 repair attempts, OR (b) **the same root cause appears on ANY two attempts** — same failing file:line AND same failing assertion (not necessarily consecutive; not a rephrased free-text trace). Don't burn a third attempt re-trying one identical misdiagnosis — each attempt must rest on a DIFFERENT root cause. Report a short structured diagnosis — tag it env/dependency (ERR-01), logic violation (ERR-02), or syntax/compile (ERR-03) — with a TRUNCATED trace and expected-vs-actual. Don't keep retrying.
 
 RETURN: case-list + impl + unit tests + ACTUAL green output
         + per-class coverage excerpt (branch %, uncovered lines + justifications).
@@ -54,7 +56,7 @@ RETURN: case-list + impl + unit tests + ACTUAL green output
 ```
 
 ### Phase 3 — Orchestrator verifies
-spec-tdd's checks, PLUS:
+spec-tdd's checks (incl. the **SPEC-INTEGRITY hash check** and the **SPEC/TEST/IMPL failure routing**), PLUS:
 1. **GAP-CHECK** — read the impl's actual branches; confirm each has a case. Any branch with no case → add one. *(Same agent wrote case-list and impl, so this cross-context check stops a case-list that quietly mirrors the impl.)*
 2. **SPOT-CHECK** the coverage excerpt against a real run — don't trust self-report.
 3. **Insist on BRANCH %, not line %.** Line % can read 100% while branches are uncovered (probe: line 100% / branch 66% on the same file).

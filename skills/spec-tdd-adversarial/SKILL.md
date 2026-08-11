@@ -33,7 +33,7 @@ As spec-tdd-coverage: ground it, behavioral black-box, MUST be RED, note the bra
 Unchanged from spec-tdd-coverage: case-list BEFORE impl, acceptance test GREEN, unit tests red→green, per-class branch coverage with uncovered-line justifications. The attacker is a THIRD party — not involved here.
 
 ### Phase 3 — Orchestrator verifies + dispatches the attacker
-spec-tdd-coverage's checks, but REPLACE the orchestrator's self gap-check with an independent attacker:
+spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dispatching the attacker; the implementer must NOT edit the acceptance test, and the attacker writes a separate wrong-impl and must not edit it either; only YOU may strengthen it — always re-confirm RED→GREEN), but REPLACE the orchestrator's self gap-check with an independent attacker:
 1. Run the acceptance test + property tests yourself. Must be GREEN. (Property tests must have been RED before impl — else tautologies.)
 2. **DISPATCH THE ADVERSARIAL SUBAGENT** (independent context), two parts in order:
    - **Part A — test-attack:** acceptance test + INTENT only, NOT the real impl. *"Write a subtly-WRONG impl that still passes this test. Construct and run it to confirm where feasible — don't just opine. If you can, report EXACTLY which missing case let it through."*
