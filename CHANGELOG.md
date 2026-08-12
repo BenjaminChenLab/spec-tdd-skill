@@ -5,6 +5,13 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-08-12
+
+Patch: bounds the `spec-tdd-adversarial` attack loop, which was unbounded (asymmetric with the implementer's capped repair loop).
+
+### Fixed
+- **Attack-loop circuit breaker (adversarial).** The attacker loop had no numeric cap — its only stop condition ("attacker cannot construct a wrong-but-green impl") is prove-a-negative and may never hold on a boundary-rich surface, so a diligent attacker could force a non-terminating loop. Added a circuit breaker mirroring the implementer's repair cap: STOP after 3 rounds, or when the same hole appears on any two rounds; if a residual hole remains at the breaker, surface it + the attacker's report to the human rather than loop. Baseline-confirmed (the unbounded loop was reproduced) and verify-confirmed.
+
 ## [1.2.0] - 2026-08-12
 
 The **prompt-discipline → protocol-discipline** release. Hardens the family's invariants from prose rules into enforceable procedures, and formalizes the method as a protocol. Each behavioral change was baseline-confirmed (RED — watched an agent fail under the old rule) and verify-confirmed (GREEN — watched it comply under the new one) via subagent pressure tests.

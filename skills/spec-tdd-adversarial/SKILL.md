@@ -13,7 +13,7 @@ spec-tdd-coverage, plus: an **independent adversarial subagent** — a *third* c
 
 **Core principle: independence is the one thing a diligent same-context agent cannot give itself.** A baseline agent told "maximum rigor, spare no cost" wrote 30 scenario tests, a differential-oracle fuzz harness that caught a real bug, and an "adversarial self-review" — all excellent, all in ONE context. It never dispatched an independent attacker; that move is non-obvious. spec-tdd-coverage's Phase-3 checks run in the orchestrator's context (biased to rubber-stamp its own test), and the implementer's unit tests share context with the impl. An independent attacker removes both biases.
 
-**The acceptance test is done only when the attacker can no longer construct a wrong-but-green impl.** Until then, it isn't.
+**The acceptance test is done when the attacker can no longer construct a wrong-but-green impl** — bounded by the **attack-loop circuit breaker** (3 rounds, or the same hole twice): a critical surface is rich enough that "no wrong-but-green impl exists" may never hold, so past the breaker you surface the residual risk to the human instead of looping. Until then, it isn't "clean done" — but it can be "done enough to ship, pending human accept".
 
 ## When to Use
 - Critical path ONLY: money movement, auth/permissions, data-loss or data-integrity surface.
@@ -38,11 +38,14 @@ spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dis
 2. **DISPATCH THE ADVERSARIAL SUBAGENT** (independent context), two parts in order:
    - **Part A — test-attack:** acceptance test + INTENT only, NOT the real impl. *"Write a subtly-WRONG impl that still passes this test. Construct and run it to confirm where feasible — don't just opine. If you can, report EXACTLY which missing case let it through."*
    - **Part B — branch-hunt:** then the real impl. *"List every branch (if/loop/null-guard/early-return/catch/boundary); mark each Covered/Uncovered with its case. Report any branch with no case."*
-3. **Act, then loop:** every hole → strengthen the acceptance test / add cases → re-run RED→GREEN → re-attack. Done only when the attacker cannot construct a wrong-but-green impl.
+3. **Act, then loop — bounded by an attack-loop circuit breaker (mirrors the implementer's repair cap):**
+   - Every hole → strengthen the acceptance test / add cases → re-run RED→GREEN → re-attack.
+   - **STOP when EITHER fires:** (i) **3 attacker rounds** run, OR (ii) **the same hole on any two rounds** — judge "same hole" objectively: the same missing acceptance-test case re-failing (the case you wrote to close it is bypassed again), NOT a rephrased wrong-impl description. Mirrors the implementer breaker's objectivity (file:line + assertion, not free text).
+   - **Done clean** = the attacker cannot construct a wrong-but-green impl (the bar). **Done enough** = the breaker fires with a residual hole → STOP and surface to the human: test hardened across N rounds + property/differential tests + the attacker's final report + the **residual risk** (remaining hole(s)); the human decides accept vs. further harden. Never loop past the breaker — a correctness-critical surface always has one more boundary.
 4. Surface to the user: acceptance test + property/differential tests + the attacker's final report (not the impl).
 
 ## Risk-tier
-This IS the top tier: critical path gets full phases + mandatory property/differential tests + the attacker loop until unbroken. Below critical → use `spec-tdd-coverage` or `spec-tdd`; not this skill.
+This IS the top tier: critical path gets full phases + mandatory property/differential tests + the attacker loop until unbroken OR the attack-loop circuit breaker fires (3 rounds / same hole twice) — then surface residual risk. Below critical → use `spec-tdd-coverage` or `spec-tdd`; not this skill.
 
 ## Common Mistakes
 | Mistake | Fix |
@@ -52,6 +55,7 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 | Attacker opines "test looks fine" without attempting a wrong impl | Require it to construct (and run) a wrong impl, or enumerate concrete codeable wrong-impl strategies. An opinion is a rubber-stamp. |
 | Property test is a tautology ("result not null") | Require a real invariant or a differential oracle. Tautologies are green lies. |
 | Strengthened test not re-run RED | After any strengthening, confirm RED-then-GREEN before re-attacking. |
+| Attacker loop runs past 3 rounds, or re-finds the same hole | The attack-loop circuit breaker (mirrors the implementer's) caps it: 3 rounds OR same hole twice → STOP and surface residual risk + the attacker's report to the human. Don't chase a moving target on a rich surface. |
 | Used on non-critical work | Critical path only; otherwise pure token waste. |
 
 ## Red Flags — STOP
@@ -59,4 +63,5 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 - Attacker returns a verdict with no attempted wrong-impl and no branch list.
 - Property/differential tests absent or trivially tautological.
 - A hole was found but the test was not strengthened and re-attacked.
+- The attacker loop is still running past 3 rounds, or the same missing case re-failed after you closed it. (STOP — attack-loop circuit breaker; surface residual risk to the human.)
 - Used on non-critical code.

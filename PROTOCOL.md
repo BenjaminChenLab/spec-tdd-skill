@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.2.0**
+**Version 1.2.1**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -40,7 +40,7 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 **I7 — Coverage is evidence, not a percentage.** Branch % (not line %) per new/changed class, with every uncovered line justified. The **case-list is the gate**, not the % — a % gate incentivizes low-value tests.
 
-**I8 — Independence for critical paths (adversarial).** A correctness-critical path gets a *third* context — an independent attacker that tries to write a wrong-but-green impl and hunts uncovered branches. Independence is the one thing a diligent same-context agent cannot give itself.
+**I8 — Independence for critical paths (adversarial).** A correctness-critical path gets a *third* context — an independent attacker that tries to write a wrong-but-green impl and hunts uncovered branches. Independence is the one thing a diligent same-context agent cannot give itself. The attack loop is **bounded by an attack-loop circuit breaker** (mirrors I9): STOP after 3 rounds, or when the same missing case re-fails on any two rounds (judge by the acceptance-test case, not the attacker's rephrased description); if a residual hole remains at the breaker, surface it to the human rather than loop — a rich surface always has one more boundary.
 
 **I9 — Circuit breaker.** STOP when *either* fires: 3 repair attempts, OR **the same root cause on any two attempts** (not necessarily consecutive). "Same root cause" = same failing file:line AND same failing assertion — judge by those, not by a rephrasable free-text trace or a coarse ERR tag. Each attempt must rest on a genuinely different root cause; never burn attempts re-trying one identical misdiagnosis.
 
