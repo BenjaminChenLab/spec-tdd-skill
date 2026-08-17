@@ -6,7 +6,7 @@ description: Use when the user says "grill-spec-tdd", or wants to interrogate/gr
 # grill-spec-tdd
 
 ## Overview
-**The requirement-grilling front-end for the `spec-tdd` family.** Interrogate the requirement until it's unambiguous ("grill"), write the acceptance test — the spec — before any implementation exists, gate it, THEN route to the verification tier that fits the stakes: `spec-tdd` (default), `spec-tdd-coverage`, or `spec-tdd-adversarial`. That tier carries the delegation handoff, circuit breaker, and failure routing.
+**The requirement-grilling front-end for the `spec-tdd` family.** Interrogate the requirement until it's unambiguous ("grill"), write the acceptance test — the spec — before any implementation exists, gate it, THEN route to the verification tier that fits the stakes and size: `spec-tdd-lite` (one small non-critical unit — in-session), `spec-tdd` (default; multi-unit for batches), `spec-tdd-coverage`, or `spec-tdd-adversarial`. That tier carries the handoff, circuit breaker, and failure routing (lite: in-session loop + review dispatch).
 
 **Why a separate front-end:** under pressure, agents skip grilling and hand a subagent a fuzzy spec, or collapse it to "sensible defaults." Grilling first forces every dimension (incl. NFR + security) explicit and gets a human OK on direction before a subagent burns tokens on the wrong thing.
 
@@ -31,14 +31,16 @@ description: Use when the user says "grill-spec-tdd", or wants to interrogate/gr
 ## Phase 2 — Route to the verification tier (INVOKE the skill — don't hunt for files)
 The gate (Phase 1, step 6) was the ONE human checkpoint. Now route by INVOKING the chosen tier as a skill. **Do NOT search the filesystem for `SKILL.md` files or wonder "how are these skills organized?"** — skills are loaded BY NAME through the Skill tool. (Fallback only if a name truly won't load: read `~/.claude/skills/<name>/SKILL.md`.)
 
-Pick by stakes, then call the Skill tool with the exact name:
+Pick by stakes and size, then call the Skill tool with the exact name:
 - **Correctness-CRITICAL** (money movement / auth-permissions / data-loss) → invoke **`spec-tdd-adversarial`**.
 - **Need branch-coverage EVIDENCE** (large/subtle branch surface: concurrency/parsing/state machines; weak unit tests; compliance proof) → invoke **`spec-tdd-coverage`**.
+- **One small non-critical unit** (a single bugfix-scale item in a session you'll clear after — one dispatch costs more than it saves) → invoke **`spec-tdd-lite`** (the in-session tier; it keeps the grilled acceptance test and skips the implementer dispatch).
+- **Multiple units** (a bug list, or a feature split into slices) → invoke **`spec-tdd`** as a **multi-unit run** (its Multi-unit section takes over; specs not yet writable are written just-in-time per unit).
 - **Otherwise** → invoke **`spec-tdd`** (the default).
 
 When the tier loads:
-- **The grilled acceptance test is already written and RED** → SKIP the tier's Phase 1 (orchestrator-writes-test); go straight to its Phase 2 (delegate to a subagent). Don't re-write or re-confirm the test.
-- The gate already passed → proceed to delegate per the tier's handoff. **Do NOT come back asking "should I hand this to a subagent?"** — that decision is made; you're executing it.
+- **The grilled acceptance test is already written and RED** → SKIP the tier's Phase 1 (orchestrator-writes-test); go straight to its Phase 2 (delegated tiers: hand off to the subagent; `spec-tdd-lite`: implement in-session). Don't re-write or re-confirm the test.
+- The gate already passed → execute per the tier's handoff (delegated tiers: dispatch; `spec-tdd-lite`: implement in-session). **Do NOT come back asking "should I hand this to a subagent?"** — that decision is made; you're executing it.
 - Hand off the grilled acceptance test as the contract; the tier implements, it does not re-litigate decisions the grill already locked.
 
 ## Red Flags — STOP

@@ -1,6 +1,6 @@
 ---
 name: spec-tdd
-description: Use when the user says "spec-tdd" or wants acceptance-test-first development delegated to a subagent. Triggers on spec-as-test, test-first-by-orchestrator, preventing weak/green-lie AI tests, circular test+implementation reasoning.
+description: Use when the user says "spec-tdd" or wants acceptance-test-first development delegated to a subagent — one feature, or a multi-unit batch (bug list, task-split feature). Triggers on spec-as-test, test-first-by-orchestrator, preventing weak/green-lie AI tests, circular test+implementation reasoning.
 ---
 
 # spec-tdd
@@ -10,17 +10,21 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 
 **Core principle:** the acceptance test is authored before any impl exists, in a different context than the implementer — so it cannot have been reverse-engineered to mirror an implementation (the structural anti-green-lie guarantee). It can still be *wrong or shallow* — a misread or under-interrogated requirement produces a bad test — but that is a different failure mode, handled by RED-first, the Phase-3 adversarial read, the grill, and the attacker. **"Must be RED first"** is the built-in green-lie detector.
 
-**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A11) and invariants (I1–I12).
+**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A13) and invariants (I1–I14).
 
 ## When to Use
 - User says `spec-tdd <feature>` (the agreed trigger).
 - Implementing a feature where weak/vacuous AI-generated tests are a risk.
+- ONE small unit (a single bugfix-scale item, non-critical, in a session you'll clear after)? Use **`spec-tdd-lite`**, the family's in-session tier — acceptance test first, implement yourself, one fresh-context review.
+- MULTIPLE independent units — a bug list, several separate fixes, or a feature split into slices? Stay HERE: **Multi-unit runs** (below) loops the phases per unit. **Count before you run:** if the task names more than one bug/fix, you are multi-unit — do NOT write one acceptance suite over the whole batch, and do NOT `spec-tdd-lite` ×N.
 - Any stack. Risk-tier how much verification you run (see below).
 
 ## The 3 Phases
 
 ### Phase 1 — Orchestrator writes the acceptance test
 > **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip this phase, go straight to Phase 2.
+
+> **About to write one suite covering SEVERAL bugs/fixes at once?** STOP — that is the mega-collapse. A task naming more than one independent fix is a **multi-unit run**: go to the Multi-unit section (below) and loop per unit.
 
 1. Requirement unclear? **Ask, don't guess.** (Can't write the test = the spec is unclear — that's the signal, surfaced before coding.)
 2. **Ground it**: read relevant entities/services/repos/existing patterns first; the test must fit the real architecture.
@@ -29,6 +33,8 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 5. **Run it — MUST be RED.** Green with no impl = fake test (vacuous / over-mocked); rewrite it.
 
 ### Phase 2 — Delegate to subagent (Agent tool)
+**No dispatch tool available** (you are running inside a subagent)? Don't improvise a protocol: single-unit work → the `spec-tdd-lite` pattern (in-session implement, solo re-RED, its disclosed degraded review); a batch → the Multi-unit degraded path (below). Say so in the report either way.
+
 **SPEC-INTEGRITY snapshot (before dispatch):** hash the acceptance test — `sha256sum <file>` (Unix) / `certutil -hashfile <file> SHA256` (Windows) / `git hash-object <file>` — and record it. This is the immutability baseline you verify in Phase 3.
 
 Handoff prompt:
@@ -52,7 +58,7 @@ RETURN: implementation + unit tests + ACTUAL test command output proving green (
 ### Phase 3 — Orchestrator verifies
 1. **SPEC-INTEGRITY check:** re-hash the acceptance test and compare to the Phase-2 snapshot. Any change → the implementer edited the spec → **FAIL**, even if a re-run is GREEN (a weakened-but-green test is the green lie) → route to **TEST** (step 6); never accept a changed test. *(This binds the implementer; your own step-3 strengthening is a separate, explicitly re-RED'd step.)*
 2. **Run the acceptance test yourself** (don't trust the subagent's self-report) → must be GREEN.
-3. **Adversarially read the test**: "could this pass even if the impl were subtly wrong?" If yes, strengthen — and if you change the test, re-confirm it goes RED against the current impl, then re-delegate to restore GREEN. Never declare done on a test you just edited without re-running it. Also check it fits existing architecture/conventions and any security/resilience edge cases.
+3. **Adversarially read the test**: "could this pass even if the impl were subtly wrong?" If yes, strengthen — and if you change the test, re-confirm it goes RED against the current impl, then re-delegate to restore GREEN. Never declare done on a test you just edited without re-running it. Also check it fits existing architecture/conventions and any security/resilience edge cases. **Correcting expected values mid-verification?** Legitimate only when justified against the requirement itself (re-derive the arithmetic independently) — never "to match what the impl returns"; disclose the correction in the report.
 4. **Surface the TEST (the spec) to the user for review — not the impl.** Reviewing the test is the cheap, high-signal human checkpoint: the human validates WHAT, the agent validates HOW.
 5. Compile + relevant suite.
 6. **On failure — or a hole found in a GREEN test — route by root cause, three buckets only:**
@@ -60,6 +66,19 @@ RETURN: implementation + unit tests + ACTUAL test command output proving green (
    - **TEST** — the requirement is right but the executable spec is weak/incomplete (a missing case), or the implementer edited it → strengthen/revert the test, re-confirm RED, re-delegate. Do NOT re-open the requirement.
    - **IMPL** — the spec is right, the code is wrong → re-delegate with the failing case + the subagent's ERR tag.
    Key: SPEC re-opens the *requirement*; TEST touches only the *test*; IMPL touches only the *code*. Mis-routing (e.g. TEST when it's really SPEC) wastes a delegation on the wrong artifact.
+
+## Multi-unit runs (bug batches, task-split features)
+The work is a batch of independently-testable units — a bug list, several separate fixes, or a feature deliberately split into slices? **If the task names more than one bug/fix, you are here.** **The agent boundary is per unit, not per feature.** Never mega-dispatch the batch (one implementer drowning = all-or-nothing circuit breaker), never run `spec-tdd-lite` per unit in-session (N inner loops drown YOUR context), never write one monolithic suite over the batch. Loop the 3 phases per unit:
+
+1. **Unit plan.** Unit = one independently-testable behavioral slice. Bug list: one bug = one unit, its repro test = the acceptance spec. Feature: slice **vertically** — each unit delivers observable behavior; infra/scaffolding belongs to the first behavioral unit that needs it (a standalone infra unit has no black-box spec — forbidden). Pure refactor = one unit; characterization tests are its spec. Group same-module bugs into one dispatch (shared grounding); unrelated units dispatch separately.
+2. **One checkpoint up front** (where the entry allows a gate): surface the unit plan + every spec writable NOW (bug batch: all repro tests, RED against current code — a control case asserting still-correct behavior may pass pre-fix; fine, as long as each unit's bug-specific cases fail; feature split: only the first unit's — later specs are written just-in-time, grounded in the codebase as it exists after earlier units land). ONE human OK covers the batch — not N. Running as a subagent with no human reachable? Surface unit plan + specs in your final report — the gate defers, it is not skipped. Arrived full-auto (`spec-tdd-escalate`)? No ask — carry the unit plan into the batch summary.
+3. **Loop per unit/group:** Phase 1 (this unit only) → Phase 2 dispatch (hash per unit spec) → Phase 3 verify (re-run, re-hash, diff-scan). A critical/branchy unit runs its Phase 2–3 at that tier's verification depth (e.g. the adversarial attacker dispatch) — applied to that unit inside this loop, not a re-invocation of another skill; the tier attaches to the unit, not the batch.
+4. **Breaker per unit.** A stuck unit parks after the circuit breaker fires (3 attempts / same root cause twice) — report it, continue the batch. A grouped dispatch that trips gets split; retry the unstuck members.
+5. **End: batch summary** — per unit: spec + green evidence; parked units surfaced with their diagnosis.
+
+**No dispatch tool available** (you are running inside a subagent)? Per-unit boundaries still hold: per-unit spec, per-unit RED, then **fix one unit → its spec goes GREEN → next unit** — yes, even for tiny disjoint fixes in one small file: the sequence IS the boundary, "they're tiny and disjoint" is the rationalization, not the exception. Solo re-RED replaces the hash here (as in `spec-tdd-lite`); the degradation is **disclosed** in the batch summary (no fresh implementer context, no fresh reviewer). Never collapse the batch into one monolithic suite "for efficiency" — a unit that then fails has no boundary of its own.
+
+Per-unit orchestrator cost stays: write spec, hash, dispatch, re-run. That is the point.
 
 ## Risk-tier (scale verification to stakes)
 - **Critical path** (money / auth / data-loss surface): full phases + property tests + adversarial impl review.
@@ -69,6 +88,8 @@ RETURN: implementation + unit tests + ACTUAL test command output proving green (
 ## Common Mistakes
 | Mistake | Fix |
 |---|---|
+| A batch arrives → one mega-dispatch with every unit, or `spec-tdd-lite` ×N in-session | Multi-unit runs: the boundary is **per unit** — loop the phases per unit; group same-module bugs per dispatch. |
+| "The fixes are tiny and disjoint — one combined edit, then verify everything" | Per-unit green is the boundary: fix one unit → its spec GREEN → next. A combined edit is the mega-collapse with extra steps. |
 | Orchestrator writes unit tests, not acceptance | Keep the spec/impl boundary = agent boundary. Unit tests belong to the subagent. |
 | Skip "must be RED first" | Non-negotiable. Green-before-impl = the test is meaningless. |
 | Subagent silently edits the acceptance test to pass | Forbid in handoff AND verify by hash: snapshot before delegating, re-hash in Phase 3 — any change = FAIL. Re-run proves GREEN, not UNCHANGED; never rely on it alone. |

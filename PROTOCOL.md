@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.2.1**
+**Version 1.4.0**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -13,16 +13,18 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 | ID | Artifact | Produced by | When |
 |---|---|---|---|
 | A1 | **Requirement** — the raw ask | human / grill | before Phase 1 |
-| A2 | **Acceptance spec** — the behavioral, black-box acceptance test | orchestrator | Phase 1 (before impl exists) |
-| A3 | **RED evidence** — the spec fails before any impl | orchestrator | Phase 1 |
-| A4 | **SPEC-INTEGRITY snapshot** — hash of A2 at handoff | orchestrator | Phase 2, before dispatch |
+| A2 | **Acceptance spec** — the behavioral, black-box acceptance test (per unit in multi-unit runs) | orchestrator | Phase 1 (before impl exists) |
+| A3 | **RED evidence** — the spec fails before any impl (per unit in multi-unit runs) | orchestrator | Phase 1 |
+| A4 | **SPEC-INTEGRITY snapshot** — hash of A2 at handoff (per unit spec in multi-unit runs) | orchestrator | Phase 2, before dispatch |
 | A5 | **Case-list** — every branch/boundary/exception the impl will cover (coverage+ only) | implementer | Phase 2, before any impl |
 | A6 | **Implementation** | implementer | Phase 2 |
 | A7 | **Unit tests** — one per case, red→green | implementer | Phase 2 |
 | A8 | **Coverage evidence** — per-class branch % + every uncovered line justified (coverage+ only) | implementer, re-run by orchestrator | Phase 2–3 |
-| A9 | **Verification evidence** — orchestrator's own re-run (GREEN) **and** re-hash of A2 == A4 | orchestrator | Phase 3 |
+| A9 | **Verification evidence** — orchestrator's own re-run (GREEN) **and** re-hash of A2 == A4 (per unit in multi-unit runs) | orchestrator | Phase 3 |
 | A10 | **Adversarial report** — attempted wrong-but-green impls + per-branch hunt (adversarial only) | independent attacker | Phase 3 |
 | A11 | **Final result** — A2 + evidence surfaced to the human (the test, not the impl) | orchestrator | end |
+| A12 | **Test-review report** — fresh-context reviewer findings: missing case / vacuous assertion / silent interpretation / none (lite only) | independent reviewer subagent | Phase 3 (lite) |
+| A13 | **Unit plan** — the units, their order/grouping, and which specs are writable now vs just-in-time (multi-unit runs) | orchestrator | before the first dispatch; gated once |
 
 ## Invariants
 
@@ -53,15 +55,28 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 **I12 — Human validates WHAT, agent validates HOW.** A wrong *spec* is the human's call, caught by reviewing the test (the cheap, high-signal checkpoint); a wrong *implementation* is the agent's call, caught by running it. Review the test, not the code.
 
+**I13 — Fresh-context test review (lite).** After GREEN, exactly one dispatch to a reviewer that has seen none of the implementation reasoning. Two questions, answered with concrete cases: test-vs-impl (name a subtly-wrong impl that still passes every test) and test-vs-requirement (every requirement line has an assertion with discriminating power; the author's silent interpretations are surfaced to the human). Where no dispatch is possible, a *disclosed* degraded mode applies (mutation checks + requirement-line audit) — never a silent improvised review.
+
+**I14 — Solo re-RED (lite).** Any acceptance-spec edit made after the impl exists must be re-confirmed RED before it counts; a strengthening that cannot go RED has no teeth and must be rewritten. The discipline replacement for I4's hash where author and implementer share a context.
+
 ## Scope per tier
 
-| Invariant | spec-tdd | +coverage | +adversarial |
-|---|:---:|:---:|:---:|
-| I1–I5, I9, I10, I12 | ✅ | ✅ | ✅ |
-| I6, I7 (case-list + coverage evidence) | — | ✅ | ✅ |
-| I8 (independent attacker) | — | — | ✅ |
-| I11 (materiality grill) | via `grill-spec-tdd` front-end | via `grill-spec-tdd` | via `grill-spec-tdd` |
+| Invariant | lite | spec-tdd | +coverage | +adversarial |
+|---|:---:|:---:|:---:|:---:|
+| I1–I3, I5, I10, I12 | ✅ | ✅ | ✅ | ✅ |
+| I4 (SPEC-INTEGRITY hash) | via **I14** (solo re-RED) | ✅ | ✅ | ✅ |
+| I6, I7 (case-list + coverage evidence) | — | — | ✅ | ✅ |
+| I8 (independent attacker) | — | — | — | ✅ |
+| I9 (circuit breaker) | stall breaker → promote to `spec-tdd` | ✅ | ✅ | ✅ |
+| I13 (fresh-context test review) | ✅ | — | — | — |
+| I11 (materiality grill) | via `grill-spec-tdd` front-end | via `grill-spec-tdd` | via `grill-spec-tdd` | via `grill-spec-tdd` |
+
+`spec-tdd-lite` implements in-session — no implementer dispatch; its only boundary crossing is the I13 review.
+
+In a **multi-unit run** (`spec-tdd`), I1–I5, I9 and I10 apply **per unit** (I9 per unit/group), and I12's checkpoint is ONE gate on the unit plan (A13) + the specs writable now — not N gates. With no dispatch tool available, per-unit boundaries still hold via a disclosed degraded path.
 
 ## What the protocol does NOT guarantee
 
 The agent boundary (I1–I4) is a structural guarantee **against the green lie** — the spec cannot have been reverse-engineered to mirror the impl. It does **not** guarantee the spec is *right*: a misread or under-interrogated requirement still produces a bad test. That failure mode is handled by the *other* invariants — RED-first (I3), the adversarial read, the grill (I11), and the independent attacker (I8) — not by the boundary alone.
+
+`spec-tdd-lite` additionally trades away the fresh implementer and I4's structural hash (replaced by I14's discipline): a misread requirement can reach GREEN unchallenged except by the I13 review's test-vs-requirement question — which is why lite is scoped to one small, non-critical unit.
