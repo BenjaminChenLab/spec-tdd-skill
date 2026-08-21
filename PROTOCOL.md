@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.4.0**
+**Version 1.4.1**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -32,9 +32,9 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 **I2 — The spec is behavioral.** Black-box, input→output/state; tests WHAT, not HOW. Never couples to internal method shapes.
 
-**I3 — RED before implementation.** The spec must fail before the impl exists (A3). Green-before-impl = a vacuous / over-mocked test; rewrite it.
+**I3 — RED before implementation.** The spec must fail before the impl exists (A3). Green-before-impl = a vacuous / over-mocked test; rewrite it. RED evidence must be **pure**: the orchestrator scans the FULL error list — every error must point at symbols the feature will create; errors about EXISTING symbols (wrong constructor arity, ambiguous overloads, unused imports) are a defect in the test itself, fixed before dispatch.
 
-**I4 — SPEC-INTEGRITY (immutability).** The acceptance spec is immutable during implementation. The orchestrator snapshots its hash before delegation (A4) and verifies byte-for-byte on return (A9). Any change = **FAIL**, even if a re-run is GREEN — a weakened-but-green spec is the green lie. *(Binds the implementer; the orchestrator's own strengthening is a separate, explicitly re-RED'd step.)*
+**I4 — SPEC-INTEGRITY (immutability).** The acceptance spec is immutable during implementation. The orchestrator snapshots its hash before delegation (A4) and verifies byte-for-byte on return (A9). Any change = **FAIL**, even if a re-run is GREEN — a weakened-but-green spec is the green lie. *(Binds the implementer; the orchestrator's own strengthening or SPEC-DEFECT correction is a separate, explicitly re-RED'd step.)*
 
 **I5 — Independent verification.** The orchestrator re-runs the spec itself; never trusts the implementer's self-report.
 
@@ -48,8 +48,9 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 **I10 — Three-bucket failure routing.** On failure — or a hole found in a GREEN test — route by root cause, three buckets only:
 - **SPEC** — requirement misread / under-interrogated; the test encodes wrong behavior → **re-open the requirement**, rewrite the test, re-confirm RED, re-delegate.
-- **TEST** — requirement right, executable spec weak / incomplete (or the implementer edited it) → **strengthen / revert the test**, re-confirm RED, re-delegate. Do NOT re-open the requirement.
+- **TEST** — requirement right, executable spec weak / incomplete, or defective (a SPEC-DEFECT, per I15), or the implementer edited it → **strengthen / revert / correct the test**, re-confirm RED, re-delegate. Do NOT re-open the requirement.
 - **IMPL** — spec right, code wrong → **re-delegate** with the failing case + ERR tag.
+SPEC vs TEST: a defect fixable by consulting artifacts already held (the requirement/plan) is TEST; a test fix that requires deciding something the requirement doesn't decide is SPEC — the human's call (I12).
 
 **I11 — The grill is bounded by materiality.** STOP grilling when remaining questions cannot change observable behavior, state transitions, failure semantics, data integrity, security/authorization, compatibility, or explicit NFRs. Materiality bounds the grill — not asking until exhausted.
 
@@ -59,12 +60,15 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 **I14 — Solo re-RED (lite).** Any acceptance-spec edit made after the impl exists must be re-confirmed RED before it counts; a strengthening that cannot go RED has no teeth and must be rewritten. The discipline replacement for I4's hash where author and implementer share a context.
 
+**I15 — Test-defect is a distinct failure mode (SPEC-DEFECT).** The acceptance test itself can be defective (wrong constructor arity, ambiguous overload matchers, unused stubs under strict stubs, assertions contradicting the spec). The implementer's instruction is asymmetric: report SPEC-DEFECT with evidence — the correct outcome, not a failure to implement — while production changes that exist solely to accommodate a test defect count as a FAILED run; when the test is defective, the implementer's only lever is production, and it will bend it instead of reporting. The orchestrator's Phase-3 **SPEC-DEFECT sweep** diffs returned production changes against the spec: any change whose only beneficiary is the acceptance test is an accommodation → correct the orchestrator's own artifact (re-hash, note the correction — the I4 escape hatch) and restore production to the spec'd shape. RED purity (I3) is the same failure mode caught at Phase 1.
+
 ## Scope per tier
 
 | Invariant | lite | spec-tdd | +coverage | +adversarial |
 |---|:---:|:---:|:---:|:---:|
 | I1–I3, I5, I10, I12 | ✅ | ✅ | ✅ | ✅ |
 | I4 (SPEC-INTEGRITY hash) | via **I14** (solo re-RED) | ✅ | ✅ | ✅ |
+| I15 (SPEC-DEFECT: report-not-bend + Phase-3 sweep) | ✅ via Phase-2 test-defect exception + exit-rule sweep (solo re-RED replaces re-hash) | ✅ | ✅ | ✅ |
 | I6, I7 (case-list + coverage evidence) | — | — | ✅ | ✅ |
 | I8 (independent attacker) | — | — | — | ✅ |
 | I9 (circuit breaker) | stall breaker → promote to `spec-tdd` | ✅ | ✅ | ✅ |
@@ -73,7 +77,7 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 `spec-tdd-lite` implements in-session — no implementer dispatch; its only boundary crossing is the I13 review.
 
-In a **multi-unit run** (`spec-tdd`), I1–I5, I9 and I10 apply **per unit** (I9 per unit/group), and I12's checkpoint is ONE gate on the unit plan (A13) + the specs writable now — not N gates. With no dispatch tool available, per-unit boundaries still hold via a disclosed degraded path.
+In a **multi-unit run** (`spec-tdd`), I1–I5, I9, I10 and I15 apply **per unit** (I9 per unit/group), and I12's checkpoint is ONE gate on the unit plan (A13) + the specs writable now — not N gates. With no dispatch tool available, per-unit boundaries still hold via a disclosed degraded path.
 
 ## What the protocol does NOT guarantee
 

@@ -30,7 +30,7 @@ As spec-tdd-coverage: ground it, behavioral black-box, MUST be RED (incl. the RE
 - **Seed the attacker**: list the wrong-but-plausible impls you most fear ("silently wraps on overflow," "skips nulls and nets the rest," "accepts mixed currency"). Drives Phase 3.
 
 ### Phase 2 — Delegate implementation to a subagent
-Unchanged from spec-tdd-coverage: case-list BEFORE impl, acceptance test GREEN, unit tests red→green, per-class branch coverage with uncovered-line justifications — handoff carries the SPEC-DEFECT STOP clause (a defect in the TEST itself → the implementer reports SPEC-DEFECT; production changes that exist solely to accommodate a test defect = a FAILED run). The attacker is a THIRD party — not involved here.
+Unchanged from spec-tdd-coverage: case-list BEFORE impl, acceptance test GREEN, unit tests red→green, per-class branch coverage with uncovered-line justifications — handoff carries the SPEC-DEFECT STOP clause (a defect in the TEST itself → the implementer reports SPEC-DEFECT — the correct outcome, not a failure to implement; production changes that exist solely to accommodate a test defect = a FAILED run). The attacker is a THIRD party — not involved here.
 
 ### Phase 3 — Orchestrator verifies + dispatches the attacker
 spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dispatching the attacker; the implementer must NOT edit the acceptance test, and the attacker writes a separate wrong-impl and must not edit it either; only YOU may strengthen it — always re-confirm RED→GREEN), but REPLACE the orchestrator's self gap-check with an independent attacker:

@@ -33,7 +33,8 @@ if it looks wrong, STOP and report — never silently weaken it.
 If the acceptance test cannot compile or pass because of a defect in the TEST itself (wrong constructor arity,
 ambiguous overload matchers, unused stubs under strict stubs, assertions contradicting the spec), STOP and
 report it as SPEC-DEFECT with evidence — do NOT change production code to make a defective test compile or
-pass. Production changes that exist solely to accommodate a test defect count as a FAILED run.
+pass. Production changes that exist solely to accommodate a test defect count as a FAILED run. Reporting a
+genuine SPEC-DEFECT is the correct outcome, not a failure to implement — you will not be penalized for it.
 
 ACCEPTANCE TEST (RED): {file}
 INTENT: {1–3 sentences}
@@ -59,6 +60,7 @@ RETURN: case-list + impl + unit tests + notable decisions (every deviation
         + ACTUAL green output
         + per-class coverage excerpt (branch %, uncovered lines + justifications).
         Paste real output. Do not claim.
+        If you stopped on SPEC-DEFECT, return the defect report with evidence instead.
 ```
 
 ### Phase 3 — Orchestrator verifies
