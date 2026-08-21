@@ -22,7 +22,7 @@ spec-tdd's handoff says *"add your own unit tests"* — no case-list, no coverag
 ### Phase 1 — Orchestrator writes the acceptance test
 > **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip to Phase 2 (still note the branch/exception surface for your gap-check).
 
-As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED**. **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
+As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED — incl. the RED-purity check** (scan the FULL error list; errors about EXISTING symbols are a defect in YOUR test — fix before dispatch). **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
 
 ### Phase 2 — Delegate to subagent (extended handoff)
 **SPEC-INTEGRITY snapshot (before dispatch):** hash the acceptance test (`sha256sum <file>` / `certutil -hashfile <file> SHA256` / `git hash-object <file>`) and record it — the immutability baseline you verify in Phase 3.
@@ -30,6 +30,10 @@ As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED**. **Not
 ```
 TASK: Implement {feature} so the acceptance test passes. Do NOT modify it — it is hashed and verified byte-for-byte on return;
 if it looks wrong, STOP and report — never silently weaken it.
+If the acceptance test cannot compile or pass because of a defect in the TEST itself (wrong constructor arity,
+ambiguous overload matchers, unused stubs under strict stubs, assertions contradicting the spec), STOP and
+report it as SPEC-DEFECT with evidence — do NOT change production code to make a defective test compile or
+pass. Production changes that exist solely to accommodate a test defect count as a FAILED run.
 
 ACCEPTANCE TEST (RED): {file}
 INTENT: {1–3 sentences}
@@ -50,13 +54,15 @@ DO:
    JS → node --test --experimental-test-coverage ; Python → pytest --cov
 CIRCUIT BREAKER: STOP if either fires — (a) the test still fails after 3 repair attempts, OR (b) **the same root cause appears on ANY two attempts** — same failing file:line AND same failing assertion (not necessarily consecutive; not a rephrased free-text trace). Don't burn a third attempt re-trying one identical misdiagnosis — each attempt must rest on a DIFFERENT root cause. Report a short structured diagnosis — tag it env/dependency (ERR-01), logic violation (ERR-02), or syntax/compile (ERR-03) — with a TRUNCATED trace and expected-vs-actual. Don't keep retrying.
 
-RETURN: case-list + impl + unit tests + ACTUAL green output
+RETURN: case-list + impl + unit tests + notable decisions (every deviation
+        from the spec'd shape: symbols added/renamed/moved beyond the spec)
+        + ACTUAL green output
         + per-class coverage excerpt (branch %, uncovered lines + justifications).
         Paste real output. Do not claim.
 ```
 
 ### Phase 3 — Orchestrator verifies
-spec-tdd's checks (incl. the **SPEC-INTEGRITY hash check** and the **SPEC/TEST/IMPL failure routing**), PLUS:
+spec-tdd's checks (incl. the **SPEC-INTEGRITY hash check**, the **SPEC-DEFECT sweep** — diff the returned production changes against the spec; a compat ctor / renamed public method / logic beyond scope passing green is a test-defect accommodation: fix the test (re-hash, note the correction), restore production — and the **SPEC/TEST/IMPL failure routing**), PLUS:
 1. **GAP-CHECK** — read the impl's actual branches; confirm each has a case. Any branch with no case → add one. *(Same agent wrote case-list and impl, so this cross-context check stops a case-list that quietly mirrors the impl.)*
 2. **SPOT-CHECK** the coverage excerpt against a real run — don't trust self-report.
 3. **Insist on BRANCH %, not line %.** Line % can read 100% while branches are uncovered (probe: line 100% / branch 66% on the same file).
@@ -77,6 +83,7 @@ spec-tdd's checks (incl. the **SPEC-INTEGRITY hash check** and the **SPEC/TEST/I
 | "100%" with no uncovered-line list | Require the list + justification **even when empty** ("none" stated, not omitted). |
 | Trusting self-reported coverage | Run it yourself in Phase 3. |
 | % gate incentivizes low-value tests | The **case-list** is the gate, not %. Each case must map to a real branch. |
+| Coverage evidence green, but the returned production diff never checked against the spec | Inherited SPEC-DEFECT sweep (spec-tdd Phase 3): a compat ctor / renamed method / logic beyond scope passing green = a bent production — fix the test (re-hash, note), restore production. |
 
 ## Red Flags — STOP
 - Impl + tests returned but **no case-list**.
