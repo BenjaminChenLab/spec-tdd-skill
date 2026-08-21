@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.4.1**
+**Version 1.4.2**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -32,7 +32,7 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 **I2 — The spec is behavioral.** Black-box, input→output/state; tests WHAT, not HOW. Never couples to internal method shapes.
 
-**I3 — RED before implementation.** The spec must fail before the impl exists (A3). Green-before-impl = a vacuous / over-mocked test; rewrite it. RED evidence must be **pure**: the orchestrator scans the FULL error list — every error must point at symbols the feature will create; errors about EXISTING symbols (wrong constructor arity, ambiguous overloads, unused imports) are a defect in the test itself, fixed before dispatch.
+**I3 — RED before implementation.** The spec must fail before the impl exists (A3). Green-before-impl = a vacuous / over-mocked test; rewrite it. RED evidence must be **pure**: the orchestrator scans the FULL error list — every error must point at symbols the feature will create; errors about EXISTING symbols (wrong constructor arity, ambiguous overloads, unused imports) are a defect in the test itself, fixed before dispatch — unless the spec itself explicitly calls for changing that existing symbol (a breaking-change feature): then the error points at the shape the feature will create and the RED is good.
 
 **I4 — SPEC-INTEGRITY (immutability).** The acceptance spec is immutable during implementation. The orchestrator snapshots its hash before delegation (A4) and verifies byte-for-byte on return (A9). Any change = **FAIL**, even if a re-run is GREEN — a weakened-but-green spec is the green lie. *(Binds the implementer; the orchestrator's own strengthening or SPEC-DEFECT correction is a separate, explicitly re-RED'd step.)*
 
@@ -60,7 +60,7 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 
 **I14 — Solo re-RED (lite).** Any acceptance-spec edit made after the impl exists must be re-confirmed RED before it counts; a strengthening that cannot go RED has no teeth and must be rewritten. The discipline replacement for I4's hash where author and implementer share a context.
 
-**I15 — Test-defect is a distinct failure mode (SPEC-DEFECT).** The acceptance test itself can be defective (wrong constructor arity, ambiguous overload matchers, unused stubs under strict stubs, assertions contradicting the spec). The implementer's instruction is asymmetric: report SPEC-DEFECT with evidence — the correct outcome, not a failure to implement — while production changes that exist solely to accommodate a test defect count as a FAILED run; when the test is defective, the implementer's only lever is production, and it will bend it instead of reporting. The orchestrator's Phase-3 **SPEC-DEFECT sweep** diffs returned production changes against the spec: any change whose only beneficiary is the acceptance test is an accommodation → correct the orchestrator's own artifact (re-hash, note the correction — the I4 escape hatch) and restore production to the spec'd shape. RED purity (I3) is the same failure mode caught at Phase 1.
+**I15 — Test-defect is a distinct failure mode (SPEC-DEFECT).** The acceptance test itself can be defective (wrong constructor arity, ambiguous overload matchers, unused stubs under strict stubs, assertions contradicting the spec; an arity/signature error on a symbol the requirement itself explicitly changes is NOT a test defect). The implementer's instruction is asymmetric: report SPEC-DEFECT with evidence — the correct outcome, not a failure to implement — while production changes that exist solely to accommodate a test defect count as a FAILED run; when the test is defective, the implementer's only lever is production, and it will bend it instead of reporting. The orchestrator's Phase-3 **SPEC-DEFECT sweep** diffs returned production changes against the spec (its subject: changes to code this dispatch did not create — new code is the feature's own shape): any change no production behavior needs — existing only to satisfy the acceptance test — is an accommodation → correct the orchestrator's own artifact (re-hash, note the correction — the I4 escape hatch) and restore production to the spec'd shape. RED purity (I3) is the same failure mode caught at Phase 1.
 
 ## Scope per tier
 

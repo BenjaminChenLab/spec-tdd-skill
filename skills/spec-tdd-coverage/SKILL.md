@@ -35,6 +35,8 @@ ambiguous overload matchers, unused stubs under strict stubs, assertions contrad
 report it as SPEC-DEFECT with evidence — do NOT change production code to make a defective test compile or
 pass. Production changes that exist solely to accommodate a test defect count as a FAILED run. Reporting a
 genuine SPEC-DEFECT is the correct outcome, not a failure to implement — you will not be penalized for it.
+An arity/signature error on a symbol the requirement itself explicitly changes is NOT a test defect —
+implement the change.
 
 ACCEPTANCE TEST (RED): {file}
 INTENT: {1–3 sentences}

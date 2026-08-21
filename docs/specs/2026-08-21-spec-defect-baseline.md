@@ -75,3 +75,38 @@ Not yet covered by a pressure test: the orchestrator-side RED-purity scan
 (clause 1) and the Phase-3 sweep (clause 3) as live behaviors — exercised
 only in the incident's aftermath. Future hardening target if a real run
 slips through.
+
+## Round 2 (v1.4.2) — clause-level gaps found by adversarial review, fixed, and pressure-tested
+
+Adversarial review of the v1.4.1 clauses themselves found two wording-level
+logic gaps (plus a third the reviewer rated BLOCKER — the same categorical
+arity example sitting in the implementer-side STOP clause, inviting a false
+SPEC-DEFECT when the requirement itself changes a signature):
+
+1. **RED-purity was categorical.** A feature that legitimately changes an
+   existing symbol's signature produces exactly the "error about an
+   EXISTING symbol" the clause orders the orchestrator to treat as a test
+   defect. Fixed: an explicit exception anchored to the requirement text
+   ("unless the spec itself explicitly calls for changing that existing
+   symbol — the RED is good").
+2. **The sweep's primary standard was impossible.** "Every change the spec
+   cannot trace" floods false positives under behavioral specs (most
+   legitimate HOW is untraceable) → audit fatigue. Fixed: the subject is
+   changes to code this dispatch did not create; the tell is change-level —
+   a change no production behavior needs, existing only to satisfy the
+   acceptance test.
+3. **The implementer-side STOP clause shared the categorical list.** Fixed
+   with: "an arity/signature error on a symbol the requirement itself
+   explicitly changes is NOT a test defect."
+
+**Pressure evidence (7 fresh-subagent arms, real RED runs, real hashes):**
+no misfire occurred under the OLD wording either — S3 arm A (old clause)
+reached the right answer by requirement-over-clause, i.e. the gap was an
+**override burden**, not a deterministic misfire; D/D2 (old implementer
+clause, explicit and implied INTENT) produced no false SPEC-DEFECT. The new
+wording held everywhere it was exercised: B/C (exception under explicit and
+*implied* requirements), E (implementer), and S4 (sweep over a mixed diff:
+1 accommodation + legit pre-existing changes + a new file — flagged only
+the accommodation, with remediation, zero false positives, bounded effort).
+Single-shot tests prove non-misclassification, not fatigue resistance —
+that remains a live-run question.
