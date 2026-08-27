@@ -24,6 +24,7 @@ The encoding audit goes family-wide (user-directed): v1.6.0's gate approves the 
   - **S3 (spec-tdd direct arrival, conversation-only settled spec, no dispatch tool):** spec doc persisted on the default-YES (unanswered ≠ decline), acceptance suite written + **pure RED** (full list checked), encoding audit run in disclosed degraded mode, then the lite-pattern no-dispatch fallback with solo re-RED, a 7-mutation battery, and the SPEC-DEFECT sweep; 17/17 GREEN verified by orchestrator re-run.
   - **S4 (grill, attended gate WITH amendments — the anchoring test):** human amends threshold $100→$150 and pins the discount base at the gate → the test is **derived from the FINAL spec**: asserts exactly-$150-no-discount, $150.10→$135.09, $160→$144 (flat 10% of pre-discount subtotal); the $100 draft survives only as a named wrong-impl mutation. RED re-confirmed after audit-driven strengthening; tier invoked BY NAME (`spec-tdd-adversarial`); 23/23 GREEN verified by orchestrator re-run.
   - **Limit (honest):** the subagent contexts had no dispatch tool of their own — every independence point (Part A/B, encoding audit, tier attacker) executed via the skills' *disclosed degraded* clauses. The decision points (dispatch → else disclose, never silently self-audit) are confirmed; a genuinely fresh-context dispatch was not exercised in these arms.
+  - Full record (fixtures, arm conditions, evidence, orchestrator-side verification): [docs/specs/2026-08-28-gate-before-test-baseline.md](docs/specs/2026-08-28-gate-before-test-baseline.md).
 
 ## [1.6.0] - 2026-08-28
 
