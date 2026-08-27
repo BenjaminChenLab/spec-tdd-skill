@@ -65,7 +65,7 @@ ONE human OK bundling: the grilled decisions + Part A findings + residuals + the
 
 ### Phase 4 — Write the test FROM the final spec, audit it, route
 1. **Derive the acceptance test from the FINAL spec** (as grill-spec-tdd Phase 2): behavioral black-box, property/invariant tests for domain logic, every gate amendment included; a decision neither grill nor gate made goes back to the human, never silently into the test. **Run it — MUST be RED with the full-list RED-purity check** (incl. the breaking-change exception).
-2. **Dispatch the grill-auditor, Part B: attack the test** (independent context, read-only; still zero implementation tokens):
+2. **Dispatch the grill-auditor, Part B: attack the test** (independent context, read-only; still zero implementation tokens — this is the front-end's encoding audit, I13, at adversarial grade):
 ```
 ATTACK an acceptance test you did not write. You are independent: hunt what the author cannot see.
 

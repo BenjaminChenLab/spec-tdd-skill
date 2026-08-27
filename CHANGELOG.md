@@ -5,6 +5,26 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-08-28
+
+The encoding audit goes family-wide (user-directed): v1.6.0's gate approves the **decisions**, not the executable test — the human no longer sees the test at a gate, so an independent agent must. New family rule: **no acceptance spec crosses the agent boundary unaudited.**
+
+### Changed
+- **I13 generalized — fresh-context test review, family-wide** (was lite-only, post-GREEN). Every acceptance spec gets ONE independent review by a context that did not write it: delegated tiers + grill front-ends **post-RED, pre-dispatch** (`adversarial-grill`'s Part B = this audit at adversarial grade); `spec-tdd-lite` post-GREEN, plus its test-vs-impl question (unchanged). Review questions: every spec line asserted with discriminating power; name a wrong-but-plausible reading the test still satisfies; surface over-assertion and silent interpretations. Findings → fix the test → re-RED. No-dispatch → disclosed degraded mode. Throwaway risk-tier may skip. A12 de-lite-scoped (pre-dispatch / post-GREEN); scope-table I13 row now all tiers.
+- **Wired:** `grill-spec-tdd` Phase 2 step 4 (encoding-audit dispatch + template; Phase 3 handoff note now "written, RED, and audited"); `spec-tdd` Phase 1 step 6 (grill arrivals skip; per-unit cost line gains "review"); `spec-tdd-coverage` Phase 1 inheritance note; `spec-tdd-adversarial` direct-arrival note (the Phase-3 attacker is post-GREEN and asks a different question — it does not replace the pre-dispatch encoding check); `adversarial-grill` Part B labeled as I13-at-adversarial-grade.
+- README: version, "no unaudited test crosses the boundary" bullet, walkthrough step 3, spec-tdd family-table row.
+
+### Condensed (no semantic change)
+- I12/I16/I17 rewritten tighter (v1.6.0 had grown them long); same contracts verified clause-by-clause: gate-before-test + blocking + tiers-zero-gate + the I13 handoff (I12), split audits + bounds + residual routing (I16), persistence defaults (I17).
+
+### Pressure-tested
+- **Verify-confirmed (4 fresh-subagent behavioral arms, temp-dir fixtures, real pytest runs; every claim below re-verified orchestrator-side against the filesystem and re-run output):**
+  - **S1 (grill, unattended):** fresh agent, fuzzy coupon requirement → full self-directed grill (11 decisions + materiality stops + interpretation table), spec doc persisted (unanswered ask = persist), then **parked at the gate** — no test file written, production byte-identical; the stop was reported with the blocking-gate clause quoted.
+  - **S2 (adversarial-grill, unattended, fuzzy+critical):** grill → Part A not dispatchable in that context → **disclosed non-independence, no silent self-audit** → spec doc persisted → parked at the gate; Phase 4 (test / Part B / routing) correctly unreachable without approval; the throwaway skip correctly inapplicable on the critical surface.
+  - **S3 (spec-tdd direct arrival, conversation-only settled spec, no dispatch tool):** spec doc persisted on the default-YES (unanswered ≠ decline), acceptance suite written + **pure RED** (full list checked), encoding audit run in disclosed degraded mode, then the lite-pattern no-dispatch fallback with solo re-RED, a 7-mutation battery, and the SPEC-DEFECT sweep; 17/17 GREEN verified by orchestrator re-run.
+  - **S4 (grill, attended gate WITH amendments — the anchoring test):** human amends threshold $100→$150 and pins the discount base at the gate → the test is **derived from the FINAL spec**: asserts exactly-$150-no-discount, $150.10→$135.09, $160→$144 (flat 10% of pre-discount subtotal); the $100 draft survives only as a named wrong-impl mutation. RED re-confirmed after audit-driven strengthening; tier invoked BY NAME (`spec-tdd-adversarial`); 23/23 GREEN verified by orchestrator re-run.
+  - **Limit (honest):** the subagent contexts had no dispatch tool of their own — every independence point (Part A/B, encoding audit, tier attacker) executed via the skills' *disclosed degraded* clauses. The decision points (dispatch → else disclose, never silently self-audit) are confirmed; a genuinely fresh-context dispatch was not exercised in these arms.
+
 ## [1.6.0] - 2026-08-28
 
 Two user-directed behavioral changes: the grill front-ends gate the **spec** (the grilled decisions) BEFORE any acceptance-test tokens are spent — the test is derived from the **final** (gate-approved) spec — and the family persists a **spec doc** by default whenever the spec isn't already a document, for later recall. The front-ends' gate is **blocking** (an unanswered gate parks the run — it never licenses proceeding on guesses); tiers run **after** the spec is final and add **no human gate of their own**.

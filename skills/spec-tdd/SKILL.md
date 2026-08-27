@@ -34,6 +34,19 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 4. (Domain logic only) add 1–3 **property/invariant tests** (e.g. money conservation, net-zero offset). Properties can't become green lies and don't over-constrain design.
 5. **Run it — MUST be RED.** Green with no impl = fake test (vacuous / over-mocked); rewrite it.
    - **RED-purity check:** scan the FULL compiler/runner error list, not just the tail. Every error must point at symbols the feature will create. Any error about EXISTING symbols — wrong constructor arity, ambiguous method overloads, unused imports — is a defect in YOUR test, not feature absence. Exception: if the spec itself explicitly calls for changing that existing symbol (a breaking-change feature), the error points at the shape the feature will create — the RED is good. Otherwise fix the test before dispatch; a defective RED masquerades as "feature missing" and the implementer will bend production to accommodate it.
+6. **Encoding audit — dispatch it (grill arrivals skip: already audited at the front-end; throwaway risk-tier may skip).** No human gates this test, so before dispatch a fresh context checks it encodes the settled spec (I13 — no unaudited test crosses the boundary):
+   ```
+   REVIEW an acceptance test you did NOT write.
+   SETTLED SPEC (requirement/plan verbatim): {paste}
+   ACCEPTANCE TEST (+ property tests), currently RED: {file or paste}
+   READ FIRST: {codebase paths}
+   1. Does every spec line have an assertion with discriminating power? Name a
+      wrong-but-plausible reading of the spec this test still satisfies.
+   2. Surface anything asserted BEYOND the spec, and every silent interpretation.
+   RETURN: findings (missing line / vacuous assertion / over-assertion / silent
+   interpretation / none), each quoting what it rests on. Do NOT edit any file.
+   ```
+   Adopt findings → fix the test → **re-confirm RED**. No dispatch tool? Disclosed same-context re-read + requirement-line audit, noted in the handoff — never silent.
 
 ### Phase 2 — Delegate to subagent (Agent tool)
 **No dispatch tool available** (you are running inside a subagent)? Don't improvise a protocol: single-unit work → the `spec-tdd-lite` pattern (in-session implement, solo re-RED, its disclosed degraded review); a batch → the Multi-unit degraded path (below). Say so in the report either way.
@@ -83,7 +96,7 @@ The work is a batch of independently-testable units — a bug list, several sepa
 
 **No dispatch tool available** (you are running inside a subagent)? Per-unit boundaries still hold: per-unit spec, per-unit RED, then **fix one unit → its spec goes GREEN → next unit** — yes, even for tiny disjoint fixes in one small file: the sequence IS the boundary, "they're tiny and disjoint" is the rationalization, not the exception. Solo re-RED replaces the hash here (as in `spec-tdd-lite`); the degradation is **disclosed** in the batch summary (no fresh implementer context, no fresh reviewer). Never collapse the batch into one monolithic suite "for efficiency" — a unit that then fails has no boundary of its own.
 
-Per-unit orchestrator cost stays: write spec, hash, dispatch, re-run. That is the point.
+Per-unit orchestrator cost stays: write spec, review (encoding audit), hash, dispatch, re-run. That is the point.
 
 ## Risk-tier (scale verification to stakes)
 - **Critical path** (money / auth / data-loss surface): full phases + property tests + adversarial impl review.

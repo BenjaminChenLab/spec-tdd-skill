@@ -22,7 +22,7 @@ spec-tdd's handoff says *"add your own unit tests"* — no case-list, no coverag
 ### Phase 1 — Orchestrator writes the acceptance test
 > **Arrived from `grill-spec-tdd` / `adversarial-grill-spec-tdd`?** The acceptance test is already written and RED — skip to Phase 2 (still note the branch/exception surface for your gap-check).
 
-As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED — incl. the RED-purity check** (scan the FULL error list; errors about EXISTING symbols are a defect in YOUR test — fix before dispatch) — and spec-tdd's **spec-doc persistence prompt** applies (no spec/plan/blueprint doc → ask once, default YES). **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
+As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED — incl. the RED-purity check and the Phase-1 encoding-audit dispatch** (fresh-context review of the test vs the settled spec, before Phase 2; skip for grill arrivals) — and spec-tdd's **spec-doc persistence prompt** applies (no spec/plan/blueprint doc → ask once, default YES). **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
 
 ### Phase 2 — Delegate to subagent (extended handoff)
 **SPEC-INTEGRITY snapshot (before dispatch):** hash the acceptance test (`sha256sum <file>` / `certutil -hashfile <file> SHA256` / `git hash-object <file>`) and record it — the immutability baseline you verify in Phase 3.

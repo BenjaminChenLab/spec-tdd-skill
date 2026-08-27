@@ -34,6 +34,19 @@ description: Use when the user says "grill-spec-tdd", or wants to interrogate/gr
 2. (Domain logic only) add 1–3 **property/invariant tests** (e.g. money conservation). Properties can't become green lies.
 3. **Run it — MUST be RED.** Green with no impl = fake test (vacuous / over-mocked); rewrite it.
    - **RED-purity check:** scan the FULL compiler/runner error list, not just the tail. Every error must point at symbols the feature will create. Any error about EXISTING symbols — wrong constructor arity, ambiguous method overloads, unused imports — is a defect in YOUR test, not feature absence. Exception: if the spec itself explicitly calls for changing that existing symbol (a breaking-change feature), the error points at the shape the feature will create — the RED is good. Otherwise fix the test before routing; a defective RED masquerades as "feature missing" and the tier's implementer will bend production to accommodate it. (The tier skips its Phase 1 on arrival from here — this check is the only RED audit the test gets.)
+4. **Encoding audit — dispatch it.** The human gated the decisions, not this test; no unaudited test crosses the agent boundary (I13). A fresh context checks the encoding before routing:
+   ```
+   REVIEW an acceptance test you did NOT write.
+   FINAL SPEC (gate-approved decisions): {list}
+   ACCEPTANCE TEST (+ property tests), currently RED: {file or paste}
+   READ FIRST: {codebase paths}
+   1. Does every decision have an assertion with discriminating power? Name a
+      wrong-but-plausible reading of the spec this test still satisfies.
+   2. Surface anything asserted BEYOND the spec, and every silent interpretation.
+   RETURN: findings (missing decision / vacuous assertion / over-assertion /
+   silent interpretation / none), each quoting what it rests on. Do NOT edit any file.
+   ```
+   Adopt every finding → fix the test → **re-confirm RED**. No dispatch tool? Disclose the same-context review in the handoff — degraded, never silent.
 
 ## Phase 3 — Route to the verification tier (INVOKE the skill — don't hunt for files)
 The spec gate (Phase 1, step 3) was the ONE human checkpoint. Now route by INVOKING the chosen tier as a skill. **Do NOT search the filesystem for `SKILL.md` files or wonder "how are these skills organized?"** — skills are loaded BY NAME through the Skill tool. (Fallback only if a name truly won't load: read `~/.claude/skills/<name>/SKILL.md`.)
@@ -46,7 +59,7 @@ Pick by stakes and size, then call the Skill tool with the exact name:
 - **Otherwise** → invoke **`spec-tdd`** (the default).
 
 When the tier loads:
-- **The grilled acceptance test is already written and RED** → SKIP the tier's Phase 1 (orchestrator-writes-test); go straight to its Phase 2 (delegated tiers: hand off to the subagent; `spec-tdd-lite`: implement in-session). Don't re-write or re-confirm the test.
+- **The grilled acceptance test is already written, RED, and encoding-audited** → SKIP the tier's Phase 1 (orchestrator-writes-test AND its encoding audit); go straight to its Phase 2 (delegated tiers: hand off to the subagent; `spec-tdd-lite`: implement in-session). Don't re-write or re-confirm the test.
 - The gate already passed → execute per the tier's handoff (delegated tiers: dispatch; `spec-tdd-lite`: implement in-session). **Do NOT come back asking "should I hand this to a subagent?"** — that decision is made; you're executing it.
 - Hand off the grilled acceptance test as the contract; the tier implements, it does not re-litigate decisions the grill already locked.
 
