@@ -29,6 +29,8 @@ Observed baseline: a diligent plain-TDD agent, on a small coupon feature, shippe
 ## Phase 1 — Write the acceptance test
 > **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip this phase, start at Phase 2 (keep the grill's interpretation notes; Phase 3 re-examines them).
 
+> **Spec not a doc — settled only in this conversation (and not a grill arrival)?** Prompt once whether to persist one — default **YES** (as `spec-tdd` Phase 1): requirement verbatim + your interpretation decisions + acceptance-test path → `docs/specs/YYYY-MM-DD-<feature>.md` (project convention wins). This session will be cleared/compacted after — the doc is what survives. Only an explicit "no" skips it.
+
 As `spec-tdd` Phase 1: ground it in the real architecture; behavioral black-box (WHAT, not HOW); run it — **MUST be RED** (a not-yet-existing module erroring is a valid first RED; GREEN is the only invalid state). **RED-purity check:** scan the FULL error list, not just the tail — every error must point at symbols the feature will create; any error about EXISTING symbols (wrong constructor arity, ambiguous method overloads, unused imports) is a defect in YOUR test, not feature absence (unless the spec itself explicitly changes that symbol — then the RED is good). Fix the test before implementing — a defective RED masquerades as "feature missing" and you will bend the impl to accommodate it. Domain logic: add 1–3 property/invariant tests. **Write down every interpretation you make of ambiguous requirement wording** — Phase 3 re-examines them.
 
 ## Phase 2 — Implement in-session (inner loop)

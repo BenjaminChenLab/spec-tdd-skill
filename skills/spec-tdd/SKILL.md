@@ -10,7 +10,7 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 
 **Core principle:** the acceptance test is authored before any impl exists, in a different context than the implementer — so it cannot have been reverse-engineered to mirror an implementation (the structural anti-green-lie guarantee). It can still be *wrong or shallow* — a misread or under-interrogated requirement produces a bad test — but that is a different failure mode, handled by RED-first, the Phase-3 adversarial read, the grill, and the attacker. **"Must be RED first"** is the built-in green-lie detector.
 
-**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A13) and invariants (I1–I14).
+**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A15) and invariants (I1–I17).
 
 ## When to Use
 - User says `spec-tdd <feature>` (the agreed trigger).
@@ -22,9 +22,11 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 ## The 3 Phases
 
 ### Phase 1 — Orchestrator writes the acceptance test
-> **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip this phase, go straight to Phase 2.
+> **Arrived from `grill-spec-tdd` / `adversarial-grill-spec-tdd`?** The acceptance test is already written and RED — skip this phase, go straight to Phase 2.
 
 > **About to write one suite covering SEVERAL bugs/fixes at once?** STOP — that is the mega-collapse. A task naming more than one independent fix is a **multi-unit run**: go to the Multi-unit section (below) and loop per unit.
+
+> **Spec not a doc — settled only in this conversation, nothing on disk?** Prompt once: "persist a spec doc?" — default **YES**. A conversation is not durable recall (sessions get cleared/compacted); the doc survives. After the test is RED, write the requirement verbatim + your interpretation decisions + the acceptance-test path to `docs/specs/YYYY-MM-DD-<feature>.md` (follow the project's convention if it has one) — it is what later recall reads (SPEC-bucket re-opens, PR review, audits). Only an explicit "no" skips it — an unanswered prompt is not a no. Arrived from either grill front-end? The final decision spec was already persisted at the gate — skip this.
 
 1. Requirement unclear? **Ask, don't guess.** (Can't write the test = the spec is unclear — that's the signal, surfaced before coding.)
 2. **Ground it**: read relevant entities/services/repos/existing patterns first; the test must fit the real architecture.
@@ -74,7 +76,7 @@ RETURN: implementation + unit tests + notable decisions (every deviation from th
 The work is a batch of independently-testable units — a bug list, several separate fixes, or a feature deliberately split into slices? **If the task names more than one bug/fix, you are here.** **The agent boundary is per unit, not per feature.** Never mega-dispatch the batch (one implementer drowning = all-or-nothing circuit breaker), never run `spec-tdd-lite` per unit in-session (N inner loops drown YOUR context), never write one monolithic suite over the batch. Loop the 3 phases per unit:
 
 1. **Unit plan.** Unit = one independently-testable behavioral slice. Bug list: one bug = one unit, its repro test = the acceptance spec. Feature: slice **vertically** — each unit delivers observable behavior; infra/scaffolding belongs to the first behavioral unit that needs it (a standalone infra unit has no black-box spec — forbidden). Pure refactor = one unit; characterization tests are its spec. Group same-module bugs into one dispatch (shared grounding); unrelated units dispatch separately.
-2. **One checkpoint up front** (where the entry allows a gate): surface the unit plan + every spec writable NOW (bug batch: all repro tests, RED against current code — a control case asserting still-correct behavior may pass pre-fix; fine, as long as each unit's bug-specific cases fail; feature split: only the first unit's — later specs are written just-in-time, grounded in the codebase as it exists after earlier units land). ONE human OK covers the batch — not N. Running as a subagent with no human reachable? Surface unit plan + specs in your final report — the gate defers, it is not skipped. Arrived full-auto (`spec-tdd-escalate`)? No ask — carry the unit plan into the batch summary.
+2. **Plan up front — surfaced, not gated.** Tiers run AFTER the spec is final (a front-end's gate, or the requirement arrived settled) — **no human gate here**; the unit plan is HOW, not WHAT (I12). Write the unit plan + every spec writable NOW (bug batch: all repro tests, RED against current code — a control case asserting still-correct behavior may pass pre-fix; fine, as long as each unit's bug-specific cases fail; feature split: only the first unit's — later specs are written just-in-time, grounded in the codebase as it exists after earlier units land), surface both at the start and carry them in the batch summary — an interactive human can redirect on sight; the batch does not wait for an OK.
 3. **Loop per unit/group:** Phase 1 (this unit only) → Phase 2 dispatch (hash per unit spec) → Phase 3 verify (re-run, re-hash, SPEC-DEFECT sweep). A critical/branchy unit runs its Phase 2–3 at that tier's verification depth (e.g. the adversarial attacker dispatch) — applied to that unit inside this loop, not a re-invocation of another skill; the tier attaches to the unit, not the batch.
 4. **Breaker per unit.** A stuck unit parks after the circuit breaker fires (3 attempts / same root cause twice) — report it, continue the batch. A grouped dispatch that trips gets split; retry the unstuck members.
 5. **End: batch summary** — per unit: spec + green evidence (+ any SPEC-DEFECT corrections); parked units surfaced with their diagnosis.

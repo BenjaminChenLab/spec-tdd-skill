@@ -1,6 +1,6 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.4.2** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.6.0** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
 A family of [Claude Code](https://claude.com/claude-code) skills enforcing **a protocol for preventing correlated test/implementation failure in AI-generated software** (the technical name for the *green lie*). Executable specifications, agent-boundary isolation, and independent verification for agentic TDD.
 
@@ -48,12 +48,13 @@ The acceptance test is written in the orchestrator's context *before* the impl e
 flowchart TD
     subgraph F["Front-ends (optional)"]
         GR["grill-spec-tdd — grill requirement: business, edges, state, NFR, security"]
+        AG["adversarial-grill-spec-tdd — fuzzy+critical: grill + independent auditor (decisions pre-gate, test pre-dispatch)"]
         ES["spec-tdd-escalate — route settled req by stakes (no grill, no gate)"]
     end
 
     subgraph O["Orchestrator context"]
-        T["Write acceptance test (RED)"]
-        GT{"Gate: human OK on direction?"}
+        GT{"Gate: human OK on the SPEC (grilled decisions)?"}
+        T["Write acceptance test from FINAL spec (RED)"]
         RT["Route to tier by stakes"]
         V["Re-run acceptance test + adversarial read (+ gap-check)"]
         P{"Pass and valid?"}
@@ -75,15 +76,16 @@ flowchart TD
         LT3["One fresh-context test review"]
     end
 
-    GR --> T
-    T --> GT
-    GT -->|"approve / defer to PR"| RT
+    GR --> GT
+    AG --> GT
+    GT -->|"approve (amendments = final spec, persisted) — no answer = PARK"| T
+    T --> RT
     ES --> RT
     RT -.->|"one small unit / non-critical"| LT1
     LT1 --> LT2
     LT2 --> LT3
     LT3 --> DONE
-    RT --> IM
+    RT -->|"tier writes its own Phase-1 test (RED) on non-front-end arrivals"| IM
     IM --> IC
     IC -->|"no, repair"| IM
     IC -.->|"3 failed"| ERR
@@ -99,12 +101,12 @@ flowchart TD
 
 - **Orchestrator → Implementer** is the delegation handoff (acceptance test = contract); the **circuit breaker** caps the implementer's repair loop — STOP after 3 attempts OR the same root cause on any two attempts — and tags `ERR-01 env · ERR-02 logic · ERR-03 syntax`.
 - **Verification is orchestrator-run** ("don't trust the subagent's self-report"): it re-hashes the acceptance test to prove the implementer didn't edit it (**SPEC-INTEGRITY**), then **routes by root cause** — three buckets: SPEC (re-open the requirement) → rewrite the test; TEST (requirement right, test weak/incomplete) → strengthen the test; IMPL (code wrong) → re-delegate.
-- **Context3 (attacker)** is `spec-tdd-adversarial` only. `grill-spec-tdd` adds the requirement grill *before* the acceptance test and routes to the matching tier; `spec-tdd-escalate` is the no-grill sibling — it routes a settled requirement straight to the matching tier, and that tier writes the test in its own Phase 1.
+- **Context3 (attacker)** is `spec-tdd-adversarial` only. `grill-spec-tdd` gates the **spec** (the grilled decisions) *before* the acceptance test is written — the test is derived from the **final**, gate-approved spec — then routes to the matching tier; `spec-tdd-escalate` is the no-grill sibling — it routes a settled requirement straight to the matching tier, and that tier writes the test in its own Phase 1.
 - **`spec-tdd-lite`** stays in the orchestrator's context: acceptance test (RED) → in-session inner loop → ONE fresh-context review dispatch → done (stall → promote to `spec-tdd`).
 
 ## The family
 
-Six skills, organized as **a verification ladder + two front-ends** — `grill-spec-tdd` (grill a fuzzy requirement, then route) and `spec-tdd-escalate` (route a settled requirement, no grilling):
+Seven skills, organized as **a verification ladder + three front-ends** — `grill-spec-tdd` (grill a fuzzy requirement, gate the spec, then route), `adversarial-grill-spec-tdd` (fuzzy **+ critical**: grill, independent auditor attacks the decisions before the gate and the final-spec test before dispatch), and `spec-tdd-escalate` (route a settled requirement, no grilling):
 
 | Skill | Role |
 |---|---|
@@ -112,10 +114,11 @@ Six skills, organized as **a verification ladder + two front-ends** — `grill-s
 | [`spec-tdd`](skills/spec-tdd/SKILL.md) | The base. Orchestrator writes the acceptance test (RED), delegates to one subagent, verifies by running it. **Multi-unit runs**: a bug list or task-split feature loops the phases per unit — the agent boundary is per unit. |
 | [`spec-tdd-coverage`](skills/spec-tdd-coverage/SKILL.md) | `spec-tdd` + **coverage evidence**: the subagent declares a case-list *before* impl and reports per-class branch %; the orchestrator gap-checks. |
 | [`spec-tdd-adversarial`](skills/spec-tdd-adversarial/SKILL.md) | `spec-tdd-coverage` + an **independent attacker** (a third agent context) that tries to write a wrong-but-green impl and hunts uncovered branches. Top tier — critical paths only. |
-| [`grill-spec-tdd`](skills/grill-spec-tdd/SKILL.md) | A **front-end**: interrogate a fuzzy/high-stakes requirement ("grill"), write the acceptance test, gate it, *then route* to whichever verification tier fits. |
+| [`grill-spec-tdd`](skills/grill-spec-tdd/SKILL.md) | A **front-end**: interrogate a fuzzy/high-stakes requirement ("grill"), gate the SPEC (the grilled decisions) with a human **before any test is written**, derive the acceptance test from the **final** spec, *then route* to whichever verification tier fits. |
+| [`adversarial-grill-spec-tdd`](skills/adversarial-grill-spec-tdd/SKILL.md) | The **critical-grade front-end**: grill-spec-tdd plus an **independent grill-auditor** dispatched twice — the decisions (incl. materiality stops) attacked BEFORE the gate, the final-spec acceptance test attacked after it (pre-dispatch) — independence at the cheapest moments (no impl tokens spent). Fuzzy + critical (money/auth/data-loss) only. |
 | [`spec-tdd-escalate`](skills/spec-tdd-escalate/SKILL.md) | A **front-end** for SETTLED requirements: skips grilling and auto-routes to whichever verification tier fits the stakes — full-auto, no gate. |
 
-`spec-tdd-lite` is the entry rung — in-session (no implementer dispatch, one review dispatch). Above it the ladder inherits upward: `spec-tdd` → `spec-tdd-coverage` → `spec-tdd-adversarial`. `grill-spec-tdd` and `spec-tdd-escalate` are orthogonal front-ends: `grill-spec-tdd` grills a fuzzy requirement then routes; `spec-tdd-escalate` routes a settled one with no grilling. Both compose with any tier, so `{grill, escalate} × {lite, spec-tdd, coverage, adversarial}` are all reachable **without** duplicating skills into monolithic combos.
+`spec-tdd-lite` is the entry rung — in-session (no implementer dispatch, one review dispatch). Above it the ladder inherits upward: `spec-tdd` → `spec-tdd-coverage` → `spec-tdd-adversarial`. `grill-spec-tdd` and `spec-tdd-escalate` are orthogonal front-ends: `grill-spec-tdd` grills a fuzzy requirement then routes; `spec-tdd-escalate` routes a settled one with no grilling. `adversarial-grill-spec-tdd` is grill's critical-grade upgrade (fuzzy + critical only; typically routes onward to `spec-tdd-adversarial`). Front-ends compose with the tiers — `{grill, escalate} × {lite, spec-tdd, coverage, adversarial}` plus `adversarial-grill × {spec-tdd, coverage, adversarial}` (never lite: a critical surface doesn't go in-session) — all reachable **without** duplicating skills into monolithic combos.
 
 Every **delegated** tier's handoff carries a **circuit breaker** (STOP after 3 repair attempts OR the same root cause on any two attempts; tag the failure `ERR-01` env/dep · `ERR-02` logic · `ERR-03` syntax, with a truncated trace) and **three-bucket failure routing** — SPEC (re-open the requirement) → rewrite the test; TEST (requirement right, test incomplete) → strengthen the test; IMPL (code wrong) → re-delegate with the error tag. `spec-tdd-lite` has no handoff: its in-session stall breaker (same trip rules) promotes to `spec-tdd` instead.
 
@@ -126,12 +129,14 @@ Requirement SETTLED and you want the tier picked for you?
   yes → spec-tdd-escalate   (auto-routes by stakes; no grilling, no gate)
 
 Otherwise pick the tier yourself:
-Correctness-CRITICAL? (money movement / auth-permissions / data-loss)
-  yes → spec-tdd-adversarial
-  no  → Need branch-coverage EVIDENCE? (large/subtle branch surface, weak tests, compliance)
-          yes → spec-tdd-coverage
-          no  → Requirement FUZZY or high-stakes?
-                  yes → grill-spec-tdd   (grills, then routes to the right tier)
+Requirement FUZZY or high-stakes?
+  yes → Critical surface? (money movement / auth-permissions / data-loss)
+          yes → adversarial-grill-spec-tdd   (grill + independent audits: decisions pre-gate, test pre-dispatch — then it routes to the tier)
+          no  → grill-spec-tdd   (grill + gate the spec, then routes to the right tier)
+  no  → Correctness-CRITICAL? (money movement / auth-permissions / data-loss)
+          yes → spec-tdd-adversarial
+          no  → Need branch-coverage EVIDENCE? (large/subtle branch surface, weak tests, compliance)
+                  yes → spec-tdd-coverage
                   no  → How many units?
                           ONE small unit (bugfix-scale, non-critical,
                           session cleared after)
@@ -141,7 +146,7 @@ Correctness-CRITICAL? (money movement / auth-permissions / data-loss)
                           otherwise → spec-tdd      (the cheap default)
 ```
 
-Rule of thumb: requirement already settled and you just want it routed? Use `spec-tdd-escalate`. Fuzzy, or you want to interrogate it first? Start with `grill-spec-tdd` — it grills and routes to the matching tier for you. One small unit and a session you'll clear after? `spec-tdd-lite`. Several units — a bug list, a split feature? `spec-tdd` as a multi-unit run.
+Rule of thumb: requirement already settled and you just want it routed? Use `spec-tdd-escalate`. Fuzzy, or you want to interrogate it first? Start with `grill-spec-tdd` — it grills and routes to the matching tier for you. Fuzzy AND on a money/auth/data-loss surface? `adversarial-grill-spec-tdd` — an independent auditor attacks the grill itself before anything is built. One small unit and a session you'll clear after? `spec-tdd-lite`. Several units — a bug list, a split feature? `spec-tdd` as a multi-unit run.
 
 ## How it relates to the `superpowers` plugin
 
@@ -171,22 +176,24 @@ Then invoke in Claude Code with `/<skill-name> <feature>`, e.g.:
 ## A quick walkthrough
 
 1. **Grill** — `grill-spec-tdd` interrogates every dimension in batches (business logic, boundaries, state transitions, NFRs, security/fraud) and forces an explicit decision on each.
-2. **Write the acceptance test** — behavioral, black-box; run it to confirm RED.
-3. **Gate** — the test + decisions surface for a quick human OK *before* delegating (the cheapest direction-check).
+2. **Gate the SPEC** — the grilled decisions (plain language, amendments welcome) + the tier choice surface for ONE human OK **before any test is written**; the approved + amended decisions are the **final spec**, persisted as a doc by default (`docs/specs/…` — say the word to skip).
+3. **Write the acceptance test** — derived from the final spec; behavioral, black-box; run it to confirm RED.
 4. **Route** — `grill-spec-tdd` picks the tier by stakes (e.g. money → `spec-tdd-adversarial`).
 5. **Delegate** — a subagent implements to green; the circuit breaker guards against runaway loops.
 6. **Verify** — the orchestrator runs the acceptance test itself, reads it adversarially, reports.
 
-For plain `spec-tdd`, skip the grill batch and route; the gate surfaces the test at verification time. For `spec-tdd-escalate`, skip the grill entirely — give it a settled requirement and it auto-routes to the right tier (no gate; the tier writes the test in its own Phase 1). For `spec-tdd-lite`, there is no delegation: acceptance test RED → implement in-session → one review dispatch → surface the test + findings. For a batch — a bug list or a split feature — `spec-tdd` runs multi-unit: unit plan → one gate → the phases per unit (grouped dispatches where modules overlap) → batch summary.
+For plain `spec-tdd`, skip the grill batch and route — tiers run **after** the spec is final, so they add no human gate of their own; if the spec isn't a doc (settled only in the conversation) it asks once whether to persist one (default yes); the test surfaces to the human at verification time. For fuzzy **+ critical** requirements, `adversarial-grill-spec-tdd` dispatches an independent auditor twice: after the grill (attacking the decisions and materiality stops, pre-gate) and after the test is written from the final spec (pre-dispatch) — the family's independence principle moved to the cheapest moments. For `spec-tdd-escalate`, skip the grill entirely — give it a settled requirement and it auto-routes to the right tier (no gate; the tier writes the test in its own Phase 1). For `spec-tdd-lite`, there is no delegation: acceptance test RED → implement in-session → one review dispatch → surface the test + findings. For a batch — a bug list or a split feature — `spec-tdd` runs multi-unit: unit plan (surfaced, not gated — the spec is already final) → the phases per unit (grouped dispatches where modules overlap) → batch summary.
 
 ## Why it works
 
 - **Agent-boundary = anti-green-lie.** A test written before the impl exists, by a different context, can't have been reverse-engineered to mirror it (it can still be *wrong* — handled by the mechanisms below).
 - **In-session without going bare.** `spec-tdd-lite` keeps acceptance-test-first and adds a fresh-context review — the two cheap structural defenses — for ONE small unit in a session you'll clear after.
-- **Human validates WHAT, agent validates HOW.** The pipeline separates the two failure modes a same-agent flow conflates: a *wrong spec* is the human's call — caught by reviewing the **test** (the cheap, high-signal checkpoint) — and a *wrong implementation* is the agent's call — caught by **running** the test. Review the test, not the code.
+- **Human validates WHAT, agent validates HOW.** The pipeline separates the two failure modes a same-agent flow conflates: a *wrong spec* is the human's call — in the grill front-ends, a gate on the **decision spec before any test is written** (amendments fold into the final spec the test then encodes); in the tiers, reviewing the surfaced **test** — and a *wrong implementation* is the agent's call — caught by **running** the test. Review WHAT, not HOW.
 - **Coverage as evidence, not luck.** `spec-tdd-coverage` makes branch coverage a measured, reported artifact with a case-list to audit — not a hopeful side-effect of green tests.
 - **Independence for critical paths.** `spec-tdd-adversarial` adds a third context (an attacker) that a diligent same-context agent cannot give itself.
 - **Grill before you build.** `grill-spec-tdd` forces every requirement dimension explicit (incl. NFR + security) instead of collapsing to "sensible defaults" under pressure.
+- **Independence at the cheapest moments, for fuzzy-critical work.** `adversarial-grill-spec-tdd` moves the family's independence principle as far forward as it can go: an independent auditor attacks the grill's decisions (incl. materiality stops) **before the gate**, and the final-spec acceptance test **before dispatch** — zero implementation tokens spent either way. Re-reading is not the fix — only independence is.
+- **Spec docs persist by default.** When no spec/plan/blueprint doc exists, the run persists one (`docs/specs/YYYY-MM-DD-<feature>.md`) — the final decision spec at the grill gate, or the requirement + interpretation decisions + test path at tier Phase 1 — so later recall (requirement re-opens, PR review, audits) never depends on session memory. Only an explicit decline skips it.
 - **Auto-route when decided.** `spec-tdd-escalate` picks the tier for you when the requirement is already settled — no grilling, no gate, route-only.
 
 ## License

@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.4.2**
+**Version 1.6.0**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -13,7 +13,7 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 | ID | Artifact | Produced by | When |
 |---|---|---|---|
 | A1 | **Requirement** — the raw ask | human / grill | before Phase 1 |
-| A2 | **Acceptance spec** — the behavioral, black-box acceptance test (per unit in multi-unit runs) | orchestrator | Phase 1 (before impl exists) |
+| A2 | **Acceptance spec** — the behavioral, black-box acceptance test (per unit in multi-unit runs) | orchestrator | Phase 1 (before impl exists); grill front-ends: after the spec gate, derived from the final decision spec (I12) |
 | A3 | **RED evidence** — the spec fails before any impl (per unit in multi-unit runs) | orchestrator | Phase 1 |
 | A4 | **SPEC-INTEGRITY snapshot** — hash of A2 at handoff (per unit spec in multi-unit runs) | orchestrator | Phase 2, before dispatch |
 | A5 | **Case-list** — every branch/boundary/exception the impl will cover (coverage+ only) | implementer | Phase 2, before any impl |
@@ -24,7 +24,9 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 | A10 | **Adversarial report** — attempted wrong-but-green impls + per-branch hunt (adversarial only) | independent attacker | Phase 3 |
 | A11 | **Final result** — A2 + evidence surfaced to the human (the test, not the impl) | orchestrator | end |
 | A12 | **Test-review report** — fresh-context reviewer findings: missing case / vacuous assertion / silent interpretation / none (lite only) | independent reviewer subagent | Phase 3 (lite) |
-| A13 | **Unit plan** — the units, their order/grouping, and which specs are writable now vs just-in-time (multi-unit runs) | orchestrator | before the first dispatch; gated once |
+| A13 | **Unit plan** — the units, their order/grouping, and which specs are writable now vs just-in-time (multi-unit runs) | orchestrator | before the first dispatch; surfaced in the batch summary — not gated (tiers run post-final-spec) |
+| A14 | **Grill-audit report** — independent attack on the grill's decisions (incl. materiality stops) BEFORE the gate, and on the final-spec acceptance test AFTER the gate: severity-tagged findings with quotes + verdict (adversarial-grill front-end only) | independent grill-auditor | Part A: pre-gate; Part B: post-gate, pre-dispatch |
+| A15 | **Spec doc** — persisted record of the decision spec (requirement + grilled/gate-amended decisions) + acceptance-spec reference, for later recall | orchestrator (grill front-ends: at the gate) | at the spec gate / tier Phase 1 — default ON, skipped only by explicit user decline (I17) |
 
 ## Invariants
 
@@ -54,13 +56,17 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 
 **I11 — The grill is bounded by materiality.** STOP grilling when remaining questions cannot change observable behavior, state transitions, failure semantics, data integrity, security/authorization, compatibility, or explicit NFRs. Materiality bounds the grill — not asking until exhausted.
 
-**I12 — Human validates WHAT, agent validates HOW.** A wrong *spec* is the human's call, caught by reviewing the test (the cheap, high-signal checkpoint); a wrong *implementation* is the agent's call, caught by running it. Review the test, not the code.
+**I12 — Human validates WHAT, agent validates HOW.** A wrong *spec* is the human's call; a wrong *implementation* is the agent's call, caught by running it. The human checkpoints the WHAT in its most readable form. In the grill front-ends, the **spec gate approves the grilled decisions (the decision spec) BEFORE the acceptance spec is authored** — the acceptance spec is then *derived* from the **final decision spec** (gate amendments included), never from a pre-gate draft: a test written before the gate anchors to the draft, and a gate amendment lands as a one-line tweak instead of a re-derivation. **The gate is blocking**: no human approval → the run parks at the gate — decisions documented and persisted, no acceptance-spec authoring, no dispatch; a slow or absent answer never licenses proceeding on guesses. **Tiers add no spec gate of their own** — they assume the spec is already final on arrival (a front-end's gate, or a settled requirement); decompositions like the multi-unit unit plan (A13) are HOW: surfaced, never gated. In the tiers, the surfaced acceptance test (A11) is the executable WHAT. Review WHAT, not HOW.
 
 **I13 — Fresh-context test review (lite).** After GREEN, exactly one dispatch to a reviewer that has seen none of the implementation reasoning. Two questions, answered with concrete cases: test-vs-impl (name a subtly-wrong impl that still passes every test) and test-vs-requirement (every requirement line has an assertion with discriminating power; the author's silent interpretations are surfaced to the human). Where no dispatch is possible, a *disclosed* degraded mode applies (mutation checks + requirement-line audit) — never a silent improvised review.
 
 **I14 — Solo re-RED (lite).** Any acceptance-spec edit made after the impl exists must be re-confirmed RED before it counts; a strengthening that cannot go RED has no teeth and must be rewritten. The discipline replacement for I4's hash where author and implementer share a context.
 
 **I15 — Test-defect is a distinct failure mode (SPEC-DEFECT).** The acceptance test itself can be defective (wrong constructor arity, ambiguous overload matchers, unused stubs under strict stubs, assertions contradicting the spec; an arity/signature error on a symbol the requirement itself explicitly changes is NOT a test defect). The implementer's instruction is asymmetric: report SPEC-DEFECT with evidence — the correct outcome, not a failure to implement — while production changes that exist solely to accommodate a test defect count as a FAILED run; when the test is defective, the implementer's only lever is production, and it will bend it instead of reporting. The orchestrator's Phase-3 **SPEC-DEFECT sweep** diffs returned production changes against the spec (its subject: changes to code this dispatch did not create — new code is the feature's own shape): any change no production behavior needs — existing only to satisfy the acceptance test — is an accommodation → correct the orchestrator's own artifact (re-hash, note the correction — the I4 escape hatch) and restore production to the spec'd shape. RED purity (I3) is the same failure mode caught at Phase 1.
+
+**I16 — Front-end independence for fuzzy-critical requirements (adversarial grill).** Where a fuzzy requirement sits on a critical surface (money movement / auth-permissions / data-loss), an independent context attacks the grill before any implementation tokens are spent (A14), in two parts: **Part A attacks the decisions — including the materiality stops — BEFORE the spec gate**; **Part B attacks the acceptance test AFTER the gate** (it is authored from the gate-approved final decision spec, per I12) and before routing/dispatch. Auditor findings must quote actual artifacts, and an "OK" must describe the attempted attack; each part's loop is bounded at audit + one re-audit. Part A's residuals surface at the gate; Part B's spec-level residuals surface to the human (never decided silently), its test-level residuals ride the tier handoff. Part A (decision coverage) is new coverage; Part B (test strength / SPEC-DEFECT classes) is the adversarial tier's Phase-3 coverage at pre-dispatch cost. Later just-in-time specs (multi-unit) are covered by the tier's own Phase 3, not by this invariant. Where no dispatch is possible, non-independence is disclosed — Part A at the gate, Part B in the handoff — never a silent self-audit. Re-reading is not a substitute: the same-context author's blind spots are the failure mode.
+
+**I17 — The spec doc persists (default on).** The decision spec — the requirement plus the decisions that interpret it — is persisted as a human-readable document (A15, e.g. `docs/specs/YYYY-MM-DD-<feature>.md`, project convention wins) whenever no spec/plan/blueprint doc already exists — **a spec settled only in conversation is not a doc; persist it**: at the grill front-ends' spec gate (the gate-approved final decision spec, amendments included), or at tier Phase 1 (requirement verbatim + interpretation decisions + acceptance-spec path). It exists for later recall — SPEC-bucket re-opens (I10), PR review, audits — and is skipped ONLY by an explicit user decline; an unanswered prompt is not a decline. The executable acceptance spec (A2) does not replace it: tests are for running, docs are for recalling.
 
 ## Scope per tier
 
@@ -74,10 +80,12 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 | I9 (circuit breaker) | stall breaker → promote to `spec-tdd` | ✅ | ✅ | ✅ |
 | I13 (fresh-context test review) | ✅ | — | — | — |
 | I11 (materiality grill) | via `grill-spec-tdd` front-end | via `grill-spec-tdd` | via `grill-spec-tdd` | via `grill-spec-tdd` |
+| I16 (grill audits: decisions pre-gate, test post-gate) | — (adversarial-grill never routes a critical surface to lite) | via `adversarial-grill-spec-tdd` front-end | via `adversarial-grill-spec-tdd` front-end | via `adversarial-grill-spec-tdd` front-end |
+| I17 (spec doc, default-on persistence) | ✅ (prompt at Phase 1) | ✅ | ✅ | ✅ |
 
 `spec-tdd-lite` implements in-session — no implementer dispatch; its only boundary crossing is the I13 review.
 
-In a **multi-unit run** (`spec-tdd`), I1–I5, I9, I10 and I15 apply **per unit** (I9 per unit/group), and I12's checkpoint is ONE gate on the unit plan (A13) + the specs writable now — not N gates. With no dispatch tool available, per-unit boundaries still hold via a disclosed degraded path.
+In a **multi-unit run** (`spec-tdd`), I1–I5, I9, I10 and I15 apply **per unit** (I9 per unit/group), and I12's spec checkpoint happened before the tier (front-end gate, or the settled requirement itself); the unit plan (A13) + the specs writable now are **surfaced, not gated**. With no dispatch tool available, per-unit boundaries still hold via a disclosed degraded path.
 
 ## What the protocol does NOT guarantee
 

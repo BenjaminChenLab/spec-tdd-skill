@@ -1,6 +1,6 @@
 ---
 name: spec-tdd-adversarial
-description: Use when implementing a correctness-CRITICAL feature (money movement, auth/permissions, data-loss or data-integrity surface) where a subtle bug means real loss and maximum rigor is worth the token cost — the highest tier above spec-tdd and spec-tdd-coverage. Triggers on critical-path, no-cost-for-correctness, hardening acceptance tests against independent attack, "this cannot be wrong".
+description: Use when implementing a correctness-CRITICAL feature (money movement, auth/permissions, data-loss or data-integrity surface) where a subtle bug means real loss and maximum rigor is worth the token cost — the highest tier above spec-tdd and spec-tdd-coverage. Requirement still FUZZY/un-grilled? Run adversarial-grill-spec-tdd first (the grill front-end: auditor on decisions pre-gate, on the final-spec test pre-dispatch); this tier starts once the requirement is grilled/settled. Triggers on critical-path, no-cost-for-correctness, hardening acceptance tests against independent attack, "this cannot be wrong".
 ---
 
 # spec-tdd-adversarial
@@ -19,13 +19,14 @@ spec-tdd-coverage, plus: an **independent adversarial subagent** — a *third* c
 - Critical path ONLY: money movement, auth/permissions, data-loss or data-integrity surface.
 - The user says `spec-tdd-adversarial`, "no cost for correctness," or "this cannot be wrong."
 - Otherwise use `spec-tdd` (general) or `spec-tdd-coverage` (coverage matters). This tier dispatches multiple agents per feature — don't burn it on glue/CRUD.
+- Requirement still fuzzy/un-grilled on this critical surface? `adversarial-grill-spec-tdd` (the front-end) grills + audits it first, then arrives here as a grill arrival.
 
 ## The 3 Phases (delta vs spec-tdd-coverage in **bold**)
 
 ### Phase 1 — Orchestrator writes the acceptance test
-> **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip to Phase 2, but ENSURE the mandatory property/differential tests below exist (add them if grill-spec-tdd didn't).
+> **Arrived from `grill-spec-tdd` / `adversarial-grill-spec-tdd`?** The acceptance test is already written and RED — skip to Phase 2, but ENSURE the mandatory property/differential tests below exist (add them if the front-end didn't).
 
-As spec-tdd-coverage: ground it, behavioral black-box, MUST be RED (incl. the RED-purity check — scan the FULL error list; errors about EXISTING symbols are a defect in YOUR test), note the branch/exception surface. PLUS:
+As spec-tdd-coverage: ground it, behavioral black-box, MUST be RED (incl. the RED-purity check — scan the FULL error list; errors about EXISTING symbols are a defect in YOUR test), note the branch/exception surface — and spec-tdd's **spec-doc persistence prompt** applies (no spec/plan/blueprint doc → ask once, default YES; adversarial-grill arrivals already persisted the final decision spec at the gate). PLUS:
 - **Property/invariant tests are MANDATORY** (money conservation, net-zero, monotonicity, no-silent-loss). Where an unbiased oracle exists (e.g. `BigInteger` for integer money), write a **differential property test**: random inputs, assert your result equals the oracle's. Oracles catch bugs hand-written cases miss.
 - **Seed the attacker**: list the wrong-but-plausible impls you most fear ("silently wraps on overflow," "skips nulls and nets the rest," "accepts mixed currency"). Drives Phase 3.
 

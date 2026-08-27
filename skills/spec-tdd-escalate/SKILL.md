@@ -13,7 +13,7 @@ The requirement is already settled (a locked plan, spec, or doc). Your ENTIRE jo
 
 **Core principle: route-only.** You do NOT grill, do NOT write the acceptance test, do NOT delegate, do NOT gate. The tier you invoke runs its own Phase 1 (it writes the test) and executes from there — the delegated tiers dispatch an implementer; `spec-tdd-lite` implements in-session. Escalate adds exactly one thing over calling a tier directly: **the machine picks the tier.**
 
-> Sibling front-end: `grill-spec-tdd` = requirement FUZZY → grill + write test + gate + route. **escalate = requirement SETTLED → route only.** If you'd need to interrogate, you're in grill-spec-tdd territory, not here.
+> Sibling front-end: `grill-spec-tdd` = requirement FUZZY → grill + gate the spec + write the test from the final spec + route. **escalate = requirement SETTLED → route only.** If you'd need to interrogate, you're in grill-spec-tdd territory, not here.
 
 ## When to Use
 - User says `spec-tdd-escalate <feature>`.
@@ -21,7 +21,7 @@ The requirement is already settled (a locked plan, spec, or doc). Your ENTIRE jo
 - User explicitly does NOT want to pick the tier or be asked ("just pick the right one and go").
 
 **When NOT to use** — route elsewhere:
-- Requirement is fuzzy / ambiguous / missing dimensions → `grill-spec-tdd` (grill first).
+- Requirement is fuzzy / ambiguous / missing dimensions → `grill-spec-tdd` (grill first); fuzzy AND on a critical surface (money/auth/data-loss) → `adversarial-grill-spec-tdd` (grill + independent audits: decisions pre-gate, test pre-dispatch).
 - You (or the user) already know which tier → invoke that tier directly. Escalate exists for "you decide for me"; if the decision is made, escalate adds nothing.
 
 ## The route (pick by stakes and size, then invoke by name)
