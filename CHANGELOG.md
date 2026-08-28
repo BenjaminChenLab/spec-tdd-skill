@@ -5,6 +5,16 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2026-08-28
+
+Dry-loop parameters retuned + `dryout` invocation flag (user-directed, design discussed and approved before implementation).
+
+### Changed
+- **Dry criterion simplified: ONE clean round stops the loop** — a round with zero BLOCKER/MAJOR findings (deduped re-finds excluded) is dry. Was 2 consecutive clean. Applies to both modes; the ONLY difference `dryout` makes is the cap.
+- **`dryout` flag** (`/spec-tdd-adversarial dryout <feature>`): raises the dry-loop cap from 4 to 5 rounds; token stripped from the feature description; all other rules identical.
+- **Cap-hit ask (both modes):** hitting the cap while fresh BLOCKER/MAJOR findings are still appearing now STOPS and ASKS the human whether to continue — a yes grants one more round, the ask repeats on further findings-rounds, a clean round or a decline ends it. The ask frames non-convergence as a signal with three named readings (superficial fixes manufacturing new issues / a lens category the list is missing / an oversized unit). Was: silent residual surfacing.
+- PROTOCOL I8 synced; README adversarial row + version 1.8.1.
+
 ## [1.8.0] - 2026-08-28
 
 **Terminal dry-loop audit** (user-directed, evidence-driven): a passed attack loop is not "done". Observed on a production `spec-tdd-adversarial` run (5 slices, overnight) — the in-run attacker loop passed, then a post-completion fresh-context audit landed **2 deployment-lens BLOCKERs** (a wrong migration-comment that would 500 every order in the deploy window; a runtime object with no creation path outside dev-profile controllers) and **2 test-strength MAJORs** the attacker hadn't constructed (a crash-window recovery path permanently dropped; a lifecycle state polled forever with its alert overwritten) — plus 8 minors (untested error handling surviving deletion, a missing mixed-scenario test, style violations). Half the findings were lenses the attacker structurally does not look through; half were attacker-lens findings it didn't reach. Both facts drive the design.

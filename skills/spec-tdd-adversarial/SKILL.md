@@ -20,6 +20,7 @@ spec-tdd-coverage, plus: an **independent adversarial subagent** — a *third* c
 - The user says `spec-tdd-adversarial`, "no cost for correctness," or "this cannot be wrong."
 - Otherwise use `spec-tdd` (general) or `spec-tdd-coverage` (coverage matters). This tier dispatches multiple agents per feature — don't burn it on glue/CRUD.
 - Requirement still fuzzy/un-grilled on this critical surface? `adversarial-grill-spec-tdd` (the front-end) grills + audits it first, then arrives here as a grill arrival.
+- **`dryout` flag** (`/spec-tdd-adversarial dryout <feature>`): args containing the token `dryout` raise the Phase-3 dry-loop cap from 4 to 5 rounds — all other rules identical. Strip the token from the feature description.
 
 ## The 3 Phases (delta vs spec-tdd-coverage in **bold**)
 
@@ -49,7 +50,7 @@ spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dis
    - **spec/plan fidelity** — impl vs the locked plan, clause by clause; intermediate-failure and recovery promises included.
    - **deployment/ops** — migration windows (old code × new schema; new code × old schema), environment-gated components, and for EVERY runtime object: how does it come to exist in EACH target environment? Ops docs/runbook claims true?
    - **production quality** — error handling, lifecycle convergence (does every state settle or does anything poll forever?), dead code, unused mocks.
-   **Dry-loop breaker:** dispatch the next round only while the current round found a **BLOCKER/MAJOR** that is NOT a deduped re-find (same file:line / same missing case / same plan clause). STOP at **2 consecutive clean rounds** (zero BLOCKER/MAJOR) or **4 total rounds** — whichever first. MINORs ride the report; they never extend the loop. Every adopted finding → fix → re-run the relevant verification (strengthened test → RED→GREEN; impl fix → repair path) → next round. A finding whose fix requires deciding something the plan doesn't decide → the human (I12), never silently. "No auditor can find anything" is prove-a-negative and is NEVER the bar — the dry-loop is.
+   **Dry-loop breaker:** a round with ZERO BLOCKER/MAJOR findings (deduped re-finds don't count) is **DRY → stop there**. Otherwise dispatch the next round, up to the cap: **4 rounds** default, **5 with the `dryout` flag**. MINORs ride the report; they never extend the loop. Every adopted finding → fix → re-run the relevant verification (strengthened test → RED→GREEN; impl fix → repair path) → next round. A finding whose fix requires deciding something the plan doesn't decide → the human (I12), never silently. **Cap hit while fresh BLOCKER/MAJOR findings are still appearing → STOP and ASK the human (both modes):** "N rounds run, findings still emerging — continue hunting or stop here?" A yes grants one more round (a findings-round repeats the ask); a clean round or a decline ends it. Frame the non-convergence as a signal, never a grind: (a) fixes are superficial — each round's fix is manufacturing new issues; (b) one lens category keeps producing findings — the lens list may be missing one; (c) the unit is too big and should be split. "No auditor can find anything" is prove-a-negative and is NEVER the bar — one clean round is.
 6. Surface to the user: acceptance test + property/differential tests + the attacker's final report + the dry-loop rounds' findings and residuals (not the impl).
 
 ## Risk-tier
@@ -67,7 +68,8 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 | Re-attacks by continuing the same attacker conversation | Each round is a FRESH dispatch — the previous attacker has seen your strengthenings; its independence decays and it rubber-stamps its own fixed findings. |
 | "The attack loop passed — done" | Step 5's terminal dry-loop exists because one lens misses another's findings (deployment/ops BLOCKERs survived a passed attack loop). Rotate lenses; stop at 2 consecutive clean or 4 rounds. |
 | Dry-loop extended by MINOR findings | Severity floor: only BLOCKER/MAJOR (not deduped re-finds) opens the next round. MINORs ride the report — otherwise you audit the auditor's taste forever. |
-| Dry-loop runs unbounded "until nobody finds anything" | Prove-a-negative; that is why the breaker stops at 2 consecutive CLEAN rounds. Bounded dry, not exhaustion. |
+| Dry-loop runs unbounded "until nobody finds anything" | Prove-a-negative; that is why ONE clean round stops the loop (capped at 4; 5 with `dryout`). Bounded dry, not exhaustion. |
+| Cap hit with fresh findings still coming → residuals surfaced, called "done" | STOP and ASK the human whether to continue (both modes). Non-convergence is a signal — superficial fixes / a missing lens / an oversized unit — never something to grind through or wave off. |
 | Used on non-critical work | Critical path only; otherwise pure token waste. |
 | Skips the SPEC-DEFECT sweep — "the attacker will catch it" | The attacker attacks the TEST (Part A) and hunts branches (Part B); neither diffs the real production changes against the spec. Sweep first — a compat ctor passing green is a bent production, not a passing spec. |
 
@@ -77,5 +79,5 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 - Property/differential tests absent or trivially tautological.
 - A hole was found but the test was not strengthened and re-attacked.
 - The attacker loop is still running past 3 rounds, or the same missing case re-failed after you closed it. (STOP — attack-loop circuit breaker; surface residual risk to the human.)
-- About to declare done with no terminal dry-loop on record — or the dry-loop is being extended by MINORs, or re-finding a deduped known residual.
+- About to declare done with no terminal dry-loop on record — or the dry-loop is being extended by MINORs, or re-finding a deduped known residual — or the cap was hit with live findings and the human was never asked.
 - Used on non-critical code.
