@@ -43,8 +43,14 @@ spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dis
 4. **Act, then loop — bounded by an attack-loop circuit breaker (mirrors the implementer's repair cap):**
    - Every hole → strengthen the acceptance test / add cases → re-run RED→GREEN → re-attack. **Each re-attack is a FRESH dispatch — never a continued conversation with the previous attacker:** it has now seen your strengthenings, its context is contaminated, and round 2 of the same context goes soft with ownership bias ("they fixed my findings"). The breaker's objective standard (below) already judges "same hole" across contexts.
    - **STOP when EITHER fires:** (i) **3 attacker rounds** run, OR (ii) **the same hole on any two rounds** — judge "same hole" objectively: the same missing acceptance-test case re-failing (the case you wrote to close it is bypassed again), NOT a rephrased wrong-impl description. Mirrors the implementer breaker's objectivity (file:line + assertion, not free text).
-   - **Done clean** = the attacker cannot construct a wrong-but-green impl (the bar). **Done enough** = the breaker fires with a residual hole → STOP and surface to the human: test hardened across N rounds + property/differential tests + the attacker's final report + the **residual risk** (remaining hole(s)); the human decides accept vs. further harden. Never loop past the breaker — a correctness-critical surface always has one more boundary.
-5. Surface to the user: acceptance test + property/differential tests + the attacker's final report (not the impl).
+   - **Done clean** = the attacker cannot construct a wrong-but-green impl (the bar) — AND the terminal dry-loop (step 5) has dried. **Done enough** = the breaker fires with a residual hole → STOP and surface to the human: test hardened across N rounds + property/differential tests + the attacker's final report + the **residual risk** (remaining hole(s)); the human decides accept vs. further harden. Never loop past the breaker — a correctness-critical surface always has one more boundary.
+5. **Terminal dry-loop audit (fresh contexts, rotating lenses).** The attacker loop passing is NOT done: one lens misses things another lens sees (observed: a passed attack loop, then a post-run fresh audit landed two deployment-lens BLOCKERs and two test-strength MAJORs). Dispatch independent read-only auditors, ONE lens per round, rotating:
+   - **test-strength** — wrong-but-green impls the attacker didn't construct; deleting error handlers must break something.
+   - **spec/plan fidelity** — impl vs the locked plan, clause by clause; intermediate-failure and recovery promises included.
+   - **deployment/ops** — migration windows (old code × new schema; new code × old schema), environment-gated components, and for EVERY runtime object: how does it come to exist in EACH target environment? Ops docs/runbook claims true?
+   - **production quality** — error handling, lifecycle convergence (does every state settle or does anything poll forever?), dead code, unused mocks.
+   **Dry-loop breaker:** dispatch the next round only while the current round found a **BLOCKER/MAJOR** that is NOT a deduped re-find (same file:line / same missing case / same plan clause). STOP at **2 consecutive clean rounds** (zero BLOCKER/MAJOR) or **4 total rounds** — whichever first. MINORs ride the report; they never extend the loop. Every adopted finding → fix → re-run the relevant verification (strengthened test → RED→GREEN; impl fix → repair path) → next round. A finding whose fix requires deciding something the plan doesn't decide → the human (I12), never silently. "No auditor can find anything" is prove-a-negative and is NEVER the bar — the dry-loop is.
+6. Surface to the user: acceptance test + property/differential tests + the attacker's final report + the dry-loop rounds' findings and residuals (not the impl).
 
 ## Risk-tier
 This IS the top tier: critical path gets full phases + mandatory property/differential tests + the attacker loop until unbroken OR the attack-loop circuit breaker fires (3 rounds / same hole twice) — then surface residual risk. Below critical → use `spec-tdd-coverage` or `spec-tdd`; not this skill.
@@ -59,6 +65,9 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 | Strengthened test not re-run RED | After any strengthening, confirm RED-then-GREEN before re-attacking. |
 | Attacker loop runs past 3 rounds, or re-finds the same hole | The attack-loop circuit breaker (mirrors the implementer's) caps it: 3 rounds OR same hole twice → STOP and surface residual risk + the attacker's report to the human. Don't chase a moving target on a rich surface. |
 | Re-attacks by continuing the same attacker conversation | Each round is a FRESH dispatch — the previous attacker has seen your strengthenings; its independence decays and it rubber-stamps its own fixed findings. |
+| "The attack loop passed — done" | Step 5's terminal dry-loop exists because one lens misses another's findings (deployment/ops BLOCKERs survived a passed attack loop). Rotate lenses; stop at 2 consecutive clean or 4 rounds. |
+| Dry-loop extended by MINOR findings | Severity floor: only BLOCKER/MAJOR (not deduped re-finds) opens the next round. MINORs ride the report — otherwise you audit the auditor's taste forever. |
+| Dry-loop runs unbounded "until nobody finds anything" | Prove-a-negative; that is why the breaker stops at 2 consecutive CLEAN rounds. Bounded dry, not exhaustion. |
 | Used on non-critical work | Critical path only; otherwise pure token waste. |
 | Skips the SPEC-DEFECT sweep — "the attacker will catch it" | The attacker attacks the TEST (Part A) and hunts branches (Part B); neither diffs the real production changes against the spec. Sweep first — a compat ctor passing green is a bent production, not a passing spec. |
 
@@ -68,4 +77,5 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 - Property/differential tests absent or trivially tautological.
 - A hole was found but the test was not strengthened and re-attacked.
 - The attacker loop is still running past 3 rounds, or the same missing case re-failed after you closed it. (STOP — attack-loop circuit breaker; surface residual risk to the human.)
+- About to declare done with no terminal dry-loop on record — or the dry-loop is being extended by MINORs, or re-finding a deduped known residual.
 - Used on non-critical code.

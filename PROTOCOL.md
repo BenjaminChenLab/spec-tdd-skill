@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.7.1**
+**Version 1.8.0**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -44,7 +44,7 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 
 **I7 — Coverage is evidence, not a percentage.** Branch % (not line %) per new/changed class, with every uncovered line justified. The **case-list is the gate**, not the % — a % gate incentivizes low-value tests.
 
-**I8 — Independence for critical paths (adversarial).** A correctness-critical path gets a *third* context — an independent attacker that tries to write a wrong-but-green impl and hunts uncovered branches. Independence is the one thing a diligent same-context agent cannot give itself. **Each attack round is a FRESH dispatch** — never a continued conversation with the previous attacker (it has seen the strengthenings; its independence decays). The attack loop is **bounded by an attack-loop circuit breaker** (mirrors I9): STOP after 3 rounds, or when the same missing case re-fails on any two rounds (judge by the acceptance-test case, not the attacker's rephrased description); if a residual hole remains at the breaker, surface it to the human rather than loop — a rich surface always has one more boundary.
+**I8 — Independence for critical paths (adversarial).** A correctness-critical path gets a *third* context — an independent attacker that tries to write a wrong-but-green impl and hunts uncovered branches. Independence is the one thing a diligent same-context agent cannot give itself. **Each attack round is a FRESH dispatch** — never a continued conversation with the previous attacker (it has seen the strengthenings; its independence decays). The attack loop is **bounded by an attack-loop circuit breaker** (mirrors I9): STOP after 3 rounds, or when the same missing case re-fails on any two rounds (judge by the acceptance-test case, not the attacker's rephrased description); if a residual hole remains at the breaker, surface it to the human rather than loop — a rich surface always has one more boundary. After the attack loop, a **terminal dry-loop audit** runs: fresh auditors with **rotating lenses** — test-strength, spec/plan fidelity, **deployment/ops** (migration windows old-code×new-schema; environment-gated components; how every runtime object comes to exist in each environment), production quality — one lens per round. The loop opens a new round ONLY on a BLOCKER/MAJOR finding that is not a deduped re-find (same file:line / missing case / plan clause), and stops at **2 consecutive clean rounds or 4 total** — "no auditor finds anything" is never the bar. Residuals + all rounds surface to the human.
 
 **I9 — Circuit breaker.** STOP when *either* fires: 3 repair attempts, OR **the same root cause on any two attempts** (not necessarily consecutive). "Same root cause" = same failing file:line AND same failing assertion — judge by those, not by a rephrasable free-text trace or a coarse ERR tag. Each attempt must rest on a genuinely different root cause; never burn attempts re-trying one identical misdiagnosis.
 

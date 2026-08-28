@@ -5,6 +5,22 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-08-28
+
+**Terminal dry-loop audit** (user-directed, evidence-driven): a passed attack loop is not "done". Observed on a production `spec-tdd-adversarial` run (5 slices, overnight) — the in-run attacker loop passed, then a post-completion fresh-context audit landed **2 deployment-lens BLOCKERs** (a wrong migration-comment that would 500 every order in the deploy window; a runtime object with no creation path outside dev-profile controllers) and **2 test-strength MAJORs** the attacker hadn't constructed (a crash-window recovery path permanently dropped; a lifecycle state polled forever with its alert overwritten) — plus 8 minors (untested error handling surviving deletion, a missing mixed-scenario test, style violations). Half the findings were lenses the attacker structurally does not look through; half were attacker-lens findings it didn't reach. Both facts drive the design.
+
+### Added
+- **`spec-tdd-adversarial` Phase 3 step 5 — terminal dry-loop audit:** after the attack loop closes (either way), fresh read-only auditors, ONE lens per round, rotating — **test-strength** (wrong-but-green impls the attacker missed), **spec/plan fidelity** (clause-by-clause, incl. intermediate-failure/recovery promises), **deployment/ops** (migration windows old-code×new-schema and new-code×old-schema; environment-gated components; how EVERY runtime object comes to exist in EACH target environment; ops-doc claims), **production quality** (error handling, lifecycle convergence, dead code). **Dry-loop breaker:** a new round opens ONLY on a BLOCKER/MAJOR that is not a deduped re-find (same file:line / missing case / plan clause); STOP at **2 consecutive clean rounds or 4 total**; MINORs ride the report and never extend the loop; fixes needing a plan-level decision go to the human (I12). "No auditor finds anything" is never the bar — bounded dry is. Common-Mistakes (3 rows) + Red Flags added; step-6 surfacing carries the dry-loop rounds + residuals.
+- **Grill deployment/rollout dimension** (`grill-spec-tdd` Phase 1 step 1): migration windows, environment-gated components, runtime-object existence per environment now an explicit grilled dimension; `adversarial-grill` Part A hunts un-grilled deployment windows under compatibility.
+- **PROTOCOL I8 amendment:** the terminal dry-loop (rotating lenses, severity floor, dedup, 2-clean/4-cap) added to the adversarial independence invariant. Version 1.8.0.
+- README: adversarial family-table row + mermaid attacker node carry the dry-loop; version 1.8.0.
+
+### Design rationale (recorded in the baseline doc)
+- NOT "fresh auditors until nobody finds anything": prove-a-negative, never terminates on a rich surface (the v1.2.1 breaker lesson), and without a severity floor it audits the auditors' taste — findings get manufactured to justify the round.
+- Diminishing returns are steep (round 1 finds the bulk; round 2 the remainder; round 3+ marginal) — 2 consecutive clean rounds is the knee, 4 total is the zombie-loop cap.
+- Lens rotation beats more same-lens rounds: the two BLOCKERs were invisible to the attacker's lens regardless of round count.
+- Full record: [docs/specs/2026-08-28-dry-loop-baseline.md](docs/specs/2026-08-28-dry-loop-baseline.md).
+
 ## [1.7.1] - 2026-08-28
 
 Pins an ambiguity surfaced in review (user-directed): **attacker/auditor identity across rounds.** The texts said "re-attack" and "one re-audit" without saying whether the same context continues — two opposite answers, both now explicit.

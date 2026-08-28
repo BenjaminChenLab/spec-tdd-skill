@@ -42,7 +42,8 @@ READ FIRST (grounding — quote it or it didn't happen): {codebase paths}
 
 PART A — grill-coverage attack:
 - Hunt UN-GRILLED dimensions that would materially change behavior, state, failure
-  semantics, data integrity, security, compatibility, or NFRs (materiality, not exhaustion).
+  semantics, data integrity, security, compatibility (incl. deployment/rollout windows),
+  or NFRs (materiality, not exhaustion).
 - Attack EVERY decision, including the materiality stops themselves — "if this stop is
   wrong, what breaks?" The cheapest place for a catastrophic miss is a dimension declared
   immaterial.
