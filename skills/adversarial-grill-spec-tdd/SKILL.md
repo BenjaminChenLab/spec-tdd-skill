@@ -57,7 +57,7 @@ End with a verdict: proceed / proceed-with-changes / redo. Do NOT edit any file.
 **Reconcile (before the gate):**
 - Adopt every BLOCKER/MAJOR: re-grill that dimension. Pre-gate, your decisions re-open freely — the grill is self-directed; self-directed means you decide, not that you decide *unexamined*. A fix that requires deciding something the **requirement** doesn't decide → surface it at the gate; don't decide it silently.
 - The auditor REFUTES a grill conclusion → downgrade it honestly and proceed.
-- Substantial revision → ONE re-audit. **Bound: audit + at most one re-audit** — if findings are unchanged or all adopted, stop auditing and carry the residuals to the gate.
+- Substantial revision → ONE re-audit. **Bound: audit + at most one re-audit** — if findings are unchanged or all adopted, stop auditing and carry the residuals to the gate. The re-audit continues the **SAME auditor**: adoption checking (were the BLOCKERs really fixed, not papered over?) needs its memory of what it found — a fresh auditor burns the budget rediscovering known residuals. (Contrast the adversarial TIER's attack loop: every round is a fresh dispatch — attack wants freshness, adoption-check wants memory.)
 - **No dispatch tool available?** Disclose at the gate that independence was NOT obtained — a self-audit is worthless by this skill's own thesis — and surface the grill decisions for the deeper human read. Never a silent improvised self-audit.
 
 ### Phase 3 — Gate the SPEC (as grill-spec-tdd Phase 1, step 3)

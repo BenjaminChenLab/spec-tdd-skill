@@ -41,7 +41,7 @@ spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dis
    - **Part A — test-attack:** acceptance test + INTENT only, NOT the real impl. *"Write a subtly-WRONG impl that still passes this test. Construct and run it to confirm where feasible — don't just opine. If you can, report EXACTLY which missing case let it through."*
    - **Part B — branch-hunt:** then the real impl. *"List every branch (if/loop/null-guard/early-return/catch/boundary); mark each Covered/Uncovered with its case. Report any branch with no case."*
 4. **Act, then loop — bounded by an attack-loop circuit breaker (mirrors the implementer's repair cap):**
-   - Every hole → strengthen the acceptance test / add cases → re-run RED→GREEN → re-attack.
+   - Every hole → strengthen the acceptance test / add cases → re-run RED→GREEN → re-attack. **Each re-attack is a FRESH dispatch — never a continued conversation with the previous attacker:** it has now seen your strengthenings, its context is contaminated, and round 2 of the same context goes soft with ownership bias ("they fixed my findings"). The breaker's objective standard (below) already judges "same hole" across contexts.
    - **STOP when EITHER fires:** (i) **3 attacker rounds** run, OR (ii) **the same hole on any two rounds** — judge "same hole" objectively: the same missing acceptance-test case re-failing (the case you wrote to close it is bypassed again), NOT a rephrased wrong-impl description. Mirrors the implementer breaker's objectivity (file:line + assertion, not free text).
    - **Done clean** = the attacker cannot construct a wrong-but-green impl (the bar). **Done enough** = the breaker fires with a residual hole → STOP and surface to the human: test hardened across N rounds + property/differential tests + the attacker's final report + the **residual risk** (remaining hole(s)); the human decides accept vs. further harden. Never loop past the breaker — a correctness-critical surface always has one more boundary.
 5. Surface to the user: acceptance test + property/differential tests + the attacker's final report (not the impl).
@@ -58,6 +58,7 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 | Property test is a tautology ("result not null") | Require a real invariant or a differential oracle. Tautologies are green lies. |
 | Strengthened test not re-run RED | After any strengthening, confirm RED-then-GREEN before re-attacking. |
 | Attacker loop runs past 3 rounds, or re-finds the same hole | The attack-loop circuit breaker (mirrors the implementer's) caps it: 3 rounds OR same hole twice → STOP and surface residual risk + the attacker's report to the human. Don't chase a moving target on a rich surface. |
+| Re-attacks by continuing the same attacker conversation | Each round is a FRESH dispatch — the previous attacker has seen your strengthenings; its independence decays and it rubber-stamps its own fixed findings. |
 | Used on non-critical work | Critical path only; otherwise pure token waste. |
 | Skips the SPEC-DEFECT sweep — "the attacker will catch it" | The attacker attacks the TEST (Part A) and hunts branches (Part B); neither diffs the real production changes against the spec. Sweep first — a compat ctor passing green is a bent production, not a passing spec. |
 

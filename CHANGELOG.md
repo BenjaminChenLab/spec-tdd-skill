@@ -5,6 +5,15 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] - 2026-08-28
+
+Pins an ambiguity surfaced in review (user-directed): **attacker/auditor identity across rounds.** The texts said "re-attack" and "one re-audit" without saying whether the same context continues — two opposite answers, both now explicit.
+
+### Fixed
+- **`spec-tdd-adversarial` + I8: each attack round is a FRESH dispatch** — never a continued conversation with the previous attacker. It has seen the orchestrator's strengthenings, so its context is contaminated and round 2 of the same context goes soft with ownership bias ("they fixed my findings"). The breaker's objective same-hole standard (the missing acceptance-test case, not a rephrased description) was already designed for cross-context comparison. Common-Mistakes row added.
+- **`adversarial-grill-spec-tdd` + I16: the ONE re-audit continues the SAME auditor** — adoption checking (were the BLOCKERs really fixed, not papered over?) needs its memory of what it found; a fresh auditor burns the budget rediscovering known residuals. Principle stated in both skills: **attack wants freshness, adoption-check wants memory.**
+- README and PROTOCOL version → 1.7.1.
+
 ## [1.7.0] - 2026-08-28
 
 The encoding audit goes family-wide (user-directed): v1.6.0's gate approves the **decisions**, not the executable test — the human no longer sees the test at a gate, so an independent agent must. New family rule: **no acceptance spec crosses the agent boundary unaudited.**
