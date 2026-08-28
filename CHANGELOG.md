@@ -5,6 +5,11 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] - 2026-08-28
+
+### Fixed
+- **Dry-loop parameters finalized to the user's spec** (after two misreads across 1.8.1/1.8.2, both now corrected): **ONE clean round stops the loop — both modes** (a round with zero BLOCKER/MAJOR findings, deduped re-finds excluded); cap **2 rounds default / 5 with `dryout`** (the flag's only difference); **cap hit while not yet clean → ask the human; a yes grants exactly ONE more round, ask repeats while rounds keep finding; a clean round or a decline ends it**; **every round is a fresh subagent**. PROTOCOL I8 + README synced; version 1.8.3.
+
 ## [1.8.2] - 2026-08-28
 
 ### Fixed
