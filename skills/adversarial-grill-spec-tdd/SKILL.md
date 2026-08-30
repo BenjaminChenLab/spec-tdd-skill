@@ -30,7 +30,7 @@ grill-spec-tdd, plus: an **independent adversarial subagent attacks the grill it
 ## The 4 Phases
 
 ### Phase 1 — Grill the requirement (as grill-spec-tdd Phase 1, steps 1–2; NO test yet)
-As grill-spec-tdd: materiality-bounded grill (every dimension incl. NFR + security; STOP GRILLING by materiality), ground it in the real architecture. Write down every interpretation of ambiguous wording. **Do NOT write the acceptance test yet** — gate-before-test ordering holds here too: the test is derived from the FINAL spec, after the gate.
+As grill-spec-tdd: ground it in the real architecture FIRST, then the materiality-bounded grill (every dimension incl. NFR + security; STOP GRILLING by materiality) — facts investigated, never asked of the human; every question numbered with its recommended answer; dependents conditional on unsettled roots (I18). Write down every interpretation of ambiguous wording. **Do NOT write the acceptance test yet** — gate-before-test ordering holds here too: the test is derived from the FINAL spec, after the gate.
 
 ### Phase 2 — Dispatch the grill-auditor, Part A: attack the decisions (pre-gate)
 ```
@@ -47,6 +47,9 @@ PART A — grill-coverage attack:
 - Attack EVERY decision, including the materiality stops themselves — "if this stop is
   wrong, what breaks?" The cheapest place for a catastrophic miss is a dimension declared
   immaterial.
+- Hunt I18 violations: FACTS the human was asked (or that decisions silently rest on)
+  that the environment already answers — un-grounded grilling — and recommendations
+  dropped under pressure.
 - Surface silent interpretations the author made that a human should confirm.
 
 RETURN: findings, each severity-tagged (BLOCKER / MAJOR / MINOR / OK), each QUOTING the
@@ -103,6 +106,7 @@ End with a verdict: proceed / proceed-with-changes / redo. Do NOT edit any file.
 | Auditor returns all-OK with no attempted counterexamples | An OK must name the attack tried and what excluded it. An opinion is a rubber-stamp. |
 | Findings without quotes | Grounding = quoting the actual file/test text. No quote, no finding. |
 | Materiality stops left un-attacked | "We decided X doesn't matter" is a decision — Part A attacks the stops themselves. |
+| Part A skipped the I18 checks (facts asked of the human, recommendations dropped under pressure) | Those are grill defects, not style — Part A hunts them like any other decision defect. |
 | Audit loops while findings evolve | Audit + at most ONE re-audit per part; then residuals move on (Part A → the gate; Part B → the human for spec-level, the handoff for test-level). |
 | Used on settled or non-critical work | Settled → `spec-tdd-escalate`; fuzzy+low-stakes → `grill-spec-tdd`. The predicate is fuzzy AND critical — verbatim the adversarial tier's. |
 | Test strengthened after Part B but RED not re-confirmed | Every post-audit test edit re-runs RED (full-list purity). |

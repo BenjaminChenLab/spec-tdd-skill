@@ -5,6 +5,24 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-08-30
+
+The grill's question interface, hardened under pressure (user-directed port, evidence-gated): three mechanics sourced from Matt Pocock's `grilling` skill — **facts-vs-decisions**, **per-question recommendations**, **dependency-aware rounds** — pressure-tested BEFORE adoption (calm baseline → pressure arms → green arms). Two mechanics earned in (the same 1/3 pressure arm collapsed on each); the full multi-round form did NOT earn adoption and lands as the lighter dependency-conditional rule instead.
+
+### Added
+- **Facts are yours; decisions are the human's** (`grill-spec-tdd` Phase 1; I18) — grounding now PRECEDES the first question (Phase 1 steps 1–2 swapped: ground → grill) and continues mid-round; a question the codebase/docs/config answers is never asked of the human — the "don't dig through the code, just ask me — I know the system" invitation is named as the trap (the human knows intent, not their code's actual shape). Pressure evidence: the invited-ask arm skipped grounding entirely (0 file reads), asked 3–4 environment-answerable facts, and rationalized "none of the above depends on it" — false; the calm baseline grounded 3/3.
+- **Every question ships its recommended answer** (I18) — numbered decisions with grounded, overridable recommendations; "all defaults except 3" is a valid reply. Pressure evidence: the collapsed arm stripped recommendations "to keep it short", while the two arms that KEPT them compressed the grill to 6–8 default-carrying decisions — recommendations are the short form, not the long one.
+- **Ask only what's answerable now** (I18, light form) — a question presupposing an unsettled root is explicitly conditional ("only if Q1 = email: …") or held for the next round, never flat; a root overridden later moots its flat dependents (same family as gate amendment-anchoring). **NOT adopted:** mandatory multi-round frontier — under a time-boxed human, one round of defaults + conditionals beat multi-round on every arm; the observable defect is the *unconditioned dependent* (one pressure arm presupposed email-only flat), and that is what the rule targets.
+- **`adversarial-grill-spec-tdd` Part A** hunts I18 violations too (facts asked of the human / decisions resting on uninvestigated environment answers, recommendations dropped under pressure); Phase 1 inheritance note updated; Common-Mistakes row added.
+- **`grill-spec-tdd` armor:** 2 Red Flags ("asked them facts the code answers"; "time pressure → questions stripped of recommendations") + 3 Common-Mistakes rows.
+- **PROTOCOL I18** + scope-table row (front-ends, like I11); README walkthrough step 1 + "Why it works" bullet synced; version 1.9.0.
+
+### Pressure-tested (9 fresh-subagent arms, temp-dir fixture, blind to hypothesis)
+- **Calm baseline (3, current skill):** all grounded, all recommended — mechanics 1–2 satisfied de-facto at rest; the mega-batch-with-conditionals pattern (mechanic 3's target) present 3/3.
+- **Pressure (3, current skill — 5-min box + "just ask me, don't read the code"):** 1/3 collapsed on BOTH facts (3–4 environment-answerable questions, 0 file reads, false "I'll verify later" rationalization) and recommendations (bare questions). The exact failure the mechanics exist for.
+- **Green (3, edited skill, same pressure):** 3/3 grounded with zero fact-questions, 3/3 recommendations on every question, 3/3 dependency-aware (one round explicitly scoped "items 2–6 assume 1 = email").
+- Full record: [docs/specs/2026-08-30-grill-frontier-baseline.md](docs/specs/2026-08-30-grill-frontier-baseline.md).
+
 ## [1.8.3] - 2026-08-28
 
 ### Fixed

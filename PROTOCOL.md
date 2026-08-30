@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.8.3**
+**Version 1.9.0**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -68,6 +68,8 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 
 **I17 — The spec doc persists (default on).** Wherever no spec/plan/blueprint doc exists, the decision spec (requirement + interpreting decisions) is persisted as a human-readable doc (A15, e.g. `docs/specs/YYYY-MM-DD-<feature>.md`; project convention wins) — **a spec settled only in conversation is not a doc; persist it**. Where: the grill front-ends' gate (final decision spec, amendments folded in), or tier Phase 1 (requirement verbatim + interpretation decisions + acceptance-spec path). Why: later recall — SPEC-bucket re-opens (I10), PR review, audits. Skipped ONLY by an explicit user decline — an unanswered prompt is not a decline. The executable acceptance spec (A2) does not replace it: tests are for running, docs are for recalling.
 
+**I18 — The grill asks decisions, not facts.** Questions answerable from the environment (codebase, docs, config) are the agent's to investigate — never asked of the human; "just ask me, I know the system" is not a substitute for grounding (the human knows their *intent*, not their code's actual shape). Grounding precedes the first question and continues through the grill. Decisions surface as numbered questions, each carrying the agent's recommended answer (the human vetoes rather than composes), and a question that presupposes an unsettled root is asked conditionally or held for the next round — a root overridden later moots its flat dependents.
+
 ## Scope per tier
 
 | Invariant | lite | spec-tdd | +coverage | +adversarial |
@@ -80,6 +82,7 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 | I9 (circuit breaker) | stall breaker → promote to `spec-tdd` | ✅ | ✅ | ✅ |
 | I13 (fresh-context encoding audit) | ✅ (post-GREEN) | ✅ (pre-dispatch) | ✅ (pre-dispatch) | ✅ (pre-dispatch) |
 | I11 (materiality grill) | via `grill-spec-tdd` front-end | via `grill-spec-tdd` | via `grill-spec-tdd` | via `grill-spec-tdd` |
+| I18 (facts-not-questions grill interface) | via `grill-spec-tdd` front-end | via `grill-spec-tdd` | via `grill-spec-tdd` | via `grill-spec-tdd` |
 | I16 (grill audits: decisions pre-gate, test post-gate) | — (adversarial-grill never routes a critical surface to lite) | via `adversarial-grill-spec-tdd` front-end | via `adversarial-grill-spec-tdd` front-end | via `adversarial-grill-spec-tdd` front-end |
 | I17 (spec doc, default-on persistence) | ✅ (prompt at Phase 1) | ✅ | ✅ | ✅ |
 
