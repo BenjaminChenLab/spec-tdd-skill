@@ -10,7 +10,7 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 
 **Core principle:** the acceptance test is authored before any impl exists, in a different context than the implementer — so it cannot have been reverse-engineered to mirror an implementation (the structural anti-green-lie guarantee). It can still be *wrong or shallow* — a misread or under-interrogated requirement produces a bad test — but that is a different failure mode, handled by RED-first, the Phase-3 adversarial read, the grill, and the attacker. **"Must be RED first"** is the built-in green-lie detector.
 
-**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A16) and invariants (I1–I19).
+**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A16) and invariants (I1–I20).
 
 ## When to Use
 - User says `spec-tdd <feature>` (the agreed trigger).
@@ -32,7 +32,7 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 2. **Ground it**: read relevant entities/services/repos/existing patterns first; the test must fit the real architecture.
 3. **Write BEHAVIORAL acceptance tests** — black-box, input→output/state. Test WHAT, not HOW. Don't couple to internal method shapes.
 4. (Domain logic only) add 1–3 **property/invariant tests** (e.g. money conservation, net-zero offset). Properties can't become green lies and don't over-constrain design.
-5. **Run it — MUST be RED.** Green with no impl = fake test (vacuous / over-mocked); rewrite it.
+5. **Run it — MUST be RED.** Green with no impl = fake test (vacuous / over-mocked); rewrite it. Intermittently green with no impl (fails, then passes on a re-run — e.g. after any audit-fix re-RED) = same verdict: pre-impl the non-determinism is test-side (unpinned seed, wall clock, live dependency, suite interference); pin it before dispatch.
    - **RED-purity check:** scan the FULL compiler/runner error list, not just the tail. Every error must point at symbols the feature will create. Any error about EXISTING symbols — wrong constructor arity, ambiguous method overloads, unused imports — is a defect in YOUR test, not feature absence. Exception: if the spec itself explicitly calls for changing that existing symbol (a breaking-change feature), the error points at the shape the feature will create — the RED is good. Otherwise fix the test before dispatch; a defective RED masquerades as "feature missing" and the implementer will bend production to accommodate it.
 6. **Encoding audit — dispatch it, TOP-TIER model (grill arrivals skip: already audited at the front-end; throwaway risk-tier may skip).** No human gates this test, so before dispatch a fresh context checks it encodes the settled spec (I13 — no unaudited test crosses the boundary; I19 — every review dispatch names the top tier). Persist the spec doc FIRST if you haven't (I17 — RED is done at step 5; the auditor reads the doc):
    ```
@@ -86,6 +86,7 @@ RETURN: impl + unit-test PATHS + notable decisions (every deviation from the spe
    - **TEST** — the requirement is right but the executable spec is weak/incomplete (a missing case), defective (a SPEC-DEFECT), or the implementer edited it → strengthen/revert/correct the test, re-confirm RED, re-delegate. Do NOT re-open the requirement.
    - **IMPL** — the spec is right, the code is wrong → re-delegate with the failing case + the subagent's ERR tag.
    Key: SPEC re-opens the *requirement*; TEST touches only the *test*; IMPL touches only the *code*. Mis-routing (e.g. TEST when it's really SPEC) wastes a delegation on the wrong artifact. SPEC vs TEST: a defect you can fix by consulting artifacts you already hold (the requirement/plan) is TEST; a test fix that requires deciding something the requirement doesn't decide is SPEC — ask the human.
+   **Flaky — a failure that flips across identical re-runs** — diagnose the side before bucketing: non-determinism in the TEST itself (unpinned seed, wall clock, a live network the test calls) = TEST — pin it, re-run, then trust the verdict; a deterministic test still flipping = IMPL non-determinism (a real race — the flake IS the bug) → re-delegate with the flake as evidence. Re-running-until-green buries the signal either way.
 
 ## Multi-unit runs (bug batches, task-split features)
 The work is a batch of independently-testable units — a bug list, several separate fixes, or a feature deliberately split into slices? **If the task names more than one bug/fix, you are here.** **The agent boundary is per unit, not per feature.** Never mega-dispatch the batch (one implementer drowning = all-or-nothing circuit breaker), never run `spec-tdd-lite` per unit in-session (N inner loops drown YOUR context), never write one monolithic suite over the batch. Loop the 3 phases per unit:
@@ -121,3 +122,4 @@ Per-unit orchestrator cost stays: write spec, review (encoding audit), hash, dis
 | GREEN accepted without diffing the returned production changes against the spec | SPEC-DEFECT sweep (Phase 3): a compat constructor, renamed public method, or logic beyond spec scope passing green = a bent production, not a passing spec — fix the test (re-hash, note the correction), restore production. |
 | Dispatch sent with no model stated — it silently inherits the session's most expensive (a whole run can land top-tier unnoticed) | Every dispatch names its model (I19): implementers MID, every review/audit/attack dispatch TOP. |
 | Green evidence returned as a pasted full log, parked permanently in the orchestrator's context | RETURN = status lines + a log file path (I19); the proof is the orchestrator's own re-run (I5), never the paste. |
+| Flaky failure re-run until green, or bucketed blind | Diagnose the side first: test-side non-determinism (unpinned seed / wall clock / live network the test calls) = TEST — pin it; a deterministic test still flipping = IMPL race (the flake IS the bug). Re-run-until-green is the anti-pattern. |

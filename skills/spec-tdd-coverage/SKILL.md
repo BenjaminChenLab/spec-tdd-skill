@@ -48,6 +48,8 @@ BEFORE ANY IMPL — write a CASE-LIST of every branch + boundary you will cover:
   happy path; each branch (if/loop/null-guard/early-return/catch);
   boundaries (empty, single, max, off-by-one, sign, rounding edges);
   exception/invalid/null/NaN/non-finite inputs. Return it FIRST.
+  Every case NAMES the branch it covers (method + condition) — the mapping
+  is cross-checked both ways in Phase 3; a case that maps to nothing is filler.
 
 DO:
 1) make the acceptance test GREEN
@@ -65,20 +67,20 @@ RETURN: case-list + impl/unit-test paths + notable decisions (every deviation
           output in a scratch log file (e.g. `.spec-tdd/<feature>-run.log` — working
           notes, never committed; hand its path)
         + per-class coverage excerpt (branch %, uncovered lines + justifications).
-        Status lines read from real runs — the orchestrator re-runs and spot-checks
-        everything itself and compares (I5/I19).
+        Status lines read from real runs — the orchestrator re-runs and compares
+        everything itself (I5/I19).
         If you stopped on SPEC-DEFECT, return the defect report with evidence instead.
 ```
 
 ### Phase 3 — Orchestrator verifies
 spec-tdd's checks (incl. the **SPEC-INTEGRITY hash check**, the **SPEC-DEFECT sweep** — diff the returned production changes against the spec; a compat ctor / renamed public method / logic beyond scope passing green is a test-defect accommodation: fix the test (re-hash, note the correction), restore production — and the **SPEC/TEST/IMPL failure routing**), PLUS:
-1. **GAP-CHECK** — read the impl's actual branches; confirm each has a case. Any branch with no case → add one. *(Same agent wrote case-list and impl, so this cross-context check stops a case-list that quietly mirrors the impl.)*
-2. **SPOT-CHECK** the coverage excerpt against a real run — don't trust self-report.
+1. **GAP-CHECK — bidirectional, machine-derived.** Derive the branch inventory from the coverage report's per-method branch detail where the tool provides it (a machine-generated list, not a free-form code read); where it doesn't (e.g. line-only reporters), derive it from the impl's own branch statements — but still check BOTH ways against the case-list: every branch is claimed by ≥1 case (unclaimed branch → add a case), and every case maps to a real branch (an unmapped case = invented filler — cut it or map it). **Branch gaps and unmapped cases go back to the implementer as ONE targeted re-dispatch — the case-list is its artifact (I6); the orchestrator never writes its cases.** *(Same agent wrote case-list and impl, so this cross-context check stops a case-list that quietly mirrors the impl — and the mapping requirement stops the reverse, a case-list padded with cases that cover nothing.)*
+2. **Re-run the coverage tool yourself and compare the numbers** against the returned excerpt — a full compare, not a spot-check; any mismatch = self-report fails. Don't trust self-report.
 3. **Insist on BRANCH %, not line %.** Line % can read 100% while branches are uncovered (probe: line 100% / branch 66% on the same file).
 4. Surface **both** the acceptance test **and** the case-list to the user.
 
 ## Risk-tier (scale to stakes)
-- **Critical path** (money / auth / data-loss): full phases + property tests + gap-check + coverage spot-check.
+- **Critical path** (money / auth / data-loss): full phases + property tests + gap-check + coverage re-run with full numeric compare.
 - **General feature**: phases 1–3 incl. case-list + coverage excerpt.
 - **Throwaway / demo**: minimal — acceptance test + compile. **No case-list, no coverage burden.**
 
@@ -90,8 +92,9 @@ spec-tdd's checks (incl. the **SPEC-INTEGRITY hash check**, the **SPEC-DEFECT sw
 | Subagent quotes whole-module % | Require **per-class for NEW/changed classes only**. Whole-module % is diluted by existing untested code. |
 | Trusting line % | Require **branch %**. line 100% can hide uncovered branches. |
 | "100%" with no uncovered-line list | Require the list + justification **even when empty** ("none" stated, not omitted). |
-| Trusting self-reported coverage | Run it yourself in Phase 3. |
+| Trusting self-reported coverage | Re-run the coverage tool yourself in Phase 3 and **full-compare** the numbers against the excerpt — not a spot-check. |
 | % gate incentivizes low-value tests | The **case-list** is the gate, not %. Each case must map to a real branch. |
+| GAP-CHECK done as a free-form code read ("I read the impl — looks covered") | Derive the branch inventory from the coverage report's per-method branch detail and check BOTH directions: branch→case AND case→branch. The case↔branch mapping makes the check countable, not vibes. |
 | Coverage evidence green, but the returned production diff never checked against the spec | Inherited SPEC-DEFECT sweep (spec-tdd Phase 3): a compat ctor / renamed method / logic beyond scope passing green = a bent production — fix the test (re-hash, note), restore production. |
 
 ## Red Flags — STOP
@@ -99,3 +102,4 @@ spec-tdd's checks (incl. the **SPEC-INTEGRITY hash check**, the **SPEC-DEFECT sw
 - Coverage excerpt shows **whole-module %** or **omits branch %**.
 - **Uncovered lines with no justification.**
 - Case-list appears **after** impl, or mirrors impl branches with no gap-check.
+- Case-list entries **name no branch** — no mapping to cross-check either direction.
