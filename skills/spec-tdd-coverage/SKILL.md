@@ -27,6 +27,8 @@ As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED — incl
 ### Phase 2 — Delegate to subagent (extended handoff)
 **SPEC-INTEGRITY snapshot (before dispatch):** hash the acceptance test (`sha256sum <file>` / `certutil -hashfile <file> SHA256` / `git hash-object <file>`) and record it — the immutability baseline you verify in Phase 3.
 
+**Dispatch model: MID tier, stated on the dispatch (I19)** — the acceptance test + top-tier reviewers enforce quality; an unstated model silently inherits the session's most expensive.
+
 ```
 TASK: Implement {feature} so the acceptance test passes. Do NOT modify it — it is hashed and verified byte-for-byte on return;
 if it looks wrong, STOP and report — never silently weaken it.
@@ -57,11 +59,14 @@ DO:
    JS → node --test --experimental-test-coverage ; Python → pytest --cov
 CIRCUIT BREAKER: STOP if either fires — (a) the test still fails after 3 repair attempts, OR (b) **the same root cause appears on ANY two attempts** — same failing file:line AND same failing assertion (not necessarily consecutive; not a rephrased free-text trace). Don't burn a third attempt re-trying one identical misdiagnosis — each attempt must rest on a DIFFERENT root cause. Report a short structured diagnosis — tag it env/dependency (ERR-01), logic violation (ERR-02), or syntax/compile (ERR-03) — with a TRUNCATED trace and expected-vs-actual. Don't keep retrying.
 
-RETURN: case-list + impl + unit tests + notable decisions (every deviation
+RETURN: case-list + impl/unit-test paths + notable decisions (every deviation
         from the spec'd shape: symbols added/renamed/moved beyond the spec)
-        + ACTUAL green output
+        + ONE status line per command (command + pass/fail counts), with the FULL
+          output in a scratch log file (e.g. `.spec-tdd/<feature>-run.log` — working
+          notes, never committed; hand its path)
         + per-class coverage excerpt (branch %, uncovered lines + justifications).
-        Paste real output. Do not claim.
+        Status lines read from real runs — the orchestrator re-runs and spot-checks
+        everything itself and compares (I5/I19).
         If you stopped on SPEC-DEFECT, return the defect report with evidence instead.
 ```
 

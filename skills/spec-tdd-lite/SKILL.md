@@ -41,12 +41,13 @@ Unit tests one at a time, red→green:
 - Refactor only while green.
 
 ## Phase 3 — Fresh-context test review (the one structural check)
-Dispatch ONE subagent that has seen none of your reasoning:
+Dispatch ONE subagent — TOP-TIER model (I19: review = top tier) — that has seen none of your reasoning:
 
 ```
 REVIEW an acceptance test you did NOT write and must not trust.
 Acceptance test: {file}
-REQUIREMENT (verbatim, do not paraphrase): {paste}
+REQUIREMENT: {spec doc path — persisted at Phase 1 (A15); READ it, it holds the requirement
+verbatim. Paste only when persistence was declined}
 Impl (may read, to judge what's tested — the TEST is the subject): {paths}
 
 Answer two questions with concrete cases:
@@ -60,7 +61,7 @@ RETURN: findings list (missing case / vacuous assertion / silent interpretation 
 Do NOT edit any file.
 ```
 
-**No dispatch tool available** (you are running inside a subagent — lite normally runs in the main session)? Degraded mode, and it must be disclosed: run Q1 as concrete mutation checks (break the impl, re-run, expect RED) and Q2 as a line-by-line audit against the pasted requirement — then state in the final report that the review was **same-context, not fresh-context**. A silent improvised review is worse than a disclosed degraded one.
+**No dispatch tool available** (you are running inside a subagent — lite normally runs in the main session)? Degraded mode, and it must be disclosed: run Q1 as concrete mutation checks (break the impl, re-run, expect RED) and Q2 as a line-by-line audit against the requirement (spec doc or in-context — nothing is dispatched) — then state in the final report that the review was **same-context, not fresh-context**. A silent improvised review is worse than a disclosed degraded one.
 
 Then, in session: **verify each finding yourself** (re-run; don't trust the report either) → strengthen the test → **re-confirm RED** — a strengthening that cannot go RED has no teeth; rewrite it → repair the impl → GREEN. A finding that is really a *requirement* question → ask the human (SPEC bucket); never resolve it alone.
 
@@ -74,7 +75,7 @@ Then, in session: **verify each finding yourself** (re-run; don't trust the repo
 | Mistake | Fix |
 |---|---|
 | Skip Phase 3 — "tests are green, done" | Green proves nothing about test *strength*. The review is the only structural check lite has; the baseline's vacuous assertion was green too. |
-| Hand the reviewer YOUR summary of the requirement | Paste the requirement verbatim. Your summary launders your interpretations — exactly what Q2 hunts. |
+| Hand the reviewer YOUR summary of the requirement | Hand the verbatim requirement — the persisted spec doc's path (I19), or a paste when persistence was declined. Your summary launders your interpretations — exactly what Q2 hunts. |
 | Strengthen the test but skip re-RED | A strengthening that stays instantly green is vacuous — rewrite until it can fail for the right reason. |
 | Edit the acceptance test to make it pass | Solo re-RED: every post-impl edit re-confirms RED or reverts. |
 | Reads only the tail of the RED error list | Full-list RED-purity check: errors about EXISTING symbols (wrong ctor arity, ambiguous overloads, unused imports) = your test's defect — fix it before implementing (unless the spec itself explicitly changes that symbol). |

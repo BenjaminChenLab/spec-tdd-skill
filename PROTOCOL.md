@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.9.0**
+**Version 1.10.0**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -26,7 +26,8 @@ The formal specification of the spec-TDD method: the **artifacts** it produces a
 | A12 | **Test-review report** — fresh-context encoding-audit findings: missing line / vacuous assertion / over-assertion / silent interpretation / none | independent reviewer subagent | pre-dispatch (delegated tiers + front-ends); post-GREEN (lite) |
 | A13 | **Unit plan** — the units, their order/grouping, and which specs are writable now vs just-in-time (multi-unit runs) | orchestrator | before the first dispatch; surfaced in the batch summary — not gated (tiers run post-final-spec) |
 | A14 | **Grill-audit report** — independent attack on the grill's decisions (incl. materiality stops) BEFORE the gate, and on the final-spec acceptance test AFTER the gate: severity-tagged findings with quotes + verdict (adversarial-grill front-end only) | independent grill-auditor | Part A: pre-gate; Part B: post-gate, pre-dispatch |
-| A15 | **Spec doc** — persisted record of the decision spec (requirement + grilled/gate-amended decisions) + acceptance-spec reference, for later recall | orchestrator (grill front-ends: at the gate) | at the spec gate / tier Phase 1 — default ON, skipped only by explicit user decline (I17) |
+| A15 | **Spec doc** — persisted record of the decision spec (requirement verbatim + grilled/gate-amended decisions) + acceptance-spec reference (grill front-ends append the test path once Phase 2 writes it), for later recall | orchestrator (grill front-ends: at the gate) | at the spec gate / tier Phase 1 — default ON, skipped only by explicit user decline (I17) |
+| A16 | **Batch ledger** — running per-unit record (unit, spec path, A4 hash, dispatch model, verdict, evidence log path), opened at dispatch and updated as the unit's phases complete; survives context compaction; feeds the batch summary | orchestrator | multi-unit runs (I19) |
 
 ## Invariants
 
@@ -70,6 +71,8 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 
 **I18 — The grill asks decisions, not facts.** Questions answerable from the environment (codebase, docs, config) are the agent's to investigate — never asked of the human; "just ask me, I know the system" is not a substitute for grounding (the human knows their *intent*, not their code's actual shape). Grounding precedes the first question and continues through the grill. Decisions surface as numbered questions, each carrying the agent's recommended answer (the human vetoes rather than composes), and a question that presupposes an unsettled root is asked conditionally or held for the next round — a root overridden later moots its flat dependents.
 
+**I19 — Dispatch economy, none of it weaker.** A subagent run is the protocol's main token cost; the rules below cut it without touching a guarantee. **(a) Every dispatch states its model.** Planning (grill, spec, unit plan) stays in the orchestrator's own context; every review/audit/attack dispatch — encoding audit (A12), grill-auditor Parts A/B (A14), the attacker (A10), dry-loop auditors, lite's fresh review — names the **top tier**; implementer dispatches name the **mid tier** (harness-relative: top = the strongest model, mid = the strong-but-cheaper tier). An unstated model silently inherits the session's most expensive (the observed failure: a whole run's reviewers landed top-tier unnoticed). The implementer's tier is not a quality lever — the acceptance spec (I1–I4) and the top-tier reviewers enforce quality. **(b) Evidence moves as files.** The green run's full output is written to a log file; the RETURN carries one status line per command (command + pass/fail counts) + the log path. Verification remains the orchestrator's own re-run (I5) — never a paste; failure diagnoses keep their truncated trace (I9's evidence). **(c) A settled spec moves by doc path.** Once the spec doc (A15) is persisted, dispatches reference its path instead of re-pasting the spec — the doc holds the requirement verbatim + decisions; paste only on an explicit persistence decline. (Pre-gate dispatches — adversarial-grill Part A — precede the doc and paste by design.) **(d) Multi-unit runs keep a batch ledger (A16)** — each unit's record appended as its phases complete; it survives context compaction (resume, don't redo) and feeds the batch summary.
+
 ## Scope per tier
 
 | Invariant | lite | spec-tdd | +coverage | +adversarial |
@@ -85,10 +88,11 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 | I18 (facts-not-questions grill interface) | via `grill-spec-tdd` front-end | via `grill-spec-tdd` | via `grill-spec-tdd` | via `grill-spec-tdd` |
 | I16 (grill audits: decisions pre-gate, test post-gate) | — (adversarial-grill never routes a critical surface to lite) | via `adversarial-grill-spec-tdd` front-end | via `adversarial-grill-spec-tdd` front-end | via `adversarial-grill-spec-tdd` front-end |
 | I17 (spec doc, default-on persistence) | ✅ (prompt at Phase 1) | ✅ | ✅ | ✅ |
+| I19 (dispatch economy: model tiers, evidence as files, spec by doc path, batch ledger) | ✅ (review dispatch top-tier; no implementer dispatch) | ✅ | ✅ | ✅ |
 
 `spec-tdd-lite` implements in-session — no implementer dispatch; its only boundary crossing is the I13 review.
 
-In a **multi-unit run** (`spec-tdd`), I1–I5, I9, I10 and I15 apply **per unit** (I9 per unit/group), and I12's spec checkpoint happened before the tier (front-end gate, or the settled requirement itself); the unit plan (A13) + the specs writable now are **surfaced, not gated**. With no dispatch tool available, per-unit boundaries still hold via a disclosed degraded path.
+In a **multi-unit run** (`spec-tdd`), I1–I5, I9, I10 and I15 apply **per unit** (I9 per unit/group), and I12's spec checkpoint happened before the tier (front-end gate, or the settled requirement itself); the unit plan (A13) + the specs writable now are **surfaced, not gated**, and the batch ledger (A16) tracks each unit's progress as its phases complete (I19). With no dispatch tool available, per-unit boundaries still hold via a disclosed degraded path.
 
 ## What the protocol does NOT guarantee
 

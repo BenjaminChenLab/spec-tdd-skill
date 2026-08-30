@@ -32,11 +32,11 @@ grill-spec-tdd, plus: an **independent adversarial subagent attacks the grill it
 ### Phase 1 — Grill the requirement (as grill-spec-tdd Phase 1, steps 1–2; NO test yet)
 As grill-spec-tdd: ground it in the real architecture FIRST, then the materiality-bounded grill (every dimension incl. NFR + security; STOP GRILLING by materiality) — facts investigated, never asked of the human; every question numbered with its recommended answer; dependents conditional on unsettled roots (I18). Write down every interpretation of ambiguous wording. **Do NOT write the acceptance test yet** — gate-before-test ordering holds here too: the test is derived from the FINAL spec, after the gate.
 
-### Phase 2 — Dispatch the grill-auditor, Part A: attack the decisions (pre-gate)
+### Phase 2 — Dispatch the grill-auditor, Part A: attack the decisions (pre-gate; TOP-TIER model — review, I19)
 ```
 ATTACK a grill you did not conduct. You are independent: hunt what the author cannot see.
 
-REQUIREMENT (verbatim, do not paraphrase): {paste}
+REQUIREMENT (verbatim, do not paraphrase — pre-gate, no spec doc exists yet; the gate persists it): {paste}
 GRILLED DECISIONS + the STOP-GRILLING calls (what was deemed immaterial): {list}
 READ FIRST (grounding — quote it or it didn't happen): {codebase paths}
 
@@ -65,16 +65,17 @@ End with a verdict: proceed / proceed-with-changes / redo. Do NOT edit any file.
 - **No dispatch tool available?** Disclose at the gate that independence was NOT obtained — a self-audit is worthless by this skill's own thesis — and surface the grill decisions for the deeper human read. Never a silent improvised self-audit.
 
 ### Phase 3 — Gate the SPEC (as grill-spec-tdd Phase 1, step 3)
-ONE human OK bundling: the grilled decisions + Part A findings + residuals + the routing choice + the spec-doc ask (default ON — persist the final spec; only an explicit decline skips). Amendments fold in → **FINAL SPEC**. No human reachable? Grill-spec-tdd's rule: document + persist the decisions and Part A findings, then **STOP at the gate** — no test, no dispatch, until a human approves. Grill's throwaway gate-skip does NOT carry over — this front-end exists because the surface is critical; there is no gate-skip here.
+ONE human OK bundling: the grilled decisions + Part A findings + residuals + the routing choice + the spec-doc ask (default ON — persist the requirement verbatim + the gate-approved decisions, amendments folded in (A15); only an explicit decline skips). Amendments fold in → **FINAL SPEC**. No human reachable? Grill-spec-tdd's rule: document + persist the decisions and Part A findings, then **STOP at the gate** — no test, no dispatch, until a human approves. Grill's throwaway gate-skip does NOT carry over — this front-end exists because the surface is critical; there is no gate-skip here.
 
 ### Phase 4 — Write the test FROM the final spec, audit it, route
 1. **Derive the acceptance test from the FINAL spec** (as grill-spec-tdd Phase 2): behavioral black-box, property/invariant tests for domain logic, every gate amendment included; a decision neither grill nor gate made goes back to the human, never silently into the test. **Run it — MUST be RED with the full-list RED-purity check** (incl. the breaking-change exception).
-2. **Dispatch the grill-auditor, Part B: attack the test** (independent context, read-only; still zero implementation tokens — this is the front-end's encoding audit, I13, at adversarial grade):
+2. **Dispatch the grill-auditor, Part B: attack the test — TOP-TIER model (I19)** (independent context, read-only; still zero implementation tokens — this is the front-end's encoding audit, I13, at adversarial grade):
 ```
 ATTACK an acceptance test you did not write. You are independent: hunt what the author cannot see.
 
-REQUIREMENT (verbatim, do not paraphrase): {paste}
-FINAL SPEC (gate-approved decisions, amendments included): {list}
+REQUIREMENT + FINAL SPEC: {spec doc path — persisted at the gate (A15); READ it: it holds
+the requirement verbatim + the gate-approved decisions, amendments included. Paste only
+when persistence was declined}
 ACCEPTANCE TEST (+ property tests) and its recorded RED error list: {file or paste}
 READ FIRST (grounding — quote it or it didn't happen): {codebase paths}
 
