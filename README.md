@@ -1,6 +1,6 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.11.0** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.11.1** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
 A family of [Claude Code](https://claude.com/claude-code) skills enforcing **a protocol for preventing correlated test/implementation failure in AI-generated software** (the technical name for the *green lie*). Executable specifications, agent-boundary isolation, and independent verification for agentic TDD.
 
@@ -20,7 +20,7 @@ Most TDD guidance fights this with *prompting* — exhorting the agent to stay o
 
 This isn't a new religion — it's established software engineering (black-box testing, contract / seam-driven design, independent verification) ported to agent orchestration. The agent boundary turns "don't fool yourself" from a discipline into a structural guarantee **against the green lie** — the test cannot have been reverse-engineered to mirror the impl. It does not guarantee the spec is *right* (a misread requirement still makes a bad test); that failure mode is handled by other mechanisms — RED-first, the Phase-3 adversarial read, the grill, and the independent attacker.
 
-Each skill was authored and pressure-tested with the TDD-for-docs process (baseline a failure mode without the skill, then write the skill to counter it).
+Each skill was authored and pressure-tested with the TDD-for-docs process (baseline a failure mode without the skill, then write the skill to counter it) — the baseline & pressure-test records are public in [`docs/specs/`](docs/specs/) (small-N, single-maintainer experiments; honest about what they are).
 
 ## Architecture & Agent Boundaries
 

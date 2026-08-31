@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.1] - 2026-08-31
+
+Docs-only patch from a second external review's two valid critiques (its other points were already answered by 1.11.0's cost table, routing, or `docs/specs/` itself). No skill files touched — zero per-run token impact.
+
+### Changed
+- **README now SHOWS the evidence trail** — the TDD-for-docs line links `docs/specs/` (5 baseline & pressure-test records) and labels them honestly ("small-N, single-maintainer experiments"). The critique "pressure-testing is mentioned but not shown" was factually wrong (the records existed, CHANGELOG links them every version) but self-inflicted: the README never linked them, so an outside reader couldn't find them.
+- **PROTOCOL "does NOT guarantee" adds: context separation ≠ model diversity.** Fresh contexts of the same base model share systematic blind spots (the reviewer inherits the author's misconceptions). Mitigated, never eliminated: binding verdicts come from deterministic execution (RED/GREEN, property/differential oracles), lens rotation (I8), and implementer/reviewer model-tier difference (I19) — what stays correlated is what gets asserted in the first place, which is why the human gate owns WHAT (I12). The honesty list previously covered spec-level risk but not model-level correlation.
+
 ## [1.11.0] - 2026-08-31
 
 External design review (Claude AI, README + skill-description level) triaged claim-by-claim against the actual skills: five of its six suggestions adopted, one replaced by the cheaper fix it actually needed. Every change is additive — no dispatch shape changes, no existing mechanism weakened.

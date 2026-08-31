@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.11.0**
+**Version 1.11.1**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -100,5 +100,7 @@ In a **multi-unit run** (`spec-tdd`), I1–I5, I9, I10 and I15 apply **per unit*
 ## What the protocol does NOT guarantee
 
 The agent boundary (I1–I4) is a structural guarantee **against the green lie** — the spec cannot have been reverse-engineered to mirror the impl. It does **not** guarantee the spec is *right*: a misread or under-interrogated requirement still produces a bad test. That failure mode is handled by the *other* invariants — RED-first (I3), the adversarial read, the grill (I11), and the independent attacker (I8) — not by the boundary alone.
+
+**Context separation is not model diversity.** Fresh contexts of the same base model share systematic blind spots — a misconception the model consistently carries can appear in both the test author and its independent reviewer. Mitigated, never eliminated: the binding verdicts come from deterministic execution (RED/GREEN, property/differential oracles — machine ground truth, not model judgment), lens rotation diversifies the viewing angle (I8), and implementer/reviewer model tiers differ (I19). What stays correlated is what gets asserted in the first place — which is why the human gate owns WHAT (I12).
 
 `spec-tdd-lite` additionally trades away the fresh implementer and I4's structural hash (replaced by I14's discipline): a misread requirement can reach GREEN unchallenged except by the I13 review's test-vs-requirement question — which is why lite is scoped to one small, non-critical unit.
