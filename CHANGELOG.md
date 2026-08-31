@@ -5,6 +5,20 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2026-08-31
+
+Routing predicate fixed from real-use trial evidence (user observation, 2026-08-31): on fintech work, nearly everything routed to `spec-tdd-adversarial`. Root cause: the tier's own positioning said the right thing ("a subtle bug means real loss" — blast radius) but every routing site operationalized it as a SURFACE test ("money movement / data-integrity surface" — domain adjacency). In a domain whose whole point is data integrity, the surface test is almost always true — so the top tier became the default and the coverage tier vanished from routing. The cost beyond tokens: an always-on top tier deafens the human to its residuals (I12 signal fatigue — the gate-fatigue failure mode, arriving from the over-trigger side).
+
+### Fixed
+- **Blast radius, not domain adjacency** — the routing litmus, now stated identically at all three routing sites (grill Phase 3, escalate route table, adversarial When-to-Use) and canonically in I8: route to `spec-tdd-adversarial` only when a unit's SILENT wrongness can MOVE money, CHANGE authorization, or IRREVERSIBLY corrupt data. Money-adjacent ≠ money-movement: display / reporting / reference data / internal tooling that READ the money system but cannot corrupt it → `spec-tdd-coverage` (branchy/compliance) or `spec-tdd`. A pre-settlement safety net (reconciliation / monitoring / dual-control) bounds the blast radius → one tier down. Multi-unit batches route PER UNIT (payments batch: movement units adversarial, statement/display units coverage).
+- **Unified with 1.11.0's blast-radius tags** — no new vocabulary: the gate's IRREVERSIBLE tag and the router's adversarial predicate are the same test (grill Phase 1 step 3 now says the routing choice follows the tags decided at the gate).
+- Synced: `spec-tdd-adversarial` (description frontmatter, When-to-Use, Risk-tier, anti-overtrigger Common-Mistakes + Red-Flag rows), `spec-tdd-escalate` (route table, post-table note, When-NOT-to-use line), `grill-spec-tdd` (Phase 1 step 3, Phase 3, fintech-trap Mistakes row), `adversarial-grill-spec-tdd` (description + Overview — still "verbatim the tier's predicate", stale surface enumeration replaced), README (decision tree, rule of thumb, family table, walkthrough example), PROTOCOL (I8 predicate + I16 reference).
+
+### Routing-tested (3 fresh-subagent arms, blind to hypothesis, new skill text from the working tree)
+- **CSV export of transaction history (read-only report)** → `spec-tdd-coverage`, quoting the money-adjacent rule; sniff independently flagged the unchosen over-cap policy (truncate vs reject). The old surface predicate routes this adversarial.
+- **Partial settlement with money conservation** → `spec-tdd-adversarial` (money-movement logic itself stays top tier); sniff flagged the undefined priority criterion + unclosed rollback-trigger scope.
+- **Mixed batch (FX rounding on POSTED transactions / audit-trail query / currency reference CRUD)** → PER-UNIT split: (a) adversarial — posted money math; (b) coverage — money-adjacent compliance reporting; (c) base — bounded display blast radius. The arm named the trap it avoided ("routing all three to adversarial because fintech"). Clean doc → sniff silent, no ask.
+
 ## [1.11.1] - 2026-08-31
 
 Docs-only patch from a second external review's two valid critiques (its other points were already answered by 1.11.0's cost table, routing, or `docs/specs/` itself). No skill files touched — zero per-run token impact.

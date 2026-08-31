@@ -21,7 +21,7 @@ The requirement is already settled (a locked plan, spec, or doc). Your ENTIRE jo
 - User explicitly does NOT want to pick the tier or be asked ("just pick the right one and go").
 
 **When NOT to use** — route elsewhere:
-- Requirement is fuzzy / ambiguous / missing dimensions → `grill-spec-tdd` (grill first); fuzzy AND on a critical surface (money/auth/data-loss) → `adversarial-grill-spec-tdd` (grill + independent audits: decisions pre-gate, test pre-dispatch). A user who answers the sniff's ask with "settled, route" wins — route per their call (I12), passing the flagged gaps along.
+- Requirement is fuzzy / ambiguous / missing dimensions → `grill-spec-tdd` (grill first); fuzzy AND blast-radius-critical (the adversarial tier's predicate) → `adversarial-grill-spec-tdd` (grill + independent audits: decisions pre-gate, test pre-dispatch). A user who answers the sniff's ask with "settled, route" wins — route per their call (I12), passing the flagged gaps along.
 - You (or the user) already know which tier → invoke that tier directly. Escalate exists for "you decide for me"; if the decision is made, escalate adds nothing.
 
 ## Before routing — the fuzziness sniff (one read, zero dispatches)
@@ -37,13 +37,13 @@ The requirement is already settled (a locked plan, spec, or doc). Your ENTIRE jo
 
 | Signal in the requirement | Invoke |
 |---|---|
-| Correctness-CRITICAL surface: money movement, auth/permissions, data-loss/data-integrity | `spec-tdd-adversarial` |
+| Blast-radius-CRITICAL: a silent wrong result MOVES money, CHANGES authorization, or IRREVERSIBLY corrupts data (money movement / auth-permissions / data-loss-data-integrity logic itself; equivalently the unit's decisions carry an IRREVERSIBLE blast-radius tag) | `spec-tdd-adversarial` |
 | Needs branch-coverage EVIDENCE: concurrency, parsing, state machines, large/subtle branch surface, weak-unit-test risk, compliance proof | `spec-tdd-coverage` |
 | ONE small unit — a single bugfix-scale item or small refactor, non-critical, session will be cleared after (one dispatch costs more than it saves) | `spec-tdd-lite` |
 | Multiple units — a bug list, or a feature split into slices | `spec-tdd` (**multi-unit run**) |
 | Anything else (incl. larger refactors / no behavior change) | `spec-tdd` (default) |
 
-A correctness-critical feature that is ALSO branchy (e.g. money math with concurrency) goes to `spec-tdd-adversarial` — it's the top tier and subsumes coverage.
+A blast-radius-critical feature that is ALSO branchy (e.g. money math with concurrency) goes to `spec-tdd-adversarial` — it's the top tier and subsumes coverage. **Money-adjacent is NOT money-movement** (the over-routing trap — observed: a fintech codebase routed nearly everything here): display / reporting / reference data / internal tooling that READ the money system but cannot corrupt it → `spec-tdd-coverage` (branchy/compliance) or `spec-tdd`. A pre-settlement safety net (reconciliation, monitoring, dual-control) bounds the blast radius → one tier down. Multi-unit batches route PER UNIT — the payments batch's movement units adversarial, its statement/display units coverage.
 
 **Invoke the chosen tier via the Skill tool, BY NAME.** Do NOT search the filesystem for `SKILL.md`, do NOT wonder how the skills are organized — skills load by name.
 

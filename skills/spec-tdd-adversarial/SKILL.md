@@ -1,6 +1,6 @@
 ---
 name: spec-tdd-adversarial
-description: Use when implementing a correctness-CRITICAL feature (money movement, auth/permissions, data-loss or data-integrity surface) where a subtle bug means real loss and maximum rigor is worth the token cost — the highest tier above spec-tdd and spec-tdd-coverage. Requirement still FUZZY/un-grilled? Run adversarial-grill-spec-tdd first (the grill front-end: auditor on decisions pre-gate, on the final-spec test pre-dispatch); this tier starts once the requirement is grilled/settled. Triggers on critical-path, no-cost-for-correctness, hardening acceptance tests against independent attack, "this cannot be wrong".
+description: Use when implementing a BLAST-RADIUS-CRITICAL unit — a silent wrong result MOVES money, CHANGES authorization, or IRREVERSIBLY corrupts data (money movement, auth/permissions, data-loss/data-integrity logic itself), where a subtle bug means real loss and maximum rigor is worth the token cost. Money-adjacent is NOT money-movement — display/reporting/reference-data/internal tooling that READS the money system but cannot corrupt it routes to spec-tdd-coverage or spec-tdd instead; a pre-settlement safety net (reconciliation/monitoring/dual-control) bounds the blast radius → one tier down. The highest tier above spec-tdd and spec-tdd-coverage. Requirement still FUZZY/un-grilled? Run adversarial-grill-spec-tdd first (the grill front-end: auditor on decisions pre-gate, on the final-spec test pre-dispatch); this tier starts once the requirement is grilled/settled. Triggers on critical-path, no-cost-for-correctness, hardening acceptance tests against independent attack, "this cannot be wrong".
 ---
 
 # spec-tdd-adversarial
@@ -16,10 +16,11 @@ spec-tdd-coverage, plus: an **independent adversarial subagent** — a *third* c
 **The acceptance test is done when the attacker can no longer construct a wrong-but-green impl** — bounded by the **attack-loop circuit breaker** (3 rounds, or the same hole twice): a critical surface is rich enough that "no wrong-but-green impl exists" may never hold, so past the breaker you surface the residual risk to the human instead of looping. Until then, it isn't "clean done" — but it can be "done enough to ship, pending human accept".
 
 ## When to Use
-- Critical path ONLY: money movement, auth/permissions, data-loss or data-integrity surface.
+- Blast-radius-critical units ONLY: a SILENT wrong result here moves money, changes authorization, or irreversibly destroys/corrupts data — money movement, auth/permissions, data-loss/data-integrity logic itself. Equivalently: the unit's spec carries an IRREVERSIBLE blast-radius tag from the grill gate (I12).
+- **Money-adjacent is NOT money-movement** — the over-routing trap (observed: a fintech codebase routed nearly everything here): display / reporting / reference data / internal tooling READ the money system but cannot corrupt it → `spec-tdd-coverage` (branchy/compliance) or `spec-tdd`. A pre-settlement safety net (reconciliation, monitoring, dual-control) catches wrongness before it settles → one tier down. Multi-unit batches route PER UNIT: the payments batch's movement units here, its statement/display units coverage.
 - The user says `spec-tdd-adversarial`, "no cost for correctness," or "this cannot be wrong."
-- Otherwise use `spec-tdd` (general) or `spec-tdd-coverage` (coverage matters). This tier dispatches multiple agents per feature — don't burn it on glue/CRUD.
-- Requirement still fuzzy/un-grilled on this critical surface? `adversarial-grill-spec-tdd` (the front-end) grills + audits it first, then arrives here as a grill arrival.
+- Otherwise use `spec-tdd` (general) or `spec-tdd-coverage` (coverage matters). This tier dispatches multiple agents per unit — don't burn it on glue/CRUD.
+- Requirement still fuzzy/un-grilled on this blast-radius-critical surface? `adversarial-grill-spec-tdd` (the front-end) grills + audits it first, then arrives here as a grill arrival.
 - **`dryout` flag** (`/spec-tdd-adversarial dryout <feature>`): args containing the token `dryout` raise the Phase-3 dry-loop cap from 2 to 5 rounds — the ONLY difference; every other rule identical. Strip the token from the feature description.
 
 ## The 3 Phases (delta vs spec-tdd-coverage in **bold**)
@@ -54,7 +55,7 @@ spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dis
 6. Surface to the user: acceptance test + property/differential tests + the attacker's final report + the dry-loop rounds' findings and residuals (not the impl).
 
 ## Risk-tier
-This IS the top tier: critical path gets full phases + mandatory property/differential tests + the attacker loop until unbroken OR the attack-loop circuit breaker fires (3 rounds / same hole twice) — then surface residual risk. Below critical → use `spec-tdd-coverage` or `spec-tdd`; not this skill.
+This IS the top tier: blast-radius-critical units get full phases + mandatory property/differential tests + the attacker loop until unbroken OR the attack-loop circuit breaker fires (3 rounds / same hole twice) — then surface residual risk. Below critical → use `spec-tdd-coverage` or `spec-tdd`; not this skill.
 
 ## Common Mistakes
 | Mistake | Fix |
@@ -70,7 +71,7 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 | Dry-loop extended by MINOR findings | Severity floor: only BLOCKER/MAJOR (not deduped re-finds) opens the next round. MINORs ride the report — otherwise you audit the auditor's taste forever. |
 | Dry-loop runs unbounded "until nobody finds anything" | Prove-a-negative; that is why ONE clean round stops the loop (capped at 2; 5 with `dryout`). Bounded dry, not exhaustion. |
 | Cap hit with fresh findings still coming → residuals surfaced, called "done" | STOP and ASK the human whether to continue (both modes). Non-convergence is a signal — superficial fixes / a missing lens / an oversized unit — never something to grind through or wave off. |
-| Used on non-critical work | Critical path only; otherwise pure token waste. |
+| Used on non-critical work — or on everything money-ADJACENT | Blast-radius-critical units only (When to Use): an always-on top tier is pure token waste AND deafens the human to its residuals (I12 — signal fatigue is how gates die). |
 | Skips the SPEC-DEFECT sweep — "the attacker will catch it" | The attacker attacks the TEST (Part A) and hunts branches (Part B); neither diffs the real production changes against the spec. Sweep first — a compat ctor passing green is a bent production, not a passing spec. |
 | Attacker or dry-loop auditor dispatched MID-tier "to save tokens" | I19: every review/attack dispatch is TOP-tier — the economy levers are the implementer dispatch and file-based evidence, never the verifier's tier. |
 
@@ -81,4 +82,4 @@ This IS the top tier: critical path gets full phases + mandatory property/differ
 - A hole was found but the test was not strengthened and re-attacked.
 - The attacker loop is still running past 3 rounds, or the same missing case re-failed after you closed it. (STOP — attack-loop circuit breaker; surface residual risk to the human.)
 - About to declare done with no terminal dry-loop on record — or the dry-loop is being extended by MINORs, or re-finding a deduped known residual — or the cap was hit with live findings and the human was never asked.
-- Used on non-critical code.
+- Used on non-critical code — or on the whole fintech codebase because everything touches money.
