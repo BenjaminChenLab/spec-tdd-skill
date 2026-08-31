@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.1] - 2026-08-31
+
+Docs-only patch: adds a committed regression suite for the v1.12.0 routing litmus and its first full run. No skill files changed — zero per-run impact.
+
+### Added
+- **[Fintech routing fixtures](docs/fixtures/fintech-routing.md)** — 13 settled one-line requirements grounded in a real treasury/dealing codebase (netting, fund allocation, cash transfer, retention purge, maker-checker, dealing-limit eligibility, cash position, recon dashboard, MT940 export, FX watchlist, cut-off config, archive encryption, payment notifications), spanning the blast-radius spectrum with an answer key per the v1.12.0 litmus. Reusable for future routing changes.
+- **First full run (13 fresh-subagent arms, blind, parallel): 0/13 false-adversarial.** All 6 true-critical fixtures (incl. the retention purge disguised as housekeeping — caught via the data-loss clause) landed adversarial; every money-adjacent fixture was held out of the top tier with the litmus quoted. Residual: base↔coverage boundary wobble (2 arms, ±1 cheap tier, both defensible on branchiness). Boundary finding: "irreversibly corrupts data" legitimately reaches key-rotation data loss (#12 routed adversarial on real grounds) — the litmus's loss clause is wider than row-deletion.
+
 ## [1.12.0] - 2026-08-31
 
 Routing predicate fixed from real-use trial evidence (user observation, 2026-08-31): on fintech work, nearly everything routed to `spec-tdd-adversarial`. Root cause: the tier's own positioning said the right thing ("a subtle bug means real loss" — blast radius) but every routing site operationalized it as a SURFACE test ("money movement / data-integrity surface" — domain adjacency). In a domain whose whole point is data integrity, the surface test is almost always true — so the top tier became the default and the coverage tier vanished from routing. The cost beyond tokens: an always-on top tier deafens the human to its residuals (I12 signal fatigue — the gate-fatigue failure mode, arriving from the over-trigger side).
