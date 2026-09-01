@@ -27,6 +27,14 @@ grill-spec-tdd, plus: an **independent adversarial subagent attacks the grill it
 
 > **Not to be confused:** `spec-tdd-adversarial` = the verification TIER (attacker at Phase 3, after impl exists). THIS = the front-end (auditor before the gate on decisions, and pre-dispatch on the test — no impl exists). Fuzzy+critical → run THIS first; it routes into that tier.
 
+## Pre-flight — orchestrator tier check (I21)
+
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+
+> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
+
+Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
+
 ## The 4 Phases
 
 ### Phase 1 — Grill the requirement (as grill-spec-tdd Phase 1, steps 1–2; NO test yet)

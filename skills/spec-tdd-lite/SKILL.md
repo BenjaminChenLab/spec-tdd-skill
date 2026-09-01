@@ -26,6 +26,16 @@ Observed baseline: a diligent plain-TDD agent, on a small coupon feature, shippe
 
 **When NOT to use** — correctness-critical → `spec-tdd-adversarial`; need coverage evidence → `spec-tdd-coverage`; the work is big enough that delegation pays for itself → `spec-tdd`.
 
+## Pre-flight — orchestrator tier check (I21)
+
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+
+> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
+
+Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
+
+("Ignore" is a reasonable answer at this deliberately-cheap tier — honor it without re-litigating.)
+
 ## Phase 1 — Write the acceptance test
 > **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip this phase, start at Phase 2 (keep the grill's interpretation notes; Phase 3 re-examines them).
 

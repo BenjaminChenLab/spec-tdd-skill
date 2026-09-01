@@ -5,6 +5,21 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-09-01
+
+Gap found in a live session (user observation, 2026-09-01): I19 pins every *dispatch's* model, but nothing ever examines the *orchestrator's own* session model — a run started on a mid-tier session executes its planning (the acceptance spec), its verification (adversarial read, SPEC-DEFECT sweep, re-run), and its failure routing entirely on that model, and no mechanism notices. Baseline arms confirmed the blind spot before any text changed.
+
+### Added
+- **I21 — Orchestrator tier check (PROTOCOL + all 7 skills)**: before any work, every entry point checks the model its own session runs as. Top tier in use, or no higher tier exists → silent, zero interaction. Non-top session → ONE soft-pause ask: **Upgrade** (the human runs `/model`, picks the top tier, says "go" — the same conversation continues) or **Ignore** (continue at this tier; the decline is disclosed in the final report, as any degraded mode is). The skill cannot switch the model itself — the harness gives skills no such lever; the upgrade path routes through the human's `/model`. A front-end that surfaced the check notes it in the handoff; the tier never re-asks, and a recorded decline rides into the tier's final-report disclosure. `spec-tdd-lite`'s ask may reasonably be answered "ignore" (the deliberately-cheap tier); either answer is honored without re-litigating.
+- **Escalate consistency edits** — the Overview's "two things" became three; the full-auto Common-Mistakes row and the Red-Flags "sole exception" now carve out BOTH routing-hygiene asks (the sniff's grill-or-route, I21's tier check) so the pre-flight cannot be read as a forbidden gate.
+- README: version bump, escalate family-table row updated, new "Why it works" bullet.
+
+### Tested (TDD-for-docs: fresh mid-tier subagent arms, dry-run; arm-read files identical to the deployed runtime copies)
+- **Baseline (old text, 4 arms: 3× escalate, 1× spec-tdd): 0/4 surfaced any session-model check.** One spec-tdd arm narrated a complete I19 dispatch-model plan ("implementer MID, reviews TOP") without once examining its own session tier — dispatch economy fully complied, orchestrator blind spot intact. The escalate arms ran the full route table + sniff and routed silently.
+- **With-skill (6 arms): 6/6 correct.** 2× escalate + 1× spec-tdd + 1× lite on non-top sessions: exactly ONE ask, verbatim per the block, full stop before any work (no sniff, no Phase 1, no tier pick). 1× handoff arm (escalate already asked; user answered Ignore): no re-ask, Phase 1 proceeds, decline carried to the final-report disclosure. 1× top-tier control: check silent, full-auto routing unchanged. The two escalate arms ran under the user's "just pick the right tier and go" framing — the ask survived it (it is one of the two carved-out asks).
+- Not arm-tested: the grill / adversarial-grill / coverage / adversarial insertions share the block verbatim with the tested skills (only placement differs); lite's parenthetical WAS arm-tested.
+- **Post-change review (same session, pre-commit): 2 MINORs + 3 NITs found, all adopted** — `spec-tdd`'s PROTOCOL pointer still read I1–I20 (→ I1–I21); the declined-I21 disclosure now has a receiving-side carrier (the tier's skip line + PROTOCOL: a handoff-recorded decline rides into the final report); the sniff's "route silently / full-auto intact" scoped against I21; the scope table's lite cell qualified ("ignore is a reasonable answer"); lite's parenthetical moved out of the user-facing ask.
+
 ## [1.12.1] - 2026-08-31
 
 Docs-only patch: adds a committed regression suite for the v1.12.0 routing litmus and its first full run. No skill files changed — zero per-run impact.

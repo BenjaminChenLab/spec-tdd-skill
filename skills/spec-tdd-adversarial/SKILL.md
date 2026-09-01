@@ -23,6 +23,14 @@ spec-tdd-coverage, plus: an **independent adversarial subagent** — a *third* c
 - Requirement still fuzzy/un-grilled on this blast-radius-critical surface? `adversarial-grill-spec-tdd` (the front-end) grills + audits it first, then arrives here as a grill arrival.
 - **`dryout` flag** (`/spec-tdd-adversarial dryout <feature>`): args containing the token `dryout` raise the Phase-3 dry-loop cap from 2 to 5 rounds — the ONLY difference; every other rule identical. Strip the token from the feature description.
 
+## Pre-flight — orchestrator tier check (I21)
+
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+
+> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
+
+Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
+
 ## The 3 Phases (delta vs spec-tdd-coverage in **bold**)
 
 ### Phase 1 — Orchestrator writes the acceptance test

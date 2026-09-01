@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.12.1**
+**Version 1.13.0**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -75,6 +75,8 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 
 **I20 — "Settled" means decided (escalate sniff).** A requirement routed as SETTLED must not carry open decision gaps: before routing, the escalate front-end scans the doc for decision-shaped gaps — unbound quantities (a named-but-unnumbered limit/threshold/timeout), unchosen options (an either/or with no pick), escape-hatch wording ("as appropriate" / "if needed" over owned behavior), TODO/TBD markers. Clean → route silently (the sniff is not a gate; full-auto intact). Gaps → ONE ask — grill first, or treat as settled and route — and the human's "settled" wins (I12); the flagged gaps ride the handoff so the tier's Phase 1 sees them. Routing an undecided doc just moves the grilling downstream to where it costs dispatches.
 
+**I21 — The orchestrator runs the top tier, or the human knowingly declined.** A run's judgment — the acceptance spec, the verification (the adversarial read, the SPEC-DEFECT sweep, the re-run), the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but the session itself is pinned by how it was started and no dispatch can upgrade it. So every entry point (front-ends and tiers alike) pre-flights the model its own session runs as BEFORE any work: top tier in use, or no higher tier exists → silent, zero interaction; a non-top session → ONE ask — upgrade (the human runs `/model`, picks the top tier, continues the same conversation) or ignore (continue at this tier; the decline is disclosed in the final report, as any degraded mode is). The check cannot switch the model itself — the harness gives skills no such lever; the upgrade path routes through the human. A front-end that surfaced the check notes it in the handoff; the tier never re-asks, and a recorded decline rides into the tier's final-report disclosure. `spec-tdd-lite`'s ask may reasonably be answered "ignore" (the deliberately-cheap tier); either answer is honored without re-litigating.
+
 ## Scope per tier
 
 | Invariant | lite | spec-tdd | +coverage | +adversarial |
@@ -92,6 +94,7 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 | I17 (spec doc, default-on persistence) | ✅ (prompt at Phase 1) | ✅ | ✅ | ✅ |
 | I19 (dispatch economy: model tiers, evidence as files, spec by doc path, batch ledger) | ✅ (review dispatch top-tier; no implementer dispatch) | ✅ | ✅ | ✅ |
 | I20 (escalate fuzziness sniff) | via `spec-tdd-escalate` front-end | via `spec-tdd-escalate` | via `spec-tdd-escalate` | via `spec-tdd-escalate` |
+| I21 (orchestrator tier check — every entry point incl. front-ends; handoff suppresses the re-ask) | ✅ (ignore is a reasonable answer) | ✅ | ✅ | ✅ |
 
 `spec-tdd-lite` implements in-session — no implementer dispatch; its only boundary crossing is the I13 review.
 

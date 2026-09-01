@@ -18,6 +18,14 @@ description: Use when the user says "grill-spec-tdd", or wants to interrogate/gr
 - For an already-settled requirement (no grilling needed), skip this: low-stakes and you know the tier → `spec-tdd` directly; want the tier auto-picked by stakes → `spec-tdd-escalate`.
 - Fuzzy requirement on a CRITICAL surface (money movement / auth-permissions / data-loss) → **`adversarial-grill-spec-tdd`** — the upgraded front-end that dispatches an independent auditor to attack the grill's decisions BEFORE the gate and the final-spec acceptance test after it (pre-dispatch).
 
+## Pre-flight — orchestrator tier check (I21)
+
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+
+> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
+
+Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
+
 ## Phase 1 — Grill the requirement, gate the SPEC (no test yet)
 1. **Ground it first**: read the relevant entities/services/repos/patterns BEFORE the first question; the decisions must fit the real architecture, and so must the test that follows. Grounding continues through the grill — a fact needed mid-round is looked up (or dispatched) on the spot, not deferred.
 2. **Grill in rounds — decisions, not facts** — interrogate EVERY dimension, not just the obvious ones: business logic, boundary/edge cases, state transitions, **NFRs (perf / scale / cost)**, **security / fraud / abuse**, and **deployment/rollout** (migration windows — old code × new schema; environment-gated components; how every runtime object comes to exist in each target environment). Force an explicit decision on each. *If you can't state a decision for a dimension, you haven't grilled it.*

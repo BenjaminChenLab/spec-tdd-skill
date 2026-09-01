@@ -10,7 +10,7 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 
 **Core principle:** the acceptance test is authored before any impl exists, in a different context than the implementer — so it cannot have been reverse-engineered to mirror an implementation (the structural anti-green-lie guarantee). It can still be *wrong or shallow* — a misread or under-interrogated requirement produces a bad test — but that is a different failure mode, handled by RED-first, the Phase-3 adversarial read, the grill, and the attacker. **"Must be RED first"** is the built-in green-lie detector.
 
-**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A16) and invariants (I1–I20).
+**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A16) and invariants (I1–I21).
 
 ## When to Use
 - User says `spec-tdd <feature>` (the agreed trigger).
@@ -18,6 +18,14 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 - ONE small unit (a single bugfix-scale item, non-critical, in a session you'll clear after)? Use **`spec-tdd-lite`**, the family's in-session tier — acceptance test first, implement yourself, one fresh-context review.
 - MULTIPLE independent units — a bug list, several separate fixes, or a feature split into slices? Stay HERE: **Multi-unit runs** (below) loops the phases per unit. **Count before you run:** if the task names more than one bug/fix, you are multi-unit — do NOT write one acceptance suite over the whole batch, and do NOT `spec-tdd-lite` ×N.
 - Any stack. Risk-tier how much verification you run (see below).
+
+## Pre-flight — orchestrator tier check (I21)
+
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+
+> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
+
+Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
 
 ## The 3 Phases
 
