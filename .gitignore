@@ -9,3 +9,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Benchmark run tree (arms' code; oracles are committed under docs/fixtures/oracle/)
+docs/fixtures/green-lie-runs/A/
+docs/fixtures/green-lie-runs/B/
