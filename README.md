@@ -1,6 +1,6 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.15.0** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.15.1** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
 A family of [Claude Code](https://claude.com/claude-code) skills enforcing **a protocol for preventing correlated test/implementation failure in AI-generated software** (the technical name for the *green lie*). Executable specifications, agent-boundary isolation, and independent verification for agentic TDD.
 
@@ -221,6 +221,17 @@ For plain `spec-tdd`, skip the grill batch and route — tiers run **after** the
 - **Batches run at file-conflict truth.** The unit plan splits disjoint units into concurrent scratch-copy waves and shared-file units into serial chains — parallelism where the files allow it, serialization where they don't; merge-backs are allowlisted and re-verified in the real tree (idle build dir — the scratch green alone proves nothing); the adversarial attack consolidates over the whole batch (dispatched as the final wave dispatches), breaker judged per hole. No invariant traded — per-unit RED, hash, and re-run all survive the concurrency.
 - **Batched verification runs, un-weakened verdicts.** The adversarial loop's experiments run as cross-file mutant batches attributed by which test goes RED (never two mutants in one file — they mask each other), and a round's strengthenings verify in one shot: N wrong-impls re-applied → exactly N new tests RED → byte-exact restore → hash re-verified → full GREEN. Measured 3–5× fewer build runs with every RED/GREEN and hash guarantee intact; the build is the only oracle, IDE diagnostics are noise (I19(f)).
 - **The orchestrator runs the top tier — or you declined, on the record.** Dispatch tiers are pinned (above), but your session's model is pinned by how you started it, and a run's planning, verification, and failure routing never leave that session — so every skill pre-flights its own orchestrator model: top tier in use → silent; a non-top session gets ONE ask — upgrade (run `/model`, say "go") or continue-with-decline, disclosed in the final report (I21).
+
+## Testing the skills
+
+The skills are tested like code — two committed fixture suites with pre-registered answer keys and mechanical scoring:
+
+| Suite | Measures | Instrument |
+|---|---|---|
+| [Fintech routing](docs/fixtures/fintech-routing.md) | routing decisions (13 settled requirements, blast-radius answer key) | blind fresh-subagent arms route each requirement; scored against the answer key |
+| [Green-lie](docs/fixtures/green-lie.md) | **wrong-but-GREEN rate** + suite discriminating power (12 seeded-trap fixtures, hidden oracles, 36-trap mutation battery) | same-context TDD arm vs structured-tier arms; `python docs/fixtures/oracle/green-lie/trap_battery.py selftest` |
+
+**Standing regression rule:** a release that changes **skill files** re-runs the affected suite before shipping and records results in `docs/specs/` — routing-text changes → the routing suite; tier-behavior changes → the green-lie suite (wrong-but-GREEN and trap-kill must hold the baseline floor: 0/12 and 36/36 per arm). Docs-only releases skip the rerun. Current baselines: [routing suite + first run](docs/fixtures/fintech-routing.md) · [green-lie first run (null) + battery](docs/specs/2026-09-03-green-lie-baseline.md).
 
 ## License
 

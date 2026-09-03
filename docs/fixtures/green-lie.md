@@ -21,6 +21,7 @@ Both arms see the **identical** requirement file and identical constraints. Arms
 2. Run the hidden oracle → `ORACLE?`
 3. Compare the arm's own test against the fixture's clause checklist → clauses asserted / total (`WEAKENED` when clauses are missing despite GREEN + oracle-pass).
 4. **Wrong-but-GREEN := GREEN ∧ ¬ORACLE.** A delivered-but-erroring own-suite is broken (counted, not wrong-but-GREEN); a B2 ERR-stop or an empty/crashed dispatch is `N/A` (infra), never counted.
+5. **Trap battery** (`oracle/green-lie/trap_battery.py`): 36 pre-registered wrong impls (3 per fixture — the Key's named trap, an adjacent variant, a clause-drop; every one verified to FAIL its oracle via `python trap_battery.py selftest`). Each trap is swapped into the arm dir and the arm's own acceptance test runs unchanged — KILLED (suite fails it) vs SURVIVED (suite passes a known-wrong impl). **Trap-kill rate** measures discriminating power independently of the delivered impl's correctness; restore is file-copy + sha256-verified. Usage: `selftest` · `oracle A|B` · `run A|B [GL-XX]`.
 
 **Disclosed deviations from the live skill:** B1 is a subagent playing the orchestrator (the live skill authors the test in your session — same stand-in method as the routing suite); the grill/gate front-ends are out of scope (requirements arrive settled); tiers above base (coverage/adversarial) are not compared here — a follow-up arm. **Disclosed limits:** single maintainer; single base model in both arms (context separation ≠ model diversity); N=12; traps authored by the skill's maintainer (authorship bias favors the skill's mechanisms — read with that in mind); arms run with repo access (B1 must read `skills/spec-tdd/SKILL.md` from the working tree), so blinding rests on the explicit containment instruction, same residual risk the routing suite accepted.
 
@@ -213,7 +214,29 @@ Report (max 12 lines): final acceptance-test output summary, plus any ERR.
 
 ## Oracle (hidden from arms, committed before any dispatch)
 
-One runner per fixture at `docs/fixtures/oracle/green-lie/GL-XX_oracle.py`, executed as `python GL-XX_oracle.py <arm_dir>`; prints one PASS/FAIL line per case plus a summary. The case tables are exactly the clause checklists above with concrete values — the runner loads `<arm_dir>/<MODULE>.py` fresh and compares against the key (GL-09's negative-amount case expects `ValueError`).
+One runner per fixture at `docs/fixtures/oracle/green-lie/GL-XX_oracle.py`, executed as `python GL-XX_oracle.py <arm_dir>`; prints one PASS/FAIL line per case plus a summary. The case tables are exactly the clause checklists above with concrete values — the runner loads `<arm_dir>/<MODULE>.py` fresh and compares against the key (GL-09's negative-amount case expects `ValueError`). Pre-registered trap impls live beside them at `oracle/green-lie/traps/GL-XX/T*.py` (battery scoring, above; arms never see either).
+
+## Arm C — adversarial tier (designed 2026-09-03, not yet run)
+
+The v2 plan's third arm, specified now so the run is mechanical when launched. Same containment discipline as A/B; the delivery target and scoring are identical (wrong-but-GREEN + trap-kill), so C's numbers land on the SAME axes as the existing baseline (both arms at ceiling: 0/12 wrong-but-GREEN, 36/36 trap-kill).
+
+**Staged blind dispatches (each a fresh subagent; roles stand in for the tier's phases, same as B):**
+
+- **C1 — test-author (orchestrator Phase 1, adversarial grade).** Containment: `<DIR>`, `<REQFILE>`, `skills/spec-tdd/SKILL.md`, `skills/spec-tdd-adversarial/SKILL.md`. Reads the adversarial skill and executes its Phase 1 for ONE unit: black-box acceptance test from the requirement + MANDATORY property/differential tests + the Phase-1 hole-class self-check (the seven hole classes) + attacker seeds. RED against the `NotImplementedError` stub (RED-purity scan required). No implementation.
+- **C0 — independent encoding audit.** Identical to B0 (read-only; one strengthen relay max).
+- **C2 — implementer.** Identical to B2 (acceptance test is a read-only contract; ERR-not-edit; may add own unit tests).
+- **C3 — attacker round 1.** Containment: `<DIR>`, `<REQFILE>`, `skills/spec-tdd-adversarial/SKILL.md`. Executes the tier's Phase-3 dispatch template verbatim (v1.15.0): Part A (suite + intent, NO impl — write wrong-but-green impls, RUN them, report the missing case per survivor) + Part B (branch-hunt the real impl, bidirectional). Run economy + hygiene apply (cross-file mutant batching — single-file fixtures make this trivial; file-copy backup/restore + `git hash-object`; preserved wrong-impls under `<DIR>/attack/round-1/`; APPEND-only progress log; build as the only oracle). RETURN: structured hole report at `<DIR>/attack/round-1-holes.md` (id | mutant | missing case | severity | evidence path).
+- **Strengthen — C1′ + harness-side batch verification.** If C3 reports holes: a FRESH C1-role dispatch strengthens the suite (its artifact; holes → cases), then the harness runs the **one-shot batch verification** mechanically: apply all preserved round-1 wrong-impls TOGETHER → expect EXACTLY the N new/strengthened tests RED (exact-count attribution) → byte-exact restore → hash → full suite GREEN vs the real impl. Any strengthened test RED against the real impl = an impl bug caught (IMPL bucket → C2 re-dispatch with the failing case).
+- **C3′ — attacker round 2, FRESH dispatch** on the strengthened suite. Clean round (no new critical/moderate) or the breaker stops the loop. Weak holes ride the residual list (severity floor).
+- **Dry-loop: OUT OF SCOPE (disclosed).** Deployment/ops and production-quality lenses have no purchase on a 5-line stdlib fixture with no deployment surface; the attack loop is the part under test here.
+
+**Scoring:** identical axes (wrong-but-GREEN, trap-kill via the battery against C's FINAL strengthened suite) + two C-specific mechanical checks: the batch-verification exact-count result per fixture, and per-round hole counts by severity. Cost recorded per dispatch.
+
+**Pre-registered predictions (written before any C dispatch):**
+- **H8:** C trap-kill = 36/36 — A and B already sit at the mutation ceiling on THESE fixtures, so C has no headroom to demonstrate; C's value is running the tier's machinery end-to-end as the regression instrument, not separation on this difficulty.
+- **H9:** C3 round 1 reports ≥1 critical/moderate hole on ≥3/12 fixtures (novel wrong-impls outside the 36-trap battery; B-grade suites were deep, so modest).
+- **H10:** where C3 reports holes, the harness-side batch verification returns exactly-N RED on every fixture (v1.15.0's attribution guarantee, mechanically checked at fixture scale).
+- **H11:** C costs ≈ 1.7–2.5× B per fixture (C1+C0+C2 + attacker rounds).
 
 ## Results — 2026-09-03 run (12 fixtures × 2 arms, 48 dispatches, ~1.2M subagent tokens)
 
@@ -246,4 +269,6 @@ Every arm's own suite GREEN on the harness's own re-run (self-reports never trus
 
 **Reading the null result honestly** — why the traps didn't catch arm A: ① *scale* — single-function greenfield with a 5-line settled spec is cheap to close-read; attention doesn't thin. ② *trap salience* — the cue words are bolded in the reqs (AT LEAST, strictly, NEVER, mandatory) and the traps are classic seeded defects that TDD-trained models reflexively test; there is no domain camouflage (unlike the routing suite's purge-as-housekeeping). ③ *a strong control* — arm A got genuine test-first instructions and free iteration, and this model is heavily trained on exactly that loop. ④ *no pressure* — nothing pushed A to ship early; the circuit breaker never engaged.
 
-**What this bounds:** on THIS model, small settled units with classic traps do not reproduce the green lie even single-context. The correlated-failure regime the family targets lives where this benchmark didn't go: longer specs where the trap is buried unbolded mid-paragraph, fuzzy requirements (the grill front-ends' actual beat), attention dilution across multi-unit batches, and repair-loop pressure. **v2 fixture design:** domain-camouflaged traps, unbolded cues, 1–2 page specs, a deliberately flaky-ish environment to engage repair pressure, and a `spec-tdd-adversarial` third arm.
+**What this bounds:** on THIS model, small settled units with classic traps do not reproduce the green lie even single-context. The correlated-failure regime the family targets lives where this benchmark didn't go: longer specs where the trap is buried unbolded mid-paragraph, fuzzy requirements (the grill front-ends' actual beat), attention dilution across multi-unit batches, and repair-loop pressure. **v2 fixture design:** domain-camouflaged traps, unbolded cues, 1–2 page specs, a deliberately flaky-ish environment to engage repair pressure, and a `spec-tdd-adversarial` third arm (now specified above as Arm C).
+
+**Trap battery (retrospective, same day):** both arms **36/36 trap-kill, zero survived** — fully discriminating suites in BOTH modes at this difficulty; the ceiling repeats. The battery is therefore the **regression floor instrument**, not an A/B discriminator: any future skill change that weakens delivered suites reads as trap-kill < 36/36 or wrong-but-GREEN > 0, mechanically. Predictions + result: [baseline doc](../specs/2026-09-03-green-lie-baseline.md).

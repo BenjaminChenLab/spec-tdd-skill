@@ -31,3 +31,16 @@ Single maintainer; single base model in both arms; N=12; traps authored by the s
 ## Verdict
 
 Honest null: the benchmark is valid (oracle self-test discriminates) and the machinery ran clean, but these fixtures sit below the green-lie threshold for this model. Keep the suite as the reusable harness; design v2 to attack attention and ambiguity rather than reflex-tested boundary classics.
+
+## Retrospective trap battery (added 2026-09-03, same day)
+
+The null result left H4 (weakening) half-answered by *spot-checks*. The **trap battery** (`oracle/green-lie/trap_battery.py`, 36 pre-registered trap impls — 3 per fixture: the Key's named trap + an adjacent variant + a clause-drop, each verified to FAIL its oracle: 36/36) converts discriminating power into a measurement: each trap is swapped into an arm's run dir and the arm's OWN acceptance test runs unchanged — KILLED = suite fails a known-wrong impl (discriminating), SURVIVED = suite passes it. An arm can be oracle-clean (correct impl) while its suite would let wrong impls through; this measures exactly that, and gives the planned adversarial arm (C) a pre-registered baseline to beat.
+
+**Pre-registered predictions (written before any arm was run against the battery):**
+- **H5:** both arms kill most traps — A ≥ 30/36, B ≥ 30/36 (the spot-checks said genuinely discriminating suites); no separation predicted — the battery's first job is measurement, not contrast.
+- **H6:** SURVIVED traps concentrate in T2/T3 (adjacent variants, clause-drops) over T1 (the Key's named trap — every suite explicitly targets it).
+- **H7:** survived traps cluster in the boundary fixtures (GL-01/05/10), where adjacent-boundary variants are subtlest.
+
+Scoring runs after this paragraph was committed to the working tree; results appended below.
+
+**Result — another ceiling: A 36/36, B 36/36 trap-kill, zero SURVIVED, zero INFRA (every restore sha256-verified; post-battery oracle re-check 24/24 both arms).** H5 confirmed at ceiling (both ≥ 30/36 — in fact both perfect); H6/H7 vacuous (no survivors to distribute). Read with the null result: on this model, small settled units with bolded classic traps produce fully discriminating suites in BOTH modes — same-context TDD and the structured tier are indistinguishable on correctness AND on mutation-kill at this difficulty. The battery's value is therefore not A/B contrast but **a mechanical floor for the standing regression rule**: any future skill change that weakens delivered suites shows up as trap-kill < 36/36 (or wrong-but-GREEN > 0) with zero judgment calls. The separating instruments must come from v2 fixtures in the untested regime (long specs, buried unbolded traps, repair pressure, multi-unit attention dilution) — where this suite already documents its own limits.

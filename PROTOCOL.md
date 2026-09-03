@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.15.0**
+**Version 1.15.1**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
