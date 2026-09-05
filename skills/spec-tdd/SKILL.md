@@ -10,7 +10,7 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 
 **Core principle:** the acceptance test is authored before any impl exists, in a different context than the implementer — so it cannot have been reverse-engineered to mirror an implementation (the structural anti-green-lie guarantee). It can still be *wrong or shallow* — a misread or under-interrogated requirement produces a bad test — but that is a different failure mode, handled by RED-first, the Phase-3 adversarial read, the grill, and the attacker. **"Must be RED first"** is the built-in green-lie detector.
 
-**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../../PROTOCOL.md) for the canonical artifacts (A1–A16) and invariants (I1–I21).
+**Protocol:** this skill operationally enforces the spec-TDD protocol — see [PROTOCOL.md](../PROTOCOL.md) for the canonical artifacts (A1–A16) and invariants (I1–I21).
 
 ## When to Use
 - User says `spec-tdd <feature>` (the agreed trigger).

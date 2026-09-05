@@ -216,9 +216,9 @@ Report (max 12 lines): final acceptance-test output summary, plus any ERR.
 
 One runner per fixture at `docs/fixtures/oracle/green-lie/GL-XX_oracle.py`, executed as `python GL-XX_oracle.py <arm_dir>`; prints one PASS/FAIL line per case plus a summary. The case tables are exactly the clause checklists above with concrete values — the runner loads `<arm_dir>/<MODULE>.py` fresh and compares against the key (GL-09's negative-amount case expects `ValueError`). Pre-registered trap impls live beside them at `oracle/green-lie/traps/GL-XX/T*.py` (battery scoring, above; arms never see either).
 
-## Arm C — adversarial tier (designed 2026-09-03, not yet run)
+## Arm C — adversarial tier (designed 2026-09-03; 3-fixture pilot run same day — see the baseline doc)
 
-The v2 plan's third arm, specified now so the run is mechanical when launched. Same containment discipline as A/B; the delivery target and scoring are identical (wrong-but-GREEN + trap-kill), so C's numbers land on the SAME axes as the existing baseline (both arms at ceiling: 0/12 wrong-but-GREEN, 36/36 trap-kill).
+The v2 plan's third arm, specified so the run is mechanical. Same containment discipline as A/B; the delivery target and scoring are identical (wrong-but-GREEN + trap-kill), so C's numbers land on the SAME axes as the existing baseline. **Pilot result (GL-01/04/11):** the machinery runs end-to-end — 7 round-1 holes found (all outside the battery's alphabet), 7/7 exact-count attributions in the harness batch verification, SPEC-DEFECT fired live, round 2 clean on 1 of 3 at the severity floor; first separation in the program (details: [baseline doc](../specs/2026-09-03-green-lie-baseline.md)).
 
 **Staged blind dispatches (each a fresh subagent; roles stand in for the tier's phases, same as B):**
 

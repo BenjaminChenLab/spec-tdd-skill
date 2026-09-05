@@ -1,0 +1,7 @@
+Payouts: the batch calls payout_action once per payout per night and acts on the
+string. Weekend payouts defer to the next business day before any other
+consideration — KYC is re-checked on the execution day, so a weekend payout for
+an unverified account still defers today. Large means at or above the 100000-cent
+escalation threshold. Everything else follows the module spec exactly: pure
+function, the seven weekday codes, ValueError on any bad input, single-digit
+string returns.

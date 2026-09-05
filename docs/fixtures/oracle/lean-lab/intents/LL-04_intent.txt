@@ -1,0 +1,7 @@
+fx.py is the extracted currency-conversion service — positions.py in the tree
+already calls it once per book entry with ONE shared rate table for the whole
+batch, so read it for the real call shapes; shorts carry negative amounts into
+the same conversion. Direct pair multiplies and rounds half-up at the whole
+cent; a reversed pair converts through the inverse rate with the same rounding;
+an unknown pair in both directions raises ValueError. Keep it a pure function of
+its arguments — no caching, no globals.

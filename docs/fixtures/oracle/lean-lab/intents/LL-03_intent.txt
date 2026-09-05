@@ -1,0 +1,5 @@
+Extract the fee rounding into fees.py — ledger.py in the tree already delegates
+to it, so read it for the real call shapes: reversals flow through the same fee
+path as charges. round_fee goes to the nearest 10 cents with halfway cases up;
+settle_total sums the per-item rounded fees and must stay a pure function. Both
+functions sit on the ledger's hot path.

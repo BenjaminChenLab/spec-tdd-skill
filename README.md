@@ -1,6 +1,6 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.15.1** · [Protocol](PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.16.0** · [Protocol](skills/PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
 A family of [Claude Code](https://claude.com/claude-code) skills enforcing **a protocol for preventing correlated test/implementation failure in AI-generated software** (the technical name for the *green lie*). Executable specifications, agent-boundary isolation, and independent verification for agentic TDD.
 
@@ -18,7 +18,7 @@ Most TDD guidance fights this with *prompting* — exhorting the agent to stay o
 
 > **"Must be RED first" is the built-in green-lie detector.**
 
-This isn't a new religion — it's established software engineering (black-box testing, contract / seam-driven design, independent verification) ported to agent orchestration. The agent boundary turns "don't fool yourself" from a discipline into a structural guarantee **against the green lie** — the test cannot have been reverse-engineered to mirror the impl. It does not guarantee the spec is *right* (a misread requirement still makes a bad test); that failure mode is handled by other mechanisms — RED-first, the Phase-3 adversarial read, the grill, and the independent attacker.
+This isn't a new religion — it's established software engineering (black-box testing, contract / seam-driven design, independent verification) ported to agent orchestration. The agent boundary turns "don't fool yourself" from a discipline into a structural guarantee **against the green lie** — the test cannot have been reverse-engineered to mirror the impl. It does not guarantee the spec is *right* (a misread requirement still makes a bad test); that failure mode is handled by other mechanisms — RED-first, the Phase-3 adversarial read, the grill, and the independent attacker. The boundary also has a floor: the handoff itself (`INTENT`, `READ FIRST`) necessarily carries the orchestrator's interpretations into the implementer's — and, on the adversarial tier, the attacker's — context, so correlation is reduced, not eliminated; the adversarial tier's independent third context is the priced answer to that residual.
 
 Each skill was authored and pressure-tested with the TDD-for-docs process (baseline a failure mode without the skill, then write the skill to counter it) — the baseline & pressure-test records are public in [`docs/specs/`](docs/specs/) (small-N, single-maintainer experiments; honest about what they are).
 
@@ -116,7 +116,7 @@ Seven skills, organized as **a verification ladder + three front-ends** — `gri
 | [`spec-tdd-lite`](skills/spec-tdd-lite/SKILL.md) | The in-session entry tier. Acceptance test (RED) → implement it yourself → **one fresh-context review dispatch**. For ONE small/non-critical unit in a session you'll clear after. |
 | [`spec-tdd`](skills/spec-tdd/SKILL.md) | The base. Orchestrator writes the acceptance test (RED), gets a fresh-context **encoding audit**, delegates to one subagent, verifies by running it. **Multi-unit runs**: a bug list or task-split feature loops the phases per unit — the agent boundary is per unit; disjoint units run as **parallel waves** (scratch-copy isolated, allowlist merge-back), shared-file units as serial chains. |
 | [`spec-tdd-coverage`](skills/spec-tdd-coverage/SKILL.md) | `spec-tdd` + **coverage evidence**: the subagent declares a case-list *before* impl (each case mapped to its branch) and reports per-class branch %; the orchestrator cross-checks the mapping both ways against the coverage report (or the impl's branch statements where the tool reports no branch detail). |
-| [`spec-tdd-adversarial`](skills/spec-tdd-adversarial/SKILL.md) | `spec-tdd-coverage` + an **independent attacker** (a third agent context) that tries to write a wrong-but-green impl and hunts uncovered branches, then a **terminal dry-loop audit** — fresh subagents rotating lenses (test-strength / plan fidelity / deployment-ops / production quality); stops on the first clean round, capped at 2 (5 with the `dryout` flag — the only difference); a cap hit while not yet clean asks the human whether to continue (one round per yes). Top tier — blast-radius-critical units only (a silent bug moves money / changes auth / irreversibly corrupts data; money-adjacent display/reporting doesn't qualify). The loop's verification runs are **batched** (cross-file mutants, one-shot strengthen verification — I19(f)), only critical/moderate holes buy a round, and a `timebox` flag trades disclosed degradations for wall-clock. On multi-unit batches the attacker + dry-loop **consolidate over the whole batch** (dispatched as the final wave dispatches; breaker judged per hole) instead of multiplying per unit. |
+| [`spec-tdd-adversarial`](skills/spec-tdd-adversarial/SKILL.md) | `spec-tdd-coverage` + an **independent attacker** (a third agent context) that tries to write a wrong-but-green impl and hunts uncovered branches, then a **terminal dry-loop audit** — fresh subagents rotating lenses (test-strength / plan fidelity / deployment-ops / production quality); stops on the first clean round, capped at 2 (5 with the `dryout` flag — the only difference); a cap hit while not yet clean asks the human whether to continue (one round per yes). Top tier — blast-radius-critical units only (a silent bug moves money / changes auth / irreversibly corrupts data; money-adjacent display/reporting doesn't qualify). The loop's verification runs are **batched** (cross-file mutants, one-shot strengthen verification — I19(f)), only critical/moderate holes buy a round, and a `timebox` flag trades disclosed degradations for wall-clock (concurrent attack parts, merged dry-loop, diff-scoped attack). On multi-unit batches the attacker + dry-loop **consolidate over the whole batch** (dispatched as the final wave dispatches; breaker judged per hole) instead of multiplying per unit. |
 | [`grill-spec-tdd`](skills/grill-spec-tdd/SKILL.md) | A **front-end**: interrogate a fuzzy/high-stakes requirement ("grill"), gate the SPEC (the grilled decisions — irreversible ones demand named confirmation, never a bulk default) with a human **before any test is written**, derive the acceptance test from the **final** spec, *then route* to whichever verification tier fits. |
 | [`adversarial-grill-spec-tdd`](skills/adversarial-grill-spec-tdd/SKILL.md) | The **critical-grade front-end**: grill-spec-tdd plus an **independent grill-auditor** dispatched twice — the decisions (incl. materiality stops) attacked BEFORE the gate, the final-spec acceptance test attacked after it (pre-dispatch) — independence at the cheapest moments (no impl tokens spent). Fuzzy + critical (money/auth/data-loss) only. |
 | [`spec-tdd-escalate`](skills/spec-tdd-escalate/SKILL.md) | A **front-end** for SETTLED requirements: skips grilling and auto-routes to whichever verification tier fits the stakes — full-auto, no gate (a one-pass **fuzziness sniff** first checks the doc is actually decided; a clean doc never triggers a question; a non-top-model session gets one I21 upgrade-or-continue ask first). |
@@ -146,6 +146,9 @@ Measured wall-clock for the adversarial tier (real ~340-line critical fix, 3 att
 ## When to use which
 
 ```
+Exploratory / throwaway code (prototype, spike, nothing blast-radius)?
+  yes → no skill — just code (the dispatches buy guarantees disposable code doesn't need)
+
 Requirement SETTLED and you want the tier picked for you?
   yes → spec-tdd-escalate   (auto-routes by stakes; fuzziness sniff; no grilling, no gate)
 
@@ -168,7 +171,7 @@ Requirement FUZZY or high-stakes?
                           otherwise → spec-tdd      (the cheap default)
 ```
 
-Rule of thumb: requirement already settled and you just want it routed? Use `spec-tdd-escalate`. Fuzzy, or you want to interrogate it first? Start with `grill-spec-tdd` — it grills and routes to the matching tier for you. Fuzzy AND blast-radius-critical — a silent bug would move money, change auth, or irreversibly corrupt data (money-adjacent display/reporting doesn't count)? `adversarial-grill-spec-tdd` — an independent auditor attacks the grill itself before anything is built. One small unit and a session you'll clear after? `spec-tdd-lite`. Several units — a bug list, a split feature? `spec-tdd` as a multi-unit run.
+Rule of thumb: exploratory or throwaway code needs none of this — just write it. Requirement already settled and you just want it routed? Use `spec-tdd-escalate`. Fuzzy, or you want to interrogate it first? Start with `grill-spec-tdd` — it grills and routes to the matching tier for you. Fuzzy AND blast-radius-critical — a silent bug would move money, change auth, or irreversibly corrupt data (money-adjacent display/reporting doesn't count)? `adversarial-grill-spec-tdd` — an independent auditor attacks the grill itself before anything is built. One small unit and a session you'll clear after? `spec-tdd-lite`. Several units — a bug list, a split feature? `spec-tdd` as a multi-unit run.
 
 ## How it relates to the `superpowers` plugin
 
@@ -188,6 +191,8 @@ Copy the skills into your personal skills directory:
 # from this repo's root
 cp -r skills/* ~/.claude/skills/
 ```
+
+The install ships `PROTOCOL.md` too (it lives in `skills/`), so the skills' protocol links resolve installed — no manual copy to `~/.claude/` needed. **Updating:** re-run the same command; it overwrites in place. After a rename release, check for and remove the leftover old directory (precedent: `grill-spec` → `grill-spec-tdd`) — a stale copy silently serves old definitions.
 
 Then invoke in Claude Code with `/<skill-name> <feature>`, e.g.:
 

@@ -9,8 +9,14 @@ Thumbs.db
 
 # Logs
 *.log
+__pycache__/
+*.pyc
 
 # Benchmark run tree (arms' code; oracles are committed under docs/fixtures/oracle/)
 docs/fixtures/green-lie-runs/A/
 docs/fixtures/green-lie-runs/B/
 docs/fixtures/green-lie-runs/C/
+docs/fixtures/lean-lab-runs/L1/
+docs/fixtures/lean-lab-runs/L2-V1/
+docs/fixtures/lean-lab-runs/L2-V2/
+docs/fixtures/lean-lab-runs/T1/

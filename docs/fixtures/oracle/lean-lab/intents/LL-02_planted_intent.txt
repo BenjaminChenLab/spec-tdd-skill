@@ -1,0 +1,6 @@
+Tier fees: the module is a pure table lookup — take the band whose lower bound
+the notional has crossed, meaning the notional must exceed the band edge to be
+in that band (edges themselves belong to the band below). An empty tier table is
+a configuration error, so raise ValueError for it rather than guessing a fee.
+Flat fees, table as pure data, ValueError on negative notionals and duplicate
+band edges — all exactly per the spec.
