@@ -5,6 +5,11 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.3] - 2026-09-09
+
+### Reverted
+- **PROTOCOL I18 live-DB enumeration** (shipped in v1.18.2, reverted the same day at the maintainer's direction): this repo is a **public** skill family — instructing every install to query "the live database" without the user's grant oversteps the protocol's remit; a user would rightly object to a skill touching their DB unasked, read-only or not. I18 stays at "(codebase, docs, config)". A maintainer's own consented arrangement (querying their DB for fact disputes) belongs in the maintainer's private global config, never in shared skill text. The v1.18.2 changelog entry and release notes stand as history; this revert supersedes.
+
 ## [1.18.2] - 2026-09-09
 
 ### Added
