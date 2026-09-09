@@ -44,9 +44,10 @@ tier 為 `spec-tdd-adversarial` 時,level-1 內部再派 attacker / dry-loop aud
 
    本 skill 的 gate 雖輕,但 level-1 dispatch 必須 TOP(它承接全部 planning / 驗證判斷)——頂層 session 本身若跑中階,整個 phase 的 routing 與覆核判斷都跟著壓在中階上。
 2. **Session commit 授權(開跑前問一次)。** Task 邊界 = commit 邊界是本 skill 的回滾設計,但 commit 權限始終是 user 的——loop 開跑前明確問一次:「本 session 授權頂層在每個 task 邊界 commit 嗎?」**授權** → gate 通過後頂層直接 commit(仍明確列檔名;push 不在此授權內)。**未授權** → 不省略邊界:每個 task 邊界暫停,列出該 commit 的檔案清單交 user 手動執行,狀態區補 user 回報的 hash——回滾單位不變,執行者換人而已。
-3. **Nested spawn depth check。** 預設 spawn 深度限制會讓 level-1 sub-agent 沒有 Agent tool → 無法派 level-2。修法:環境變數 **`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`**,設在頂層 session 的啟動環境(harness 讀得到的位置——settings 的 env 區塊或啟動時的 shell 環境;在某次 Bash call 裡 export 影響不了 spawn sub-agent 的上層)。驗證法:dispatch template 內建「若你沒有 Agent tool,立刻 STOP 回報」——第一個 task 它回報有 tool,設定即生效。
-4. **權威文件就位。** Phase 開始前確認三件套存在:(a) 需求本文;(b) **決定區**——編號決定(如 D1、D2…),新決定**續接編號**,不改號不重編;(c) **任務總表狀態區**——每 task 一列:id + 白話名稱 + 狀態(pending / in-flight / done + commit hash)+ 一行證據指向。
-5. **Task-doc 自足性檢查。** 每個 task 一份自足 doc——sub-agent 不翻其他文件就能做。必要欄位:
+3. **Adversarial ceiling(開跑前問一次)。** 每 task 的 tier 由 level-1 的 escalate 機械按 stakes 自動判定——但一次 full `spec-tdd-adversarial` 是小時級(攻擊輪 + dry-loop rotation),長 task list 整個 phase 會被吃掉。所以 phase 開跑前先設**全 phase 的 tier 上限**,一問:「本 phase 允許 escalate 到 adversarial 嗎?**預設:不允許**」——**不允許(預設)** → 上限 `spec-tdd-coverage`:level-1 的路由把它當硬上限,stakes 再高也只在 coverage 執行,並在報告揭露「本 task 被 ceiling 擋下」(被擋的 critical task 進 phase 報告的殘餘風險清單)。**允許** → 追問一次:「adversarial task 跑 `timebox` 嗎?**建議:要**」(timebox = I8 的限時 invocation:dry-loop 併成單輪、Part A 限縮到 change surface——正是為 task loop 這種每 task 成本相乘的情境設計的)。Ceiling 是 phase 政策,中途要改走「中途變向」機制(下一個 task 邊界生效,同樣揭露)。
+4. **Nested spawn depth check。** 預設 spawn 深度限制會讓 level-1 sub-agent 沒有 Agent tool → 無法派 level-2。修法:環境變數 **`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`**,設在頂層 session 的啟動環境(harness 讀得到的位置——settings 的 env 區塊或啟動時的 shell 環境;在某次 Bash call 裡 export 影響不了 spawn sub-agent 的上層)。驗證法:dispatch template 內建「若你沒有 Agent tool,立刻 STOP 回報」——第一個 task 它回報有 tool,設定即生效。
+5. **權威文件就位。** Phase 開始前確認三件套存在:(a) 需求本文;(b) **決定區**——編號決定(如 D1、D2…),新決定**續接編號**,不改號不重編;(c) **任務總表狀態區**——每 task 一列:id + 白話名稱 + 狀態(pending / in-flight / done + commit hash)+ 一行證據指向。
+6. **Task-doc 自足性檢查。** 每個 task 一份自足 doc——sub-agent 不翻其他文件就能做。必要欄位:
    - 目標與範圍(含明確的**非目標**);
    - 現況錨點:file:line(行號會 drift,同時給 method/symbol 名當錨);
    - 設計要點;
@@ -105,6 +106,12 @@ GIT: NO git write operations (add/commit/stash/checkout/restore/...). The
 top-level session owns all commits. Read-only git (status/diff/hash-object)
 is fine.
 
+TIER CEILING: {coverage | adversarial+timebox | adversarial-full} — the
+phase-level cap set at pre-flight. Your escalate routing treats it as a
+HARD maximum: if this task's stakes would route above the ceiling, run AT
+the ceiling and disclose the cap in your report — the capped-critical
+residual is the phase's accepted trade, decided by the human upfront.
+
 MOCK PHASE: {yes/no}. If yes: the contract target is the mock established
 by task {id}; reduced verification depth is user-approved for mock-phase
 tasks; disclose the tier actually used.
@@ -120,9 +127,10 @@ VERIFICATION REPORTING (your numbers will be independently rechecked):
 RETURN: 1) one status line per command (command + pass/fail counts), full
 logs to scratch files under .spec-tdd/ (never committed; hand paths)
  2) per-class numbers  3) created/modified file list (absolute paths)
- 4) disclosures: tier actually used (+ any mid-run downgrade), deviations
-from the task doc (DDL deltas, mock placement, naming/structure), locally
-decided rule details  5) prior-test adaptations with per-file rationale.
+ 4) disclosures: tier actually used (+ any mid-run downgrade or ceiling
+cap), deviations from the task doc (DDL deltas, mock placement,
+naming/structure), locally decided rule details  5) prior-test adaptations
+with per-file rationale.
 ```
 
 ## 輕量 gate(頂層唯一的驗證動作)
@@ -158,6 +166,7 @@ User 任何時刻可因時間壓力降 tier——包括 task 進行中:
 - **資產保留** — 已完成的測試與實作不丟棄;收斂到綠就收工。
 - **揭露** — 該 task 的報告必須載明 tier 變更(何時、降了什麼、留下什麼未驗風險)。
 - 送不進去(非背景 dispatch)→ 於下一個 task 邊界生效,同樣揭露。
+- **Ceiling 調整** — 開跑前定的 adversarial ceiling 中途要升/降,同路處理:送達在跑的 level-1,否則下一個 task 邊界生效,揭露同前。
 
 ## 半成品續作(session 中斷後)
 
@@ -172,7 +181,7 @@ Session 中斷 / context 損毀,task 停在半途:
 
 以下事項 sub-agent 報告**必須明列**、由頂層 / user 複審——不得默默做:
 
-- tier 被上限(如 spawn depth 不足)或中途降級;
+- tier 被上限(如 spawn depth 不足、phase 的 adversarial ceiling)或中途降級;
 - doc 字面偏離 — DDL additive 偏差、mock 落點與 doc 不同、命名 / 結構調整;
 - 本地拍板的規則細節(doc 沒寫死、level-1 自行決定的小規則);
 - 前批測試的調整(下節)。
@@ -203,6 +212,7 @@ Session 中斷 / context 損毀,task 停在半途:
 | user 拍板的決策只留在對話裡 | 即時回寫權威文件決定區(編號續接)+ 相關 task doc(舊方案劃刪除線備查)。對話會被清除 / 壓縮——沒回寫 = 沒發生。 |
 | Session 中斷後把半成品整個重寫 | 續作模式:盤點既有 diff vs task doc → spec-defect 檢查(測試與 doc 矛盾 → 修測試)→ 保留合理改動、只補缺口。 |
 | Mock-first 階段硬上最重 tier「求穩」 | 時間維度:契約未定案前的深測是浪費(契約一變全部重寫)。User 拍板可降;真實 API 定案後用契約對齊 task 回補。降級是暫緩+回補,不是省略。 |
+| 長 task list 放任 escalate 逐 task 自判,多個 task 全上 full adversarial,phase 被攻擊輪吃掉 | Pre-flight 問一次 adversarial ceiling(預設 coverage);template 的 TIER CEILING 是硬上限;stakes 超過 → 在 ceiling 執行並揭露,殘餘風險進 phase 報告。 |
 | 中途要降 tier,直接殺掉在跑的 sub-agent 重來 | SendMessage 送達變更;已完成資產保留,收斂到綠即收工,報告揭露。 |
 | 後續 task 順手大改前批測試 | 迴圈牆規則:僅允許接線調整(契約演化必須)、逐檔記錄;斷言語意改動 = 新測試,重走 RED→GREEN。 |
 | 追 LSP / jdtls 的「method undefined」假錯 | BUILD 是唯一 oracle(I19(f));以 gradle compile / test 為準。 |

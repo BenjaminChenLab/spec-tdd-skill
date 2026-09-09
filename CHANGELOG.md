@@ -5,6 +5,11 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.0] - 2026-09-09
+
+### Added
+- **`spec-tdd-task-loop` pre-flight adversarial ceiling** — ONE ask before the loop starts: is escalating to `spec-tdd-adversarial` allowed this phase? **Default no → a hard phase ceiling at `spec-tdd-coverage`** — level-1's escalate routing treats it as a maximum, and a task whose stakes would route higher runs AT the ceiling with the cap disclosed (capped-critical tasks ride the phase report as the accepted residual). Allowing adversarial draws ONE follow-up: run those tasks `timebox`? (recommended yes — I8's time-constrained invocation: merged dry-loop round, change-surface-scoped Part A — built for exactly this cost-multiplied context.) The ceiling rides the dispatch template as a TIER CEILING line; mid-phase changes go through the existing mid-course-change mechanism (next task boundary, disclosed). Motivation: a full adversarial run is hours; on a long task list it swallows the phase.
+
 ## [1.17.0] - 2026-09-09
 
 ### Added
