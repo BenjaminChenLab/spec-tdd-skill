@@ -13,6 +13,7 @@ __pycache__/
 *.pyc
 
 # Benchmark run tree (arms' code; oracles are committed under docs/fixtures/oracle/)
+docs/fixtures/task-loop-runs/
 docs/fixtures/green-lie-runs/A/
 docs/fixtures/green-lie-runs/B/
 docs/fixtures/green-lie-runs/C/

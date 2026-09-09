@@ -111,6 +111,10 @@ phase-level cap set at pre-flight. Your escalate routing treats it as a
 HARD maximum: if this task's stakes would route above the ceiling, run AT
 the ceiling and disclose the cap in your report — the capped-critical
 residual is the phase's accepted trade, decided by the human upfront.
+It is also a FLOOR at spec-tdd: the lite tier is structurally unavailable
+inside the loop (its solo author-implementer mode IS the self-testing this
+template forbids) — a task escalate would route to lite runs spec-tdd
+instead, disclosed.
 
 MOCK PHASE: {yes/no}. If yes: the contract target is the mock established
 by task {id}; reduced verification depth is user-approved for mock-phase
@@ -213,6 +217,7 @@ Session 中斷 / context 損毀,task 停在半途:
 | Session 中斷後把半成品整個重寫 | 續作模式:盤點既有 diff vs task doc → spec-defect 檢查(測試與 doc 矛盾 → 修測試)→ 保留合理改動、只補缺口。 |
 | Mock-first 階段硬上最重 tier「求穩」 | 時間維度:契約未定案前的深測是浪費(契約一變全部重寫)。User 拍板可降;真實 API 定案後用契約對齊 task 回補。降級是暫緩+回補,不是省略。 |
 | 長 task list 放任 escalate 逐 task 自判,多個 task 全上 full adversarial,phase 被攻擊輪吃掉 | Pre-flight 問一次 adversarial ceiling(預設 coverage);template 的 TIER CEILING 是硬上限;stakes 超過 → 在 ceiling 執行並揭露,殘餘風險進 phase 報告。 |
+| level-1 照 escalate 路由把小 task 送到 lite,於是自己實作(self-testing) | Loop 內 lite 結構性不可用——TIER CEILING 同時是下限:最低 `spec-tdd`(lite 的 solo author-implementer 模式正是 template 硬禁的 self-testing);改跑 spec-tdd 並揭露。 |
 | 中途要降 tier,直接殺掉在跑的 sub-agent 重來 | SendMessage 送達變更;已完成資產保留,收斂到綠即收工,報告揭露。 |
 | 後續 task 順手大改前批測試 | 迴圈牆規則:僅允許接線調整(契約演化必須)、逐檔記錄;斷言語意改動 = 新測試,重走 RED→GREEN。 |
 | 追 LSP / jdtls 的「method undefined」假錯 | BUILD 是唯一 oracle(I19(f));以 gradle compile / test 為準。 |

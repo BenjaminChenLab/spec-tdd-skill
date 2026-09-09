@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.1] - 2026-09-09
+
+### Fixed
+- **`spec-tdd-task-loop` lite-tier floor** — pre-dispatch catch while staging the first GREEN trial: escalate's routing would send a small non-critical task to `spec-tdd-lite`, whose solo author-implementer mode IS the self-testing the loop's dispatch template forbids — a level-1 following escalate faithfully could only violate one of the two. The TIER CEILING template line now states a FLOOR at `spec-tdd` as well: lite is structurally unavailable inside the loop; a task escalate would route to lite runs `spec-tdd` instead, disclosed. Common Mistakes row added.
+
+### Docs
+- **First GREEN trial record** — [docs/specs/2026-09-09-task-loop-first-green.md](docs/specs/2026-09-09-task-loop-first-green.md): a 2-task compliance micro-trial against a throwaway Python project in an isolated scratch repo; all six pre-registered criteria passed (nested dispatches, pure RED, number rechecks matched 4/4, commit isolation with zero scratch leakage, four-category disclosure, three pre-flight asks). Disclosed limits: neither ceiling bound was stress-forced, resume untested, compliance not effectiveness. Run tree (`docs/fixtures/task-loop-runs/`) gitignored.
+
 ## [1.18.0] - 2026-09-09
 
 ### Added
