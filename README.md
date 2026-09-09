@@ -1,6 +1,6 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.16.0** · [Protocol](skills/PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.17.0** · [Protocol](skills/PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
 A family of [Claude Code](https://claude.com/claude-code) skills enforcing **a protocol for preventing correlated test/implementation failure in AI-generated software** (the technical name for the *green lie*). Executable specifications, agent-boundary isolation, and independent verification for agentic TDD.
 
@@ -109,7 +109,7 @@ flowchart TD
 
 ## The family
 
-Seven skills, organized as **a verification ladder + three front-ends** — `grill-spec-tdd` (grill a fuzzy requirement, gate the spec, then route), `adversarial-grill-spec-tdd` (fuzzy **+ critical**: grill, independent auditor attacks the decisions before the gate and the final-spec test before dispatch), and `spec-tdd-escalate` (route a settled requirement, no grilling):
+Eight skills, organized as **a verification ladder + three front-ends + an outer task-loop driver** — `grill-spec-tdd` (grill a fuzzy requirement, gate the spec, then route), `adversarial-grill-spec-tdd` (fuzzy **+ critical**: grill, independent auditor attacks the decisions before the gate and the final-spec test before dispatch), and `spec-tdd-escalate` (route a settled requirement, no grilling):
 
 | Skill | Role |
 |---|---|
@@ -120,8 +120,9 @@ Seven skills, organized as **a verification ladder + three front-ends** — `gri
 | [`grill-spec-tdd`](skills/grill-spec-tdd/SKILL.md) | A **front-end**: interrogate a fuzzy/high-stakes requirement ("grill"), gate the SPEC (the grilled decisions — irreversible ones demand named confirmation, never a bulk default) with a human **before any test is written**, derive the acceptance test from the **final** spec, *then route* to whichever verification tier fits. |
 | [`adversarial-grill-spec-tdd`](skills/adversarial-grill-spec-tdd/SKILL.md) | The **critical-grade front-end**: grill-spec-tdd plus an **independent grill-auditor** dispatched twice — the decisions (incl. materiality stops) attacked BEFORE the gate, the final-spec acceptance test attacked after it (pre-dispatch) — independence at the cheapest moments (no impl tokens spent). Fuzzy + critical (money/auth/data-loss) only. |
 | [`spec-tdd-escalate`](skills/spec-tdd-escalate/SKILL.md) | A **front-end** for SETTLED requirements: skips grilling and auto-routes to whichever verification tier fits the stakes — full-auto, no gate (a one-pass **fuzziness sniff** first checks the doc is actually decided; a clean doc never triggers a question; a non-top-model session gets one I21 upgrade-or-continue ask first). |
+| [`spec-tdd-task-loop`](skills/spec-tdd-task-loop/SKILL.md) | The **outer driver** for a whole multi-TASK feature phase — a task plan split into self-contained task docs, one task per commit, a plan-doc status board + numbered decisions section. The main session stays a **lightweight gate** (compile, `git diff --stat`, JUnit-XML number recheck — never deep review, never running the tests itself); each task dispatches a **level-1 sub-agent** that runs the escalate/tier machinery and itself dispatches the nested implementer (no self-testing; needs `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`). Adds mock-first contract phases (tier may drop against the mock until a real-API alignment task — the time dimension of tier choice), mid-run tier downgrades delivered by message and disclosed, half-finished-task resume (audit the diff vs the task doc; keep, don't rewrite), and the number-recheck discipline (XML, invocation counts, one final all-classes run). |
 
-`spec-tdd-lite` is the entry rung — in-session (no implementer dispatch, one review dispatch). Above it the ladder inherits upward: `spec-tdd` → `spec-tdd-coverage` → `spec-tdd-adversarial`. `grill-spec-tdd` and `spec-tdd-escalate` are orthogonal front-ends: `grill-spec-tdd` grills a fuzzy requirement then routes; `spec-tdd-escalate` routes a settled one with no grilling. `adversarial-grill-spec-tdd` is grill's critical-grade upgrade (fuzzy + critical only; typically routes onward to `spec-tdd-adversarial`). Front-ends compose with the tiers — `{grill, escalate} × {lite, spec-tdd, coverage, adversarial}` plus `adversarial-grill × {spec-tdd, coverage, adversarial}` (never lite: a critical surface doesn't go in-session) — all reachable **without** duplicating skills into monolithic combos.
+`spec-tdd-lite` is the entry rung — in-session (no implementer dispatch, one review dispatch). Above it the ladder inherits upward: `spec-tdd` → `spec-tdd-coverage` → `spec-tdd-adversarial`. `grill-spec-tdd` and `spec-tdd-escalate` are orthogonal front-ends: `grill-spec-tdd` grills a fuzzy requirement then routes; `spec-tdd-escalate` routes a settled one with no grilling. `adversarial-grill-spec-tdd` is grill's critical-grade upgrade (fuzzy + critical only; typically routes onward to `spec-tdd-adversarial`). Front-ends compose with the tiers — `{grill, escalate} × {lite, spec-tdd, coverage, adversarial}` plus `adversarial-grill × {spec-tdd, coverage, adversarial}` (never lite: a critical surface doesn't go in-session) — all reachable **without** duplicating skills into monolithic combos. `spec-tdd-task-loop` is not a tier — it composes **above** the whole ladder: each task is a full front-end→tier run inside a level-1 sub-agent, and the loop's own rules govern what happens *between* tasks (the lightweight gate, the status board, per-task commits, resume, disclosure).
 
 Every **delegated** tier's handoff carries a **circuit breaker** (STOP after 3 repair attempts OR the same root cause on any two attempts; tag the failure `ERR-01` env/dep · `ERR-02` logic · `ERR-03` syntax, with a truncated trace) and **three-bucket failure routing** — SPEC (re-open the requirement) → rewrite the test; TEST (requirement right, test incomplete) → strengthen the test; IMPL (code wrong) → re-delegate with the error tag. `spec-tdd-lite` has no handoff: its in-session stall breaker (same trip rules) promotes to `spec-tdd` instead.
 
@@ -138,6 +139,7 @@ Typical single-unit dispatch counts (the protocol's main token cost — I19 keep
 | `grill-spec-tdd` | same as the tier, or +1 on lite | the front-end's encoding audit (**TOP**) **replaces** the tier's own — grill→`spec-tdd` still totals 2; only the `spec-tdd-lite` route adds one (audit + lite's post-GREEN review); the grilling itself is in-session |
 | `adversarial-grill-spec-tdd` | +1 net on the routed tier | grill-auditor Parts A & B (**TOP**) — Part B is the tier's encoding audit at adversarial grade, so it replaces rather than adds; → `spec-tdd-adversarial` totals 5–6 typical (Part A is the only net addition) |
 | `spec-tdd-escalate` | 0 of its own | the fuzziness sniff is a doc read; it routes to one of the above |
+| `spec-tdd-task-loop` | 1 **TOP** dispatch per task (the level-1 orchestrator) + that run's own nested dispatches | the level-1 run carries the tier's dispatch mix (audit/attack TOP, implementer MID — I19 applies inside it); your session verifies numbers + file scope only — the loop exists to protect its context across the whole phase |
 
 Every dispatch names its model (reviews/attacks TOP, implementers MID — an unstated model silently inherits the session's most expensive). A multi-unit run multiplies the per-unit dispatch pair — encoding audit + implementer — per unit, grouped where modules overlap, with disjoint units running as concurrent scratch-copy waves; on the adversarial tier the per-unit attacker loops are replaced by ONE consolidated attack (+ per-cluster branch-hunts) dispatched as the final wave dispatches.
 
@@ -148,6 +150,11 @@ Measured wall-clock for the adversarial tier (real ~340-line critical fix, 3 att
 ```
 Exploratory / throwaway code (prototype, spike, nothing blast-radius)?
   yes → no skill — just code (the dispatches buy guarantees disposable code doesn't need)
+
+A whole MULTI-TASK phase (task-plan doc, one self-contained doc per task,
+per-task commits, sessions that must survive the phase)?
+  yes → spec-tdd-task-loop   (main session = lightweight gate; each task =
+                              a level-1 sub-agent running the full tier machinery)
 
 Requirement SETTLED and you want the tier picked for you?
   yes → spec-tdd-escalate   (auto-routes by stakes; fuzziness sniff; no grilling, no gate)
@@ -171,14 +178,14 @@ Requirement FUZZY or high-stakes?
                           otherwise → spec-tdd      (the cheap default)
 ```
 
-Rule of thumb: exploratory or throwaway code needs none of this — just write it. Requirement already settled and you just want it routed? Use `spec-tdd-escalate`. Fuzzy, or you want to interrogate it first? Start with `grill-spec-tdd` — it grills and routes to the matching tier for you. Fuzzy AND blast-radius-critical — a silent bug would move money, change auth, or irreversibly corrupt data (money-adjacent display/reporting doesn't count)? `adversarial-grill-spec-tdd` — an independent auditor attacks the grill itself before anything is built. One small unit and a session you'll clear after? `spec-tdd-lite`. Several units — a bug list, a split feature? `spec-tdd` as a multi-unit run.
+Rule of thumb: exploratory or throwaway code needs none of this — just write it. Requirement already settled and you just want it routed? Use `spec-tdd-escalate`. Fuzzy, or you want to interrogate it first? Start with `grill-spec-tdd` — it grills and routes to the matching tier for you. Fuzzy AND blast-radius-critical — a silent bug would move money, change auth, or irreversibly corrupt data (money-adjacent display/reporting doesn't count)? `adversarial-grill-spec-tdd` — an independent auditor attacks the grill itself before anything is built. One small unit and a session you'll clear after? `spec-tdd-lite`. Several units — a bug list, a split feature? `spec-tdd` as a multi-unit run. A whole feature phase off a task plan — many task docs, per-task commits? `spec-tdd-task-loop` drives it while keeping your session a lightweight gate.
 
 ## How it relates to the `superpowers` plugin
 
 Complementary, not redundant:
 
 - `superpowers:test-driven-development` is single-agent atomic TDD (RED→GREEN→REFACTOR). `spec-tdd` *uses* that discipline but splits it across the agent boundary — adding the structural green-lie defense that single-agent TDD cannot provide.
-- `superpowers:subagent-driven-development` verifies via a reviewer reading a *prose spec*; `spec-tdd` verifies by *running an executable spec* (the acceptance test). Different bets, and `spec-tdd` is far lighter (1 subagent vs implementer + 2 reviewers per task). `spec-tdd`'s multi-unit runs close the cadence gap — per-unit dispatch with between-unit verification — without giving up the executable oracle.
+- `superpowers:subagent-driven-development` verifies via a reviewer reading a *prose spec*; `spec-tdd` verifies by *running an executable spec* (the acceptance test). Different bets, and `spec-tdd` is far lighter (1 subagent vs implementer + 2 reviewers per task). `spec-tdd`'s multi-unit runs close the cadence gap — per-unit dispatch with between-unit verification — without giving up the executable oracle. `spec-tdd-task-loop` is the family's own plan-execution layer — the same shape (a written plan, one dispatch per task) with the executable oracle per task, and a main session that gates on numbers and file scope instead of reading every diff.
 - `spec-tdd-lite` is the self-contained in-session option: a distilled red-green-refactor loop inline, plus the one fresh-context test review that single-agent TDD cannot give itself.
 
 You do **not** need `superpowers` installed — `spec-tdd` is self-contained.
