@@ -5,6 +5,16 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.18.2] - 2026-09-09
+
+### Added
+- **`spec-tdd-task-loop` 429 interruption recovery** (from the skill's first real field run, 2026-09-09 afternoon — a 5-fix fintech batch): the resume section now distinguishes *session lost* from *agent died, session alive* — on an API rate-limit (429) kill, SendMessage-resume the SAME agent (context preserved) instead of a fresh redo-dispatch; breakpoint triage rides the existing git-status audit (clean RED breakpoint = zero-risk; partial production → verify the acceptance-test hash first); when the dead agent is the NESTED implementer, the resumed level-1 dispatches a CONTINUATION implementer on the predecessor's partial work (keep-don't-rewrite, one level down); the resume message carries the current state. Common Mistakes row extended. Field instance narration stripped per the lean-text rule.
+
+### Changed
+- **PROTOCOL I18 enumeration extended** — "questions answerable from the environment (codebase, docs, config, **the live database via read-only query**)": the field run proved an under-trigger (the DB never occurred to anyone until the maintainer volunteered access); the enumeration fix covers every front-end and tier at once. Field-specific operating details (connection profile, client tool) deliberately NOT enshrined here — they belong to the project that has them.
+
+Routing and tier behavior untouched; I18's change is grill-interface enumeration, not a routing predicate — **no fixture-suite rerun required** under the standing rule.
+
 ## [1.18.1] - 2026-09-09
 
 ### Fixed

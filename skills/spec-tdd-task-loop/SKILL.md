@@ -181,6 +181,8 @@ Session 中斷 / context 損毀,task 停在半途:
 3. **續作 brief** — 重派 level-1(若前手有留 ledger / scratch log,一併交出)時明確指示:**保留既有合理改動、只補缺口、不重寫**,並附上盤點結果(diff 檔案清單 + 判讀)。
 4. 狀態區就是恢復點 — in-flight 的 task 直接可見(呼應 A16 的 resume 語意:在飛中的 row = re-verify,不盲目重做)。
 
+**API 限額中斷(429)——agent 死了、session 還活著,與上述 session 遺失不同:** 額度重置 / 換 key 後**用 SendMessage 續同一個 agent**(保留完整 context),不重派新 agent 重來。斷點性質照步驟 1 盤點:acceptance test 已寫、production 零改動 = 乾淨 RED 斷點,恢復零風險;production 已有部分改動 → 先驗 acceptance test 的 I4 hash 未被動過。掛掉的若是 nested implementer 而非 level-1:orchestrator 恢復後**重派一個續作 implementer,在前身的半成品上修正完成**(同「保留、只補缺口、不重寫」,下沉一層)。resume 訊息講明現況(working tree 已有哪些檔、斷在哪一步),不讓 agent 重建認知。
+
 ## 揭露慣例(disclosure)
 
 以下事項 sub-agent 報告**必須明列**、由頂層 / user 複審——不得默默做:
@@ -214,7 +216,7 @@ Session 中斷 / context 損毀,task 停在半途:
 | 頂層沒問就在 task 邊界自己 commit | Pre-flight 問一次 session commit 授權;未授權 → 邊界暫停、列檔案清單交 user 手動 commit,狀態區補回報的 hash。 |
 | sub-agent 自己 commit / stash / checkout | 全層禁止 git 寫入;commit 是頂層獨佔職責(task 邊界 = commit 邊界 = 回滾單位)。 |
 | user 拍板的決策只留在對話裡 | 即時回寫權威文件決定區(編號續接)+ 相關 task doc(舊方案劃刪除線備查)。對話會被清除 / 壓縮——沒回寫 = 沒發生。 |
-| Session 中斷後把半成品整個重寫 | 續作模式:盤點既有 diff vs task doc → spec-defect 檢查(測試與 doc 矛盾 → 修測試)→ 保留合理改動、只補缺口。 |
+| Session 中斷後把半成品整個重寫 | 續作模式:盤點既有 diff vs task doc → spec-defect 檢查(測試與 doc 矛盾 → 修測試)→ 保留合理改動、只補缺口。429 中斷(agent 死、session 活):SendMessage 續同一 agent,不重派重來;死的是 implementer → 重派續作 implementer,不清空重做。 |
 | Mock-first 階段硬上最重 tier「求穩」 | 時間維度:契約未定案前的深測是浪費(契約一變全部重寫)。User 拍板可降;真實 API 定案後用契約對齊 task 回補。降級是暫緩+回補,不是省略。 |
 | 長 task list 放任 escalate 逐 task 自判,多個 task 全上 full adversarial,phase 被攻擊輪吃掉 | Pre-flight 問一次 adversarial ceiling(預設 coverage);template 的 TIER CEILING 是硬上限;stakes 超過 → 在 ceiling 執行並揭露,殘餘風險進 phase 報告。 |
 | level-1 照 escalate 路由把小 task 送到 lite,於是自己實作(self-testing) | Loop 內 lite 結構性不可用——TIER CEILING 同時是下限:最低 `spec-tdd`(lite 的 solo author-implementer 模式正是 template 硬禁的 self-testing);改跑 spec-tdd 並揭露。 |
