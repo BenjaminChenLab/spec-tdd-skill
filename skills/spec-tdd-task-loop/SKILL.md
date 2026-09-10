@@ -1,6 +1,6 @@
 ---
 name: spec-tdd-task-loop
-description: Use when driving a whole MULTI-TASK feature phase — a task plan split into many self-contained task docs, run one task at a time with per-task commits, a plan-doc status board, and sessions that must survive the phase. The main session stays a LIGHTWEIGHT gate (compile + `git diff --stat` + JUnit-XML number recheck — never deep review, never running the tests itself); each task dispatches a level-1 sub-agent that runs the spec-tdd-escalate/tier machinery and itself dispatches the nested implementer (no self-testing — requires CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3). Covers mock-first contract phases (the time dimension of tier choice), mid-run tier downgrades delivered by SendMessage, and resuming a half-finished task after a session break. Triggers on task loop, task-by-task spec-tdd, multi-task orchestration, per-task commit cadence, plan status board, 多 task 迴圈.
+description: Use when driving a whole MULTI-TASK feature phase — a task plan split into many self-contained task docs, run one task at a time with per-task commits, a plan-doc status board, and sessions that must survive the phase. The main session stays a LIGHTWEIGHT gate (compile + `git diff --stat` + JUnit-XML number recheck — never deep review, never running the tests itself); each task dispatches a level-1 sub-agent that runs the spec-tdd-escalate/tier machinery and itself dispatches the nested implementer (no self-testing — requires CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3). Covers mock-first contract phases (the time dimension of tier choice), mid-run tier downgrades delivered by SendMessage, and resuming a half-finished task after a session break. Triggers on task loop, task-by-task spec-tdd, multi-task orchestration, per-task commit cadence, plan status board, not-yet-split requirement/blueprint needing task breakdown, 多 task 迴圈.
 ---
 
 # spec-tdd-task-loop
@@ -29,12 +29,22 @@ tier 為 `spec-tdd-adversarial` 時,level-1 內部再派 attacker / dry-loop aud
 - 一個 feature phase 拆成多個 task(通常 5+),每 task 一份自足 doc,逐 task 開發、逐 task commit。
 - 預期跨越多個 session、context 會被壓縮或中斷 → 需要狀態區 + 半成品續作模式。
 - 有權威計畫文件(single source of truth:需求 + 決定區 + 任務總表狀態區)。
+- 進場時只有需求結論或 plan/blueprint,還沒拆成任務總表 + task docs → 先走 Phase 0(總表是續作 / 回滾 / 回寫的 trace base)。
 - 上游依賴(外部 API、別團隊 service)未定案 → mock-first 契約開發(見專節)。
 
 **When NOT to use:**
 - 單一 task / 單一 feature → 直接 `/spec-tdd-escalate`(或手動選 tier),主 session 自己當 orchestrator;外層迴圈是 overhead。
 - 一次清一 batch 獨立小 bug → `spec-tdd` 的 **multi-unit run**(一個 session 內迴圈單元;邊界在單元,不涉及 per-task commit 與跨 session 狀態)。
 - 探索性 / 拋棄式程式碼 → 不需要任何 skill。
+
+## Phase 0 — 任務拆解(進場時總表未拆)
+
+進場時若只有需求結論或 plan/blueprint,**還沒拆成任務總表 + 自足 task docs** → 先做本節,產出控制文件後才進 Pre-flight。三件套已在 → 跳過。理由:狀態區是斷點續作的 trace base、task 邊界是回滾單位、決定區是決策回寫的家——**拆解只在對話裡 = 沒拆**(I17 精神),沒落檔,續作 / 回滾 / 回寫全部無所依附。
+
+1. **結算檢查(I20 sniff)。** 掃需求決策缺口(未綁數量、二選一未選、TODO/TBD):有缺口 → 轉 grill 前端補談,不在本節補洞;乾淨 → 續行。
+2. **拆解(頂層執筆 — I19(a):planning 不下沉)。** 頂層讀需求結論 / blueprint + 盤 codebase 錨點(可派 read-only Explore 代跑偵察),產出:(a) 權威計畫文件三件套(Pre-flight 5 格式)——需求本文、決定區(討論既有決定沉澱為 D1… 續接編號)、任務總表狀態區(全部 pending);(b) 每 task 一份自足 doc(Pre-flight 6 欄位)。粒度原則:**一個 task 一件事**——task 邊界 = commit 邊界 = 回滾單位,拆錯顆粒 = 回滾單位變形。
+3. **Fresh-context plan review(獨立 sub-agent,TOP)。** 派一個未參與撰寫的 sub-agent 攻擊這份計畫:需求覆蓋率(每條需求都有 task 接)、漏 task、依賴順序、task-doc 自足性(契約欄位缺漏)、粒度變形(一個 task 塞多件事 / 切得無謂地細)。Findings → 頂層修 → **同一 reviewer 複審**(bounded:audit + 一次 re-audit,I16 慣例)。
+4. **雙同意 gate。** Reviewer 收斂(無 finding)+ 頂層核定 → 進 Pre-flight;任務總表隨 Pre-flight 既有 asks 一併露出(非另設 gate)。Re-audit 後仍有 unresolved finding → 升交 user 拍板,不得帶著未收斂的拆解開跑。
 
 ## Pre-flight
 
@@ -46,7 +56,7 @@ tier 為 `spec-tdd-adversarial` 時,level-1 內部再派 attacker / dry-loop aud
 2. **Session commit 授權(開跑前問一次)。** Task 邊界 = commit 邊界是本 skill 的回滾設計,但 commit 權限始終是 user 的——loop 開跑前明確問一次:「本 session 授權頂層在每個 task 邊界 commit 嗎?」**授權** → gate 通過後頂層直接 commit(仍明確列檔名;push 不在此授權內)。**未授權** → 不省略邊界:每個 task 邊界暫停,列出該 commit 的檔案清單交 user 手動執行,狀態區補 user 回報的 hash——回滾單位不變,執行者換人而已。
 3. **Adversarial ceiling(開跑前問一次)。** 每 task 的 tier 由 level-1 的 escalate 機械按 stakes 自動判定——但一次 full `spec-tdd-adversarial` 是小時級(攻擊輪 + dry-loop rotation),長 task list 整個 phase 會被吃掉。所以 phase 開跑前先設**全 phase 的 tier 上限**,一問:「本 phase 允許 escalate 到 adversarial 嗎?**預設:不允許**」——**不允許(預設)** → 上限 `spec-tdd-coverage`:level-1 的路由把它當硬上限,stakes 再高也只在 coverage 執行,並在報告揭露「本 task 被 ceiling 擋下」(被擋的 critical task 進 phase 報告的殘餘風險清單)。**允許** → 追問一次:「adversarial task 跑 `timebox` 嗎?**建議:要**」(timebox = I8 的限時 invocation:dry-loop 併成單輪、Part A 限縮到 change surface——正是為 task loop 這種每 task 成本相乘的情境設計的)。Ceiling 是 phase 政策,中途要改走「中途變向」機制(下一個 task 邊界生效,同樣揭露)。
 4. **Nested spawn depth check。** 預設 spawn 深度限制會讓 level-1 sub-agent 沒有 Agent tool → 無法派 level-2。修法:環境變數 **`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`**,設在頂層 session 的啟動環境(harness 讀得到的位置——settings 的 env 區塊或啟動時的 shell 環境;在某次 Bash call 裡 export 影響不了 spawn sub-agent 的上層)。驗證法:dispatch template 內建「若你沒有 Agent tool,立刻 STOP 回報」——第一個 task 它回報有 tool,設定即生效。
-5. **權威文件就位。** Phase 開始前確認三件套存在:(a) 需求本文;(b) **決定區**——編號決定(如 D1、D2…),新決定**續接編號**,不改號不重編;(c) **任務總表狀態區**——每 task 一列:id + 白話名稱 + 狀態(pending / in-flight / done + commit hash)+ 一行證據指向。
+5. **權威文件就位。** Phase 開始前確認三件套存在:(a) 需求本文;(b) **決定區**——編號決定(如 D1、D2…),新決定**續接編號**,不改號不重編;(c) **任務總表狀態區**——每 task 一列:id + 白話名稱 + 狀態(pending / in-flight / done + commit hash)+ 一行證據指向。不存在 → 回 Phase 0 產出,不得即興開跑(拿 blueprint 直接當計畫、口頭拆一拆就跑,都是即興)。
 6. **Task-doc 自足性檢查。** 每個 task 一份自足 doc——sub-agent 不翻其他文件就能做。必要欄位:
    - 目標與範圍(含明確的**非目標**);
    - 現況錨點:file:line(行號會 drift,同時給 method/symbol 名當錨);
@@ -207,6 +217,9 @@ Session 中斷 / context 損毀,task 停在半途:
 
 | Mistake | Fix |
 |---|---|
+| 拿 blueprint 直接當權威計畫文件開跑(沒狀態區、task docs 不自足) | Phase 0 先行:進場判三件套在不在,不在 → 拆解 bootstrap 產出,才進 Pre-flight。 |
+| 口頭在對話裡拆 task 就開跑 | 拆解只在對話裡 = 沒拆(I17 精神):session 壓縮後 trace base 消失,續作 / 回滾 / 回寫無所依附。落檔三件套 + 自足 task docs。 |
+| 拆解未經 fresh-context review 就開跑 | Reviewer 攻擊覆蓋率 / 漏項 / 順序 / 自足性 / 粒度 + 頂層核定(雙同意)是 bootstrap 的一半;錯拆的成本是整個 phase;unresolved → 升交 user。 |
 | 頂層親自深度 code review、親自跑測試 | 輕量 gate only:compile、`diff --stat`、XML 數字複核。深度審查下沉給 level-1 的 audit / 攻擊輪;頂層 context 是整個 phase 最稀缺的資源。 |
 | level-1 沒有 Agent tool,於是自己實作(self-testing) | 硬禁——停下回報 user;修法是 `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`(設在頂層啟動環境,不是某次 Bash call 的 export)。 |
 | 採信 sub-agent 的口頭測試數字 | 讀 JUnit XML 逐類複核(實測:回報 165 實為 163;回報 21+6、XML 30)。 |
@@ -228,6 +241,7 @@ Session 中斷 / context 損毀,task 停在半途:
 
 ## Red Flags — STOP
 
+- Loop 已開跑但狀態區 / task docs 不存在 → STOP,回 Phase 0 補齊(既有成果按 diff 盤點回補狀態列)再續。
 - level-1 回報「我自己實作了」(self-testing)→ run 作廢,重派。
 - level-1 回報沒有 Agent tool → 停,回報 user 設 spawn depth;不得讓它就地 self-testing。
 - XML 數字與回報不符(計數單位換算後)→ 要求解釋或重跑;不吻合不 commit。
