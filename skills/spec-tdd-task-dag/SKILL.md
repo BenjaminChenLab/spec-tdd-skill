@@ -46,6 +46,7 @@ description: Use when driving a multi-task feature phase whose WALL-CLOCK matter
 - Worktree 回收:確認 branch 已全併、殘留僅 scratch/build → `git worktree remove --force` + 刪 branch(level-1 必留 scratch 與 build 產物,乾淨 remove 必被拒;Windows 上另有 gradle daemon 檔案鎖)。
 - **迴圈牆**:wave N 的 worktree 從 merge 完的 wave N−1 HEAD 切出 → 每 task 的「單一 run 涵蓋全部相關 test class」template 規定驗證了**所有前波**測試;**同波兄弟間**的交叉綠由波末聯集 run 兜底(語意互毀不能由檔案互斥排除)。聯集 run 全綠 → 無殘餘。
 - **收盤批次審查**(task-loop 收盤程序)在**全部波 merge 完、總表 all-done 後**於 real tree 執行——波邊界不觸發它(它看的正是整個 phase 的累積效應,不是單波)。其 fix rows 進 DAG 照常排:**depends-on 與預期檔案欄要補**(空 = 根);收斂補輪範圍限 fix rows 的 diff。
+- **Watchdog 訊號路徑與產出軸都在 worktree 內**:level-1 全程在 worktree,heartbeat / POLICY 檔、工作樹 diff(vs 波起點 HEAD)、build/test 輸出全部讀**該 worktree** 的路徑(worktree 是頂層切的,絕對路徑已知)——讀 real-tree 對應路徑永遠 stale,每張超過門檻的平行卡都會誤報。檢查點**一次喚醒服務全部 in-flight**(不逐卡排——×N 平行下頂層 context 經濟);zombie 發生在 worktree 內 → 復活嘗試與續作重派都在該 worktree 接手,路徑不變。**冷 worktree 的第一次 build 是冷的**(無 daemon 快取)——平行 task 的預算要把 cold build 計入,否則開工即超支。
 
 ## 續作(波中斷)
 
