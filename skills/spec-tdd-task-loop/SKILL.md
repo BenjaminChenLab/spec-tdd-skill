@@ -150,18 +150,21 @@ expected-done <time>"; 2) re-read `.spec-tdd/POLICY-<task>.md` — an ABSENT
 file means no policy (not an error); a PRESENT file overrides TIER BAND
 above, DOWNGRADE-ONLY (raising waits for the next task boundary).
 
-NESTED DISPATCHES (every tier above lite): dispatch your implementer in
+NESTED DISPATCHES (any nested child — your implementer on tiers above
+lite; your fresh-context reviewer on lite): dispatch each nested child in
 BACKGROUND mode — a blocking Agent call makes you unreachable and
 unmonitorable, and its never returning is NOT evidence the child lives (a
 child's death is silent to you). Record the expected duration with each
 dispatch (floor it at the known build cost of the affected files); on
 overtime with no fresh output from the child (worktree / build outputs),
 treat the child as dead: TaskStop it first (a presumed death is not a
-confirmed one — two implementers must never write the same tree; clear
+confirmed one — two agents must never write the same tree; clear
 build-process locks, e.g. stale daemons, before re-dispatching), then
-dispatch a continuation implementer on its partial work. Harness without
-background nested dispatch: disclose the degradation (the top's budget
-backstops).
+re-dispatch: a CONTINUATION implementer on its partial work; for a dead
+lite reviewer, a FRESH reviewer — its judgment depends on fresh context,
+nothing is inherited (same re-dispatch-cost disclosure shape as the
+closing review). Harness without background nested dispatch: disclose
+the degradation (the top's budget backstops).
 
 VERIFICATION REPORTING (your numbers will be independently rechecked):
   - FINAL verification = ONE gradle run covering ALL related test classes —

@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Standing-rule note
 No routing text touched (descriptions, When-to-Use/NOT unchanged); PROTOCOL.md untouched (loop-layer rules stay in SKILL.md, v1.19.1 precedent; standalone adversarial and the I8/timebox machinery are untouched) — no fixture-suite rerun under the standing rule.
 
+## [1.20.1] - 2026-09-11
+
+### Fixed
+- **`spec-tdd-task-loop` NESTED DISPATCHES scope — lite's review dispatch re-included** (found while answering the maintainer's lite-in-loop/dag verification, immediately after v1.20.0 shipped): the template block's "(every tier above lite)" qualifier accidentally scoped the whole background-mode / expected-duration / overtime-TaskStop discipline AWAY from lite — whose fresh-context review dispatch is itself a nested child that can die silently and hang a blocking parent in exactly the zombie-wait shape the block exists to prevent. The qualifier now covers ANY nested child (the implementer on tiers above lite; the fresh-context reviewer on lite), with one asymmetric note: a dead lite reviewer is replaced by a FRESH reviewer (its judgment depends on fresh context — nothing is inherited; the same re-dispatch-cost disclosure shape as the closing review's fresh reviewer). `spec-tdd-task-dag` inherits via REQUIRED BASE. No routing text touched — no fixture-suite rerun under the standing rule.
+
 ## [1.19.2] - 2026-09-11
 
 ### Added
