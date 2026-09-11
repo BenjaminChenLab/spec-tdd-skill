@@ -160,7 +160,7 @@ Level-1 回報後、commit 前,頂層親自:
 4. **hash 抽查** — level-1 應回報 acceptance test 的 dispatch 前 / 後 hash(bit-identical,I4);頂層比對字串相等即可。
 5. **純文件 task 的 gate 與 dispatch 同步縮形。** **純文件 = task doc 明載、且 diff 僅含文件類交付檔案**(契約文件、usecase map、說明)——含任何 production / test code 或 config 變更即非純文件,整 task 回一般 gate(1–4 項全跑);分類在 Phase 0 / task doc 宣告,gate 以 `diff --stat` 對照**交付檔案清單**驗證,不由事後認定。Gate:無測試數字可複核——數字項以路徑級核對取代(清單所列檔案逐項存在、範圍吻合);**交付物內容品質不入頂層 gate**(內容判讀下沉原則,見 429 段)。Dispatch 同步縮形:template 的 acceptance test / hash / gradle 數字回報項整組以「交付檔案清單 + 逐檔交付」取代——無測試可寫即無循環推理顧慮,tier 機械(含 spec-tdd 下限)不適用;文件由 level-1 執筆(或派 level-2),編譯項照跑防夾帶 code 變更,hash / 數字項自然空集。內容**正確性**由產出的 level-1 對照上游出處自證並於報告揭露;消費 task 的契約測試與 plan review 把關的是**接線與覆蓋**,不是文件本身的真偽。
 
-**不做的**:深度 code review(下沉給 level-1 的 audit / 攻擊輪)、親自跑測試(level-1 已跑,XML 在)、重跑全套(gate 失敗需要診斷時例外)。頂層做主觀審查不是勤快,是浪費:它沒有 level-1 的 full context,結論不會比 sub-agent 的 audit 輪好,卻燒掉最稀缺的 context。頂層的價值在**客觀性與連續性**,不在深度。
+**不做的**:深度 code review(下沉給 level-1 的 audit / 攻擊輪;跨 task 深審另由收盤批次審查承接,見專節)、親自跑測試(level-1 已跑,XML 在)、重跑全套(gate 失敗需要診斷時例外)。頂層做主觀審查不是勤快,是浪費:它沒有 level-1 的 full context,結論不會比 sub-agent 的 audit 輪好,卻燒掉最稀缺的 context。頂層的價值在**客觀性與連續性**,不在深度。
 
 ## 數字複核紀律
 
@@ -217,6 +217,18 @@ Session 中斷 / context 損毀,task 停在半途:
 - 每個 task 的驗收測試是下一個 task 的既有資產——phase 越後面,牆越厚。這是 task loop 的複利。
 - 後續 task 因 constructor / 契約演化調整前批測試屬合理演化,但:(1) **逐檔記錄**於報告並附理由;(2) **斷言語意不得改動**——改的只能是接線(新 constructor 參數、新契約欄位),不是預期行為。改了語意 = 那面牆倒了一段,必須當成新測試重走 RED→GREEN。
 
+## 收盤批次審查(batch review)
+
+總表全部列 done ≠ 直接出報告——收盤有固定程序:**先派一次收盤批次審查,再出 phase 報告。** 理由:task doc 自足設計讓每個 level-1 互相看不見對方,跨 task 維度在整條鏈上無人可見(頂層被硬禁深審是對的——它沒 full context 又燒稀缺資源);這個盲區用一個一次性 fresh context 補,不靠任何人「順便看」。
+
+1. **觸發。** 任務總表全部列 done(含 re-test debt 排回的補測列)→ 派收盤審查;審查收斂、findings 處置完 → 才產 phase 報告。User 明示跳過 → 照做,但列入 phase 報告殘餘風險清單——不靜默省略。
+2. **誰審、審什麼(bounded,唯讀)。** Fresh-context **TOP** sub-agent(同 Phase 0 plan-review 的形狀),一次看整個 phase 的累積成果:全部 task 的 commit 範圍(首..末 hash)、task docs、權威計畫文件(狀態區/決定區/外部未決題)、揭露清單(由頂層彙總交付——reviewer 不重讀交付物)。唯讀:git read + 讀檔;不改 code、不跑 build、不動 git。
+3. **四個攻擊維度(跨 task 才看得到的)。** (a) 跨 task 不一致——同一概念多種實作形狀(金額處理、錯誤處理風格、命名);(b) 重複邏輯沒抽出——跨 task 邊界的多份相似 copy,日後改一處漏一處;(c) 迴圈牆調整的累積效應——逐次合法的接線調整,合起來牆薄了一段;(d) 揭露的合併模式——多筆本地拍板合起來與決定區矛盾(單筆都合理)。
+4. **Findings 處置(自動進板)。** 每筆 finding 編號(F1、F2…)→ **自動開總表新 task row**(續接編號、來源註明「收盤審查 F#」),走正常迴圈——tier 機械照判、輕量 gate、per-task commit。頂層判為非缺陷的 finding **不得靜默丟棄**:總表劃刪除線 + 一行理由(同決策備查慣例)。Findings 是缺陷帳,與 re-test debt(tier 降級帳)分開記,不合併。
+5. **收斂 bound(I16 慣例)。** Fix rows 全部 done → **同一 reviewer 補一輪收斂審查**,範圍限 fix rows 的 diff;仍有 unresolved finding → 升交 user 拍板,不無限循環。無 findings → 免補輪,直接出報告。
+6. **它是加法,不是替代。** Per-task 輕量 gate 與 tier 機械照舊——收盤審查不接手任何單 task 驗證(consolidated 視角抓不到單 task 內的洞);也不改頂層深審禁令——審查是派的 dispatch,頂層只做 findings triage 與劃記。審查 dispatch 撞 429 → 適用既有續作規則(SendMessage 續同一 agent)。
+7. **成本與揭露。** +1 TOP dispatch/phase(有 findings 才有補輪,上限 +1)。審查輪數、findings 數、開了幾個 fix row、劃掉幾筆(附理由)全部進 phase 報告。
+
 ## LSP / IDE 診斷不是證據
 
 子代理寫檔後,LSP / jdtls 常報過期假錯——「method undefined」「cannot be resolved」,甚至指向已刪除的 scratch 檔。**一律以 gradle compile / test 結果為準**(I19(f):the BUILD is the only oracle — IDE diagnostics are noise)。任何層級都不要把時間花在追 LSP 錯誤上。
@@ -228,7 +240,7 @@ Session 中斷 / context 損毀,task 停在半途:
 | 拿 blueprint 直接當權威計畫文件開跑(沒狀態區、task docs 不自足) | Phase 0 先行:進場判三件套在不在,不在 → 拆解 bootstrap 產出,才進 Pre-flight。 |
 | 口頭在對話裡拆 task 就開跑 | 拆解只在對話裡 = 沒拆(I17 精神):session 壓縮後 trace base 消失,續作 / 回滾 / 回寫無所依附。落檔三件套 + 自足 task docs。 |
 | 拆解未經 fresh-context review 就開跑 | Reviewer 攻擊覆蓋率 / 漏項 / 順序 / 自足性 / 粒度 + 頂層核定(雙同意)是 bootstrap 的一半;錯拆的成本是整個 phase;unresolved → 升交 user。 |
-| 頂層親自深度 code review、親自跑測試 | 輕量 gate only:compile、`diff --stat`、XML 數字複核。深度審查下沉給 level-1 的 audit / 攻擊輪;頂層 context 是整個 phase 最稀缺的資源。 |
+| 頂層親自深度 code review、親自跑測試 | 輕量 gate only:compile、`diff --stat`、XML 數字複核。深度審查下沉給 level-1 的 audit / 攻擊輪,跨 task 深審下沉給收盤批次審查;頂層 context 是整個 phase 最稀缺的資源。 |
 | level-1 沒有 Agent tool,於是自己實作(self-testing) | 硬禁——停下回報 user;修法是 `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`(設在頂層啟動環境,不是某次 Bash call 的 export)。 |
 | 採信 sub-agent 的口頭測試數字 | 讀 JUnit XML 逐類複核(實測:回報 165 實為 163;回報 21+6、XML 30)。 |
 | 數字對不上就當行為異常 | 先問計數單位:`@ParameterizedTest` 1 方法 = N invocations,XML 計 invocations;單位換算後仍不符才是異常。 |
@@ -244,6 +256,9 @@ Session 中斷 / context 損毀,task 停在半途:
 | level-1 照 escalate 路由把小 task 送到 lite,於是自己實作(self-testing) | Loop 內 lite 結構性不可用——TIER CEILING 同時是下限:最低 `spec-tdd`(lite 的 solo author-implementer 模式正是 template 硬禁的 self-testing);改跑 spec-tdd 並揭露。 |
 | 中途要降 tier,直接殺掉在跑的 sub-agent 重來 | SendMessage 送達變更;已完成資產保留,收斂到綠即收工,報告揭露。 |
 | 後續 task 順手大改前批測試 | 迴圈牆規則:僅允許接線調整(契約演化必須)、逐檔記錄;斷言語意改動 = 新測試,重走 RED→GREEN。 |
+| 總表 all-done 直接出 phase 報告,沒跑收盤批次審查 | 收盤程序:all-done(含補測列)→ 收盤審查 → findings 進板/劃記 → 報告。跨 task 盲區(自足設計的代價)整條鏈只有這一關看得到。 |
+| 把收盤審查當 per-task 深審的替代(「有它兜底,tier 降了也行」) | 加法不是替代:consolidated 視角抓不到單 task 內的洞;tier 機械與輕量 gate 照舊,審查不接手任何單 task 驗證。 |
+| 收盤審查的 findings 靜默丟棄,或只列在 phase 報告 | 進總表 row(收斂點:板上 = 會被執行)或劃刪除線附理由;只列報告 = 沒收斂點(I17 精神)。 |
 | 追 LSP / jdtls 的「method undefined」假錯 | BUILD 是唯一 oracle(I19(f));以 gradle compile / test 為準。 |
 | Tier 降級 / doc 偏離 / 本地拍板沒有揭露 | Disclosure 慣例:全部明列由頂層 / user 複審——doc 是契約,未揭露的偏離讓契約失效。 |
 | Task doc 寫「DDL 同前案」「見需求文件」 | 自足性:完整契約一次給全;dispatch prompt 把路徑縮寫還原為絕對路徑。 |
@@ -260,3 +275,4 @@ Session 中斷 / context 損毀,task 停在半途:
 - Acceptance test 在 dispatch 前後非 bit-identical → I4 FAIL,走 tier 的 TEST bucket,即使 re-run 是 GREEN。
 - 續作盤點發現中斷前的 production 改動是為了遷就與 doc 矛盾的測試 → 修測試,還原被彎曲的 production。
 - Tier 被降級、doc 被偏離而報告未載明 → 視為未驗證,要求補揭露後再複審。
+- 收盤審查的 finding 沒進總表、也沒劃刪除線附理由 → STOP 補程序——板上 = 收斂點;記在帳上然後不看 = 沒記。
