@@ -47,6 +47,7 @@ description: Use when driving a multi-task feature phase whose WALL-CLOCK matter
 - **迴圈牆**:wave N 的 worktree 從 merge 完的 wave N−1 HEAD 切出 → 每 task 的「單一 run 涵蓋全部相關 test class」template 規定驗證了**所有前波**測試;**同波兄弟間**的交叉綠由波末聯集 run 兜底(語意互毀不能由檔案互斥排除)。聯集 run 全綠 → 無殘餘。
 - **收盤批次審查**(task-loop 收盤程序)在**全部波 merge 完、總表 all-done 後**於 real tree 執行——波邊界不觸發它(它看的正是整個 phase 的累積效應,不是單波)。其 fix rows 進 DAG 照常排:**depends-on 與預期檔案欄要補**(空 = 根);收斂補輪範圍限 fix rows 的 diff。
 - **Watchdog 訊號路徑與產出軸都在 worktree 內**:level-1 全程在 worktree,heartbeat / POLICY 檔、工作樹 diff(vs 波起點 HEAD)、build/test 輸出全部讀**該 worktree** 的路徑(worktree 是頂層切的,絕對路徑已知)——讀 real-tree 對應路徑永遠 stale,每張超過門檻的平行卡都會誤報。檢查點**一次喚醒服務全部 in-flight**(不逐卡排——×N 平行下頂層 context 經濟);zombie 發生在 worktree 內 → 復活嘗試與續作重派都在該 worktree 接手,路徑不變。**冷 worktree 的第一次 build 是冷的**(無 daemon 快取)——平行 task 的預算要把 cold build 計入,否則開工即超支。
+- **梯次預排與凍結 SOP(繼承 task-loop watchdog 規則 1–2 與 429 段,此處只記波形 delta)**:平行本就乘上限額壓力(×N,上限 3)——遠火與凍結程序在 dag 是常態路徑不是邊角。細階視野 = 在飛卡預算的**最大值**,每次波 dispatch 補滿梯次;**凍結連波邊界一起凍**——凍結期到期的 wave dispatch 順延,第一個成功 turn 先收單(凍結期完工的兄弟卡、到期未派的波、board 對帳)再判讀與排波;凍結扣除**逐卡**適用——不同池兄弟在頂層凍結期間照跑在 dag 是常態,收單先於三態的價值高於序列。
 
 ## 續作(波中斷)
 
