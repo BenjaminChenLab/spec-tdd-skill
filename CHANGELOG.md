@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.1] - 2026-09-11
+
+### Added
+- **`spec-tdd-task-loop` three field-validated rules** (from the STP2 field phase — the skill's live field site; each was maintainer discipline in the field, now skill text; audited pre-implementation, 1 blocker + 7 majors folded): (1) **re-test debt** — any RUNTIME time-pressure downgrade (mid-phase ceiling drop, e.g. coverage→`spec-tdd`, or per-task SendMessage downgrade) books every task that passed BELOW its deserved tier into a re-test debt list (unaffected low-stakes tasks excluded — dilution kills the list); re-test is a formal entry: scheduled back into the board when time allows, or the full list rides the phase report to the user at close — without booking, a light first pass silently ossifies; without handoff, the ledger dies too. Pre-flight-set ceilings are the user's pre-accepted trade (the residual list, pre-flight 3) and are not double-booked. (2) **External-question landing points** — questions awaiting third-party answers live in their own section INSIDE the authoritative plan doc (scratch/conversation = didn't happen): question + interim workaround + the single convergence point; an arrived answer is written back to the decisions section (numbered continuation, source noted as external) and the row struck converged — the contract-alignment task's ready digest list. (3) **Pure-docs tasks, gate and dispatch shrunk in step** — defined as task-doc-declared AND diff contains only document deliverables (any production/test/config change → the WHOLE task returns to the regular gate); the gate's numeric items are replaced by path-level verification against the new **deliverables-list** task-doc field (Pre-flight 6), content quality never enters the top gate (content-judgment-sinks), and the DISPATCH shrinks with it: the template's acceptance-test/hash/gradle-report items are replaced wholesale by "deliverables list + file-by-file delivery", the tier floor doesn't apply (no test to write = no circular-reasoning concern), compile still runs to catch smuggled code changes — the audit's blocker: legalizing the docs-task GATE while the dispatch template still mandated a test would force the very improvisation this family polices. `spec-tdd-task-dag` delta: pure-docs deliverables DO ride the worktree (the "worktree carries only production/test code" rule excepted) and merge back at wave end; test-less tasks stay out of the wave-union run.
+
+### Standing-rule note
+No routing text touched (descriptions, When-to-Use/NOT unchanged) — no fixture-suite rerun under the standing rule.
+
 ## [1.19.0] - 2026-09-11
 
 ### Added

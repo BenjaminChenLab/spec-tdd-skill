@@ -63,6 +63,7 @@ tier 為 `spec-tdd-adversarial` 時,level-1 內部再派 attacker / dry-loop aud
    - 現況錨點:file:line(行號會 drift,同時給 method/symbol 名當錨);
    - 設計要點;
    - **完整外部契約一次給全**——DDL 全文、API 形狀、介面簽名;禁寫「同前案」「見需求文件」;
+   - **交付檔案清單**——本 task 將產出 / 修改的檔案;純文件 task 必填且 exhaustive(輕量 gate 第 5 項的核對輸入);
    - 驗收標準(可轉成 acceptance test 的行為描述);
    - 風險與回滾。
 
@@ -125,7 +126,8 @@ residual is the phase's accepted trade, decided by the human upfront.
 It is also a FLOOR at spec-tdd: the lite tier is structurally unavailable
 inside the loop (its solo author-implementer mode IS the self-testing this
 template forbids) — a task escalate would route to lite runs spec-tdd
-instead, disclosed.
+instead, disclosed. (Pure-docs tasks excepted — no acceptance test to
+write, the tier machinery does not apply; see the loop's gate item 5.)
 
 MOCK PHASE: {yes/no}. If yes: the contract target is the mock established
 by task {id}; reduced verification depth is user-approved for mock-phase
@@ -156,6 +158,7 @@ Level-1 回報後、commit 前,頂層親自:
 2. **檔案範圍** — `git diff --stat` + `git status --porcelain`,對照 level-1 回報的 created/modified 清單;出現清單外的改動 = 先盤點(level-1 說明或回退)再 commit。Untracked scratch 目錄除外。
 3. **數字複核** — 讀 JUnit XML(`build/test-results/test/*.xml`)對 level-1 回報的逐類數字(見下節)。
 4. **hash 抽查** — level-1 應回報 acceptance test 的 dispatch 前 / 後 hash(bit-identical,I4);頂層比對字串相等即可。
+5. **純文件 task 的 gate 與 dispatch 同步縮形。** **純文件 = task doc 明載、且 diff 僅含文件類交付檔案**(契約文件、usecase map、說明)——含任何 production / test code 或 config 變更即非純文件,整 task 回一般 gate(1–4 項全跑);分類在 Phase 0 / task doc 宣告,gate 以 `diff --stat` 對照**交付檔案清單**驗證,不由事後認定。Gate:無測試數字可複核——數字項以路徑級核對取代(清單所列檔案逐項存在、範圍吻合);**交付物內容品質不入頂層 gate**(內容判讀下沉原則,見 429 段)。Dispatch 同步縮形:template 的 acceptance test / hash / gradle 數字回報項整組以「交付檔案清單 + 逐檔交付」取代——無測試可寫即無循環推理顧慮,tier 機械(含 spec-tdd 下限)不適用;文件由 level-1 執筆(或派 level-2),編譯項照跑防夾帶 code 變更,hash / 數字項自然空集。內容**正確性**由產出的 level-1 對照上游出處自證並於報告揭露;消費 task 的契約測試與 plan review 把關的是**接線與覆蓋**,不是文件本身的真偽。
 
 **不做的**:深度 code review(下沉給 level-1 的 audit / 攻擊輪)、親自跑測試(level-1 已跑,XML 在)、重跑全套(gate 失敗需要診斷時例外)。頂層做主觀審查不是勤快,是浪費:它沒有 level-1 的 full context,結論不會比 sub-agent 的 audit 輪好,卻燒掉最稀缺的 context。頂層的價值在**客觀性與連續性**,不在深度。
 
@@ -172,6 +175,7 @@ Level-1 回報後、commit 前,頂層親自:
 1. **第一個 task 先做 mock**(mock controller / server),把契約定下來;後續所有 task 對 mock 開發,不空轉等待。
 2. **Mock-first 階段的 tier 可以降(user 拍板)。** 對 mock 的程式碼,在契約定案前過度投資 verification 是浪費——契約一變,深測跟著重寫。Tier 不只按 blast radius(空間維度)選,也按**這份 code 的壽命階段**(時間維度)選。
 3. **真實依賴確定後,排一個契約對齊 task** — 回頭比對真實 API vs mock 契約、修正偏差、補上 mock 期省下的深測。降級必須是「暫緩 + 回補」,不是「省略」;全程揭露。
+4. **外部未決題在計畫文件記落地點(與決定區分流)。** 決定區記 user 拍板;等第三方答案的題(上游 API 行為、別團隊回覆)在**權威計畫文件內**另立一節(落在 scratch / 對話 = 沒發生),每題一行:**問題 + 權宜落地點(哪個 task 用什麼權宜、單一替換點在哪)+ 答案到手收斂哪裡**。**答案到手 → 回寫決定區(編號續接,註記來源為外部),該行劃記已收斂**,由契約對齊 task 消化——答案到達有明確收斂點不散失,對齊 task 有現成消化清單(實戰:STP2 G 清單——「錯誤碼真實值未決→W6 分類器單一替換點已建,答案到手改一處」)。
 
 ## 中途變向(tier 降級送達在跑的 sub-agent)
 
@@ -182,6 +186,7 @@ User 任何時刻可因時間壓力降 tier——包括 task 進行中:
 - **揭露** — 該 task 的報告必須載明 tier 變更(何時、降了什麼、留下什麼未驗風險)。
 - 送不進去(非背景 dispatch)→ 於下一個 task 邊界生效,同樣揭露。
 - **Ceiling 調整** — 開跑前定的 adversarial ceiling 中途要升/降,同路處理:送達在跑的 level-1,否則下一個 task 邊界生效,揭露同前。
+- **時間壓力的降級產生 re-test 債。** **任何因時間壓力的 runtime 降級——中途調降 ceiling(如 coverage→spec-tdd),或逐 task SendMessage 降級——一視同仁記債:低於應得 tier 通過的 task 進 re-test debt 清單**(board 記錄;stakes 本就低於新 ceiling、未受降級影響的 task 不記——稀釋清單 = 清單失效),並進 phase 報告揭露。回補(re-test)是正式入口,不是可選:**時間允許時直接排回本 phase 總表**(新增 task 列續接);phase 收盤仍未回補 → 清單全量列入 phase 報告移交 user。沒記帳,輕量首過會靜默變永久;沒移交,記帳也會。Pre-flight 即設定的 ceiling 是 user 預先接受的 trade(進殘餘風險清單,pre-flight 3),不重複記債。這是 mock-first「暫緩+回補,不是省略」的 phase 級版(實戰:STP2「W11–W14 全以輕量通過=re-test 對象」)。
 
 ## 半成品續作(session 中斷後)
 
