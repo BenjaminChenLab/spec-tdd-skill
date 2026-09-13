@@ -11,7 +11,7 @@ description: Use when the user says "spec-tdd-escalate", or has a SETTLED requir
 
 The requirement is already settled (a locked plan, spec, or doc). Your ENTIRE job is to **run the I21 pre-flight (below), read it, run the fuzziness sniff, pick the tier that fits the stakes, and invoke that tier by name.** Then stop.
 
-**Core principle: route-only.** You do NOT grill, do NOT write the acceptance test, do NOT delegate, do NOT gate. The tier you invoke runs its own Phase 1 (it writes the test) and executes from there — the delegated tiers dispatch an implementer; `spec-tdd-lite` implements in-session. Escalate adds exactly three things over calling a tier directly: **the machine picks the tier, the I21 pre-flight refuses to run this protocol on a non-top-tier orchestrator unheard, and the fuzziness sniff refuses to silently route a doc that only looks settled** — a clean doc on a top-tier session never triggers a question.
+**Core principle: route-only.** You do NOT grill, do NOT write the acceptance test, do NOT delegate, do NOT gate. The tier you invoke runs its own Phase 1 (it writes the test) and executes from there — the delegated tiers dispatch an implementer; `spec-tdd-lite` implements in-session. Escalate adds exactly four things over calling a tier directly: **the machine picks the tier, the I21 pre-flight refuses to run this protocol on a non-top-tier orchestrator unheard, the fuzziness sniff refuses to silently route a doc that only looks settled, and the top tier costs a confirmation — a computed `spec-tdd-adversarial` route stops for ONE ask before invoking** (the family's most expensive run never launches on a machine's say-so alone) — a clean doc never triggers the sniff's question.
 
 > Sibling front-end: `grill-spec-tdd` = requirement FUZZY → grill + gate the spec + write the test from the final spec + route. **escalate = requirement SETTLED → route only.** If you'd need to interrogate, you're in grill-spec-tdd territory, not here. (The sniff's single grill-or-route ask and I21's tier-check pre-flight excepted.)
 
@@ -45,11 +45,13 @@ Arrived from a front-end that already surfaced this check? Skip it — never re-
 
 | Signal in the requirement | Invoke |
 |---|---|
-| Blast-radius-CRITICAL: a silent wrong result MOVES money, CHANGES authorization, or IRREVERSIBLY corrupts data (money movement / auth-permissions / data-loss-data-integrity logic itself; equivalently the unit's decisions carry an IRREVERSIBLE blast-radius tag) | `spec-tdd-adversarial` |
+| Blast-radius-CRITICAL: a silent wrong result MOVES money, CHANGES authorization, or IRREVERSIBLY corrupts data (money movement / auth-permissions / data-loss-data-integrity logic itself; equivalently the unit's decisions carry an IRREVERSIBLE blast-radius tag) | `spec-tdd-adversarial` (confirm first — the ask below) |
 | Needs branch-coverage EVIDENCE: concurrency, parsing, state machines, large/subtle branch surface, weak-unit-test risk, compliance proof | `spec-tdd-coverage` |
 | ONE small unit — a single bugfix-scale item or small refactor, non-critical, session will be cleared after (one dispatch costs more than it saves) | `spec-tdd-lite` |
 | Multiple units — a bug list, or a feature split into slices | `spec-tdd` (**multi-unit run**) |
 | Anything else (incl. larger refactors / no behavior change) | `spec-tdd` (default) |
+
+**Computed `spec-tdd-adversarial` → STOP and ask first — a cost gate, not a stake re-litigation.** Adversarial is the family's most expensive run (independent attack rounds, hours-level depth), and its predicate has a known over-trigger (money-adjacent misread as money-movement). Escalate is the family's only SILENT adversarial launcher — the grill front-ends surface the routing choice at their spec gates, and a direct tier invocation is the user's own pick. Before invoking it, surface ONE ask carrying the stakes basis in one line: **Confirm** → invoke `spec-tdd-adversarial`; **Downgrade** → the named alternative is `spec-tdd-coverage` (the band directly below — branch evidence, no attacker), disclosed in the final report; any other call the user makes wins (I12). This is the only ask a clean critical doc draws. A dispatched context with no user reach never invokes adversarial from here: the task-loop/dag tier band caps in-loop routing at coverage (above-coverage stakes hit the routing-point STOP long before invocation), and any other dispatched escalate that cannot ask stops and reports up — the report IS the ask, relayed by the top.
 
 A blast-radius-critical feature that is ALSO branchy (e.g. money math with concurrency) goes to `spec-tdd-adversarial` — it's the top tier and subsumes coverage. **Money-adjacent is NOT money-movement** (the over-routing trap — observed: a fintech codebase routed nearly everything here): display / reporting / reference data / internal tooling that READ the money system but cannot corrupt it → `spec-tdd-coverage` (branchy/compliance) or `spec-tdd`. A pre-settlement safety net (reconciliation, monitoring, dual-control) bounds the blast radius → one tier down. Multi-unit batches route PER UNIT — the payments batch's movement units adversarial, its statement/display units coverage.
 
@@ -60,7 +62,7 @@ A blast-radius-critical feature that is ALSO branchy (e.g. money math with concu
 |---|---|
 | Writes the acceptance test itself | Route-only — the invoked tier writes it in its own Phase 1. Writing it yourself collapses the agent boundary and duplicates grill-spec-tdd. |
 | Grills a settled requirement ("I need to confirm X first") | Route up instead. The requirement is settled; an unconfirmed-but-risky dimension is a **routing signal, not a grill trigger** (adversarial for security/auth, coverage for branchy logic). |
-| Asks "should I proceed?" / gates before invoking | Full-auto — the user chose auto-routing so they don't decide. Announce the tier + a ONE-line stakes reason, then invoke. Not a briefing. (Two carved-out asks, both routing hygiene: the sniff's "grill or route?" on an undecided doc, and I21's orchestrator tier check.) |
+| Asks "should I proceed?" / gates before invoking | Full-auto below the top tier — the user chose auto-routing so they don't decide. Announce the tier + a ONE-line stakes reason, then invoke. Not a briefing. (Three carved-out asks, all routing hygiene: the sniff's "grill or route?" on an undecided doc, I21's orchestrator tier check, and the top-tier confirmation when the machine computes adversarial — a cost gate on the family's most expensive run, never a stake re-litigation.) |
 | Over-thinks and exits the family ("just a refactor, I'll just do it") | Always pick one of the four. Small refactor → `spec-tdd-lite`; larger refactor / no behavior change → `spec-tdd` (base). Don't invent a fifth path. |
 | Starts planning the implementation / writing characterization tests | Job ends the instant you invoke the tier. |
 | Briefs the tier on HOW — test ideas, attacker seeds, property invariants | Pass the RAW requirement; let the tier form its own Phase-1 plan. Pre-digesting contaminates the tier's independent judgment (the agent-boundary principle). |
@@ -70,8 +72,9 @@ A blast-radius-critical feature that is ALSO branchy (e.g. money math with concu
 | Routed a "settled" doc carrying open decision gaps (unnumbered limits, unchosen options, TODO markers) | The fuzziness sniff catches them pre-route: surface the gaps in ONE ask (grill or route); the user's "settled" wins and the flags ride the handoff. Absorbing the gaps silently is the failure. |
 
 ## Red Flags — STOP
-- You're about to write an acceptance test, grill the user, or ask "proceed?" — none of these are escalate's job. (Two exceptions, both routing hygiene, never a grill question: the sniff's ONE "grill or route?" ask and I21's orchestrator tier check.)
+- You're about to write an acceptance test, grill the user, or ask "proceed?" — none of these are escalate's job. (Three exceptions, all routing hygiene, never a grill question: the sniff's ONE "grill or route?" ask, I21's orchestrator tier check, and the adversarial confirmation.)
 - About to invoke a tier with sniff findings unresolved and no user "settled" on record.
+- You invoked `spec-tdd-adversarial` with no user confirm on record — the one tier that never launches on the machine's say-so alone.
 - You're planning the implementation, writing scaffolding tests, OR briefing the tier on how to test (seeding attacker strategies, suggesting property invariants) — you've gone past routing. Pass the raw requirement and stop.
 - You picked a tier other than the four, or "none, I'll just do it."
 - You can't even tell the stakes because the requirement is too vague — that means the user should have used `grill-spec-tdd`; say so and stop, don't guess-route.

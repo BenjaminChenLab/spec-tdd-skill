@@ -5,6 +5,18 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.3] - 2026-09-13
+
+### Added
+- **`spec-tdd-escalate` top-tier confirmation — a computed `spec-tdd-adversarial` route stops for ONE ask before invoking** (maintainer's feature call). Rationale: escalate is the family's ONLY silent adversarial launcher — the grill front-ends surface the routing choice at their spec gates (adversarial-grill Phase 3 bundles it; grill likewise), and a direct tier invocation is the user's own explicit pick; escalate alone could start the most expensive run (independent attack rounds, hours-level depth) purely on a machine's say-so, on a predicate with a known over-trigger (money-adjacent misread as money-movement — the fintech observation). The ask is a COST gate, not a stake re-litigation: one line of stakes basis + **Confirm** (invoke adversarial) / **Downgrade** (named alternative `spec-tdd-coverage`, the band directly below — branch evidence, no attacker; disclosed in the final report) / any other call the user makes wins (I12). It is the only ask a clean critical doc draws — escalate is now full-auto below the top tier. Edits: the Overview's "exactly three things" becomes four, the route table's adversarial cell carries the pointer, a new paragraph sits between the table and the money-adjacent trap, the Common-Mistakes carve-out and Red Flags enumerate three routing-hygiene asks, and a new Red Flag forbids invoking adversarial with no confirm on record. Loop interplay (why task-loop/task-dag need nothing, maintainer's note): their structural tier band caps in-loop routing at coverage — above-coverage stakes hit the routing-point STOP escape hatch long before any adversarial invocation; the paragraph states this and generalizes it (any dispatched escalate that cannot reach a user: stopping and reporting up IS the ask, relayed by the top).
+
+### Changed
+- **PROTOCOL I20 micro-trim** — "(the sniff is not a gate; full-auto intact)" → "(the sniff is not a gate)": "full-auto intact" stopped being a blanket truth of escalate the moment the top tier gained its confirmation; the trimmed sentence stays exactly true of the sniff it describes. No invariant semantics touched.
+- **README synced** (three spots): the escalate family row ("full-auto, no gate" → full-auto below the top tier + the confirm), the decision-tree line, and the "Auto-route when decided" bullet. Documentation sync per the v1.20.0 precedent, not routing text.
+
+### Standing-rule note
+No routing text touched (descriptions, When-to-Use/NOT unchanged — the front-end still routes to the same four tiers under the same predicates; the change adds a gate inside escalate only). The PROTOCOL touch is a parenthetical truth trim inside I20, not a routing predicate. No fixture-suite rerun under the standing rule.
+
 ## [1.20.2] - 2026-09-12
 
 ### Added
