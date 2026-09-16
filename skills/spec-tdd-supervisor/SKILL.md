@@ -20,7 +20,7 @@ description: Use when the user says "spec-tdd-supervisor", or wants ONE settled 
 
 | 層 | 是誰 | 做 | 禁止 |
 |---|---|---|---|
-| 頂層 supervisor（主 session，TOP 或 recorded decline） | 進場路由、一次性 dispatch、回報轉達、**總複審**、findings 處置、commit | 跑機械（寫 test / 派 implementer / 期中驗證）、終審前深讀交付物、親手修 findings |
+| 頂層 supervisor（主 session，TOP 或 recorded decline） | 進場路由、一次性 dispatch、回報轉達、**總複審**、findings 處置、**列 commit 清單交 user（不自動 commit）** | 跑機械（寫 test / 派 implementer / 期中驗證）、終審前深讀交付物、親手修 findings、**git 寫入（含 commit——除非 user 明示要求代勞）** |
 | level-1 sub-agent（**MID**） | 單元 spec-tdd orchestrator（跑 escalate 機械）：sniff、選 tier、寫 acceptance test（RED）、派 encoding audit、派 level-2、親自驗證（re-run / hash / tier 要求的證據） | git 寫入、路由出 band（above-coverage → STOP 回報）、停下等 user（夠不到——回報即 ask） |
 | level-2 implementer（**MID**） | 實作到綠 + 自身 unit tests | 改 acceptance test（hash 鎖定）、git 寫入 |
 
@@ -48,14 +48,14 @@ description: Use when the user says "spec-tdd-supervisor", or wants ONE settled 
 1. **進場路由。** 上面的 When/When-NOT 逐項過；進了本 skill 才續行。
 2. **Session tier 靜默記錄。** 記下本 session 跑的 model tier，**不問**——review gate 才問（opt-in 2）。
 3. **Dispatch 能力檢查。** 主 session 需有 Agent tool；level-1 要派 level-2 → **`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`** 設在頂層啟動環境（settings 的 env 區塊或啟動 shell；某次 Bash call 裡 export 影響不了 spawn）。修不了 → 降級：改跑 `/spec-tdd-escalate` in-session，報告揭露。
-4. **Commit 授權（開跑前問一次）。** 終審通過後的 commit 是回滾單位。**授權** → 頂層明列檔名 commit（push 不在授權內）。**未授權** → 終審通過後列檔案清單交 user 手動執行，報告補 hash。
+4. **Commit 模式（與 loop/dag 的差異——不自動 commit）。** Loop/dag 的 task 邊界 = commit 邊界，授權後由頂層自動落；本 skill 單一單元只有一個 commit，**預設 user 手動執行**：終審通過後頂層列交付檔案清單（含回寫後的 requirement doc），user 自己 commit、回報 hash，頂層補進最終報告與 RUN-STATE。**全鏈零 git 寫入**——頂層與所有 sub-agent 都不碰（read-only git 照常可用）。User 明示要求頂層代 commit → 照做，以披露模式記載（user 的決定權不因此條喪失）。
 5. **Requirement 落檔確認（I17）。** settled 結論必須已是 doc（requirement verbatim + 決定）；只在對話裡 = 沒落檔 → 先落檔再開跑（planning 不下沉——I19(a) 精神，頂層執筆）。Handoff 用 doc path（I19(c)），不貼全文。
 
 ## The dispatch（一次性，背景模式）
 
 用下面的 template 派 level-1（**背景模式**——blocking 呼叫讓頂層不可達不可監視）。**Agent call 的 model 參數必須明確指名 MID tier**（harness-relative，例如 sonnet）——省略 = 靜默繼承 session model，session 若是 TOP 則整個 MID 經濟當場破功（I19(a) 每 dispatch 指名 model 的本 skill 版：這裡指名的是 MID）。template 內 `{family root}`、doc 路徑縮寫一律還原為絕對路徑（sub-agent 的 cwd 不可依賴）；`{unit}` 由頂層定一個 kebab-case 單元名（如 `payment-retry`），全 run 一致使用。
 
-派出當下，頂層執筆 `.spec-tdd/<unit>/RUN-STATE.md`：unit 名、requirement doc 路徑、dispatch 時刻、預期時長（依單元尺寸估——tier 此時未知，level-1 路由後對齊 tier 預算）、commit 授權狀態。**這是本 skill 的 re-arm base**：session 中斷後的重新武裝、續作重派、凍結記帳都以它為準（本 skill 沒有 task 邊界、沒有總表——這一頁就是狀態載體）。
+派出當下，頂層執筆 `.spec-tdd/<unit>/RUN-STATE.md`：unit 名、requirement doc 路徑、dispatch 時刻、預期時長（依單元尺寸估——tier 此時未知，level-1 路由後對齊 tier 預算）、commit 模式（預設 manual；user 明示要求代 commit 時記錄）。**這是本 skill 的 re-arm base**：session 中斷後的重新武裝、續作重派、凍結記帳都以它為準（本 skill 沒有 task 邊界、沒有總表——這一頁就是狀態載體）。
 
 ### Level-1 dispatch template
 
@@ -124,8 +124,10 @@ are the regression wall: adapt one only where this unit's contract
 evolution forces it — one file at a time, assertion SEMANTICS
 unchanged, each adaptation listed in your report with its rationale.
 
-GIT: NO git write operations (add/commit/stash/checkout/restore/...).
-The top-level session owns the commit. Read-only git
+GIT: NO git write operations (add/commit/stash/checkout/restore/...)
+at ANY level of this run — you, your nested children, and the
+top-level session alike. The USER commits manually at close, from
+the file list the top delivers. Read-only git
 (status/diff/hash-object) is fine.
 
 TIER BAND: lite … coverage — structural. Your escalate routing runs
@@ -235,7 +237,7 @@ GREEN 報告 → 進總複審。
 
 Session 中斷 / context 損毀，run 停在半途。本 skill 沒有 board——**trace base = `RUN-STATE.md` + `REPORT.md` + git**：
 
-1. **先盤點，不重寫** — 讀 `RUN-STATE.md`（in-flight 事實：unit、dispatch 時刻、預算、授權狀態）＋ `git status` / `diff --stat` 對 requirement doc 做路徑級對照，判斷哪些是合理半成品；level-1 若已寫 `REPORT.md`，數字與 hash 從它回收——不從已死的對話挖。
+1. **先盤點，不重寫** — 讀 `RUN-STATE.md`（in-flight 事實：unit、dispatch 時刻、預算、commit 模式）＋ `git status` / `diff --stat` 對 requirement doc 做路徑級對照，判斷哪些是合理半成品；level-1 若已寫 `REPORT.md`，數字與 hash 從它回收——不從已死的對話挖。
 2. **Level-1 還活著 → 優先 SendMessage 續同一個 agent**（背景 dispatch 保留完整 context；429 中斷的既有規則：agent 死、session 活 → SendMessage 續）。掛掉的是 nested implementer → 恢復的 level-1 自己重派續作 implementer，下沉一層。
 3. **重派續作 level-1（keep-don't-rewrite）** — 附盤點結果（diff 檔案清單 + 範圍對照）＋「保留既有合理改動、只補缺口、不重寫」＋先讀 `.spec-tdd/POLICY-<unit>.md`（冷啟動的政策來源）＋ USER-FLAGGED GAPS 帶上。預算按剩餘範圍重給（繼承已燒穿的預算 = 秒殺）。
 4. **重新武裝** — checkpoint ladder 依新 dispatch 時刻重排整梯；RUN-STATE 補斷點紀錄（中斷時刻、已重派代次）。
@@ -262,7 +264,7 @@ Top → 靜默。**兩筆同意帳在此分明**：機械跑 MID 的 decline 已
 
 **3. Findings 迴圈（頂層不親修）。** Finding → **SendMessage 給 level-1 續跑**（完成過的 agent 可續——它有 full context，最便宜的一路）或重派續作（它的 context 已不可用時，keep-don't-rewrite）；頂層只遞事實與 finding，I10 三 bucket 判讀是 level-1 的事。**Bound：一輪 fix → 複審 delta**（I16 慣例）；未收斂 → 升交 user 拍板，不無限循環。
 
-**4. 決策回寫 + commit + 最終報告。** Level-1 回報的 requirement-doc 編輯提案（DDL 偏差、本地拍板的規則）由頂層**套用回寫**——舊文劃刪除線備查、不直接刪除（家族慣例）；只留在對話裡 = 沒發生（I17 精神），下個 run 會按舊契約理解系統。回寫與交付同一個 commit。依 pre-flight 授權 commit（**明列檔名**，禁 `git add -A`——`.spec-tdd/` scratch 會被吃進去）。最終報告必載：證據（XML 數字、hash）、揭露清單（tier 實用、**全部 MID opt-in**、review-gate decline if any、doc 偏離、本地拍板、re-test 建議）、findings 處置、殘餘風險。
+**4. 決策回寫 + commit 清單 + 最終報告。** Level-1 回報的 requirement-doc 編輯提案（DDL 偏差、本地拍板的規則）由頂層**套用回寫**——舊文劃刪除線備查、不直接刪除（家族慣例）；只留在對話裡 = 沒發生（I17 精神），下個 run 會按舊契約理解系統。**Commit 交 user 手動執行（預設）**：頂層列**交付檔案清單**（明列路徑，含回寫後的 requirement doc；`.spec-tdd/` 標記為 scratch 永不入清單——user 手動 commit 也不該 `git add -A`），user commit 後回報 hash，頂層補進最終報告與 RUN-STATE。User 明示要求頂層代 commit → 照做（明列檔名、禁 `git add -A`），以披露模式記載。最終報告必載：證據（XML 數字、hash）、揭露清單（tier 實用、**全部 MID opt-in**、review-gate decline if any、doc 偏離、本地拍板、re-test 建議、代 commit 披露 if any）、findings 處置、殘餘風險。
 
 ## 中途變向（降 tier）
 
@@ -280,7 +282,8 @@ User 時間壓力中途降 tier → **雙通道**：SendMessage 送進背景 lev
 | Findings 頂層親手修 | SendMessage 續跑或重派——頂層只遞事實；親修 = agent boundary 崩塌 |
 | Computed adversarial 在本 skill 內將就跑 coverage | 退出 standalone 跑 `spec-tdd-adversarial`——攻擊輪不在 MID 經濟內承載；doc 與已寫 test 作為參考輸入交接（standalone run 走自己的 Phase 1） |
 | 非 top session 跳過 review-gate tier check | 必問一次（opt-in 2 的落點）；decline 揭露進報告 |
-| Commit 吃進 scratch | 明列檔名；`.spec-tdd/` 永不入 commit |
+| 頂層自己動了 git 寫入（「就一個 commit 順手掉了」） | 全鏈零 git 寫入：預設列清單交 user 手動 commit、回報 hash；代 commit 唯 user 明示要求，且以披露模式記載 |
+| 交付清單漏列或混入 scratch | 清單逐檔列絕對路徑（含回寫後的 requirement doc）；`.spec-tdd/` 標記 scratch 不入清單——清單是 user 手動 commit 的唯一輸入 |
 | Session 完全不能派 sub-agent 還硬跑本 skill | 降級 = `/spec-tdd-escalate` in-session，揭露；「頂層親跑機械」這個選項不存在 |
 | In-flight 只排單發檢查點 | Checkpoint ladder 遠火（v1.20.2 形狀）——主 session 與池同命，遠火才不依賴成功 turn |
 | Requirement 只在對話裡就開跑 | I17：先落檔（requirement verbatim + 決定），handoff 走 doc path |
@@ -297,3 +300,4 @@ User 時間壓力中途降 tier → **雙通道**：SendMessage 送進背景 lev
 - 終審發現弱 test 但實作已 GREEN，頂層想手改 test → STOP——TEST bucket 重派 level-1（re-RED），頂層不親修。
 - 重派已達 2 次上限還想再派 → 升交 user。
 - 發現自己（頂層）正在跑機械的任何一步 → STOP——回到 run 形狀，或降級退出本 skill。
+- 頂層在 user 明示要求之外執行了任何 git 寫入（含 commit）→ STOP——本 skill 的 git 寫入權全鏈歸零，commit 是 user 的手動收尾。

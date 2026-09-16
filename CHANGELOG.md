@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.2] - 2026-09-16
+
+### Changed
+- **`spec-tdd-supervisor` no auto-commit — the git-write stance inverted from the loop/dag precedent** (maintainer's ruling, same-day follow-up): loop/dag commit at task boundaries once authorized (task boundary = commit boundary = rollback unit is their shape); supervisor is ONE unit with ONE commit, and the maintainer wants it **manual** — at close the session delivers the deliverables file list (incl. the written-back requirement doc; `.spec-tdd/` marked scratch) and the **user commits themselves**, reporting the hash back into the final report and RUN-STATE. Git writes are now **zero across the whole chain** — the top session joins the sub-agents in the no-git-writes discipline (pre-flight 4 rewritten from a commit-authorization ask into the commit-mode statement; the layer table, the template's GIT block, the review-gate step 4, the resume inventory, and two Common-Mistakes rows synced; a new Red Flag stops any top-side git write). The one escape: an explicit user instruction to commit on their behalf is honored and disclosed (the user's decision right is never welded shut — the task-loop "user-explicit → do it, disclose" idiom). README family row + version header synced.
+
+### Standing-rule note
+One skill file changed — `spec-tdd-supervisor`'s own, shipped 3 commits ago and not yet field-run (its routing description's commit wording unchanged: no When-Use/NOT or frontmatter predicate touched — the description never mentioned committing). No existing skill file changed; PROTOCOL.md untouched — no fixture-suite rerun under the standing rule.
+
 ## [1.21.1] - 2026-09-16
 
 ### Changed
