@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.1] - 2026-09-16
+
+### Changed
+- **README: the supervisor selection purpose made explicit** (maintainer's clarification, same-day follow-up to v1.21.0): the family row, cost row, and rule of thumb now state the run-shape's economic intent in one line — top-tier tokens cost real multiples of mid-tier (**≈2× on GLM-class pricing**, cited as a harness-relative example, not a family constant), so supervisor exists to keep the expensive tier out of the machinery: machinery dispatches run all-MID (the recorded I19(a) opt-in) and the top tier pays only for the final review. Version header 1.21.0 → 1.21.1.
+
+### Standing-rule note
+No skill file changed; PROTOCOL.md untouched; README-only documentation sync (the v1.20.3 precedent) — no fixture-suite rerun.
+
 ## [1.21.0] - 2026-09-16
 
 ### Added
