@@ -1,34 +1,35 @@
 ---
 name: spec-tdd-supervisor
-description: Use when the user says "spec-tdd-supervisor", or wants ONE settled unit implemented with the WHOLE spec-tdd machinery delegated to a subagent while the main session keeps only a final comprehensive review — supervisor mode / full delegation of a single unit; every machinery dispatch (level-1 orchestrator, nested implementer, encoding audit, lite fresh review) is pinned to the MID tier as a recorded user opt-in, and the review-gate upgrade prompt fires at review time when the session is not top-tier. NOT for multi-task phases (spec-tdd-task-loop / -task-dag), NOT for machinery run in-session (spec-tdd-escalate), NOT for fuzzy requirements (grill front-ends). Triggers on supervisor mode, 全委派, delegate the whole run, all-MID run, top reviews only, 主 session 只做總複審, mid model 全包.
+description: Use when the user says "spec-tdd-supervisor", or wants ONE settled unit implemented with the WHOLE spec-tdd machinery delegated to a subagent while the final comprehensive review itself is a TOP-tier read-only audit dispatch — supervisor mode / full delegation of a single unit; every machinery dispatch (level-1 orchestrator, nested implementer, encoding audit, lite fresh review) is pinned to the MID tier as a recorded user opt-in, and the session's own tier is never a premise of the shape (any-tier session; no upgrade ask — the deep review runs in the TOP-pinned dispatch, the session keeps the objective gate + brief + arbitration). NOT for multi-task phases (spec-tdd-task-loop / -task-dag), NOT for machinery run in-session (spec-tdd-escalate), NOT for fuzzy requirements (grill front-ends). Triggers on supervisor mode, 全委派, delegate the whole run, all-MID run, top reviews only, 主 session 只做總複審, mid model 全包.
 ---
 
 # spec-tdd-supervisor
 
-**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — the front-ends (`grill-spec-tdd`, `spec-tdd-escalate`), the tiers (`spec-tdd-lite` / `spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`), and [PROTOCOL.md](../PROTOCOL.md) (I1–I21). 本 skill 不新增也不放寬任何 invariant：tier 機械原樣下沉到 level-1 執行；這裡定義的是疊在家族**外層**的 run 形狀——誰在哪層、判斷 token 花在哪、以及兩個 recorded opt-in（全部 MID 偏離 I19(a)；I21 ask 移位到 review gate）。外層 driver 有三個**平行同輩**：`spec-tdd-task-loop`（多 task 序列）、`spec-tdd-task-dag`（多 task 平行 DAG）、本 skill（單單元全委派）——三者互不引用、互不派工：loop / dag 的 level-1 跑的是 escalate 機械，不會派 sub-agent 執行本 skill；本 skill 也不依賴它們的本文（監視與恢復機械自足於本檔）。
+**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — the front-ends (`grill-spec-tdd`, `spec-tdd-escalate`), the tiers (`spec-tdd-lite` / `spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`), and [PROTOCOL.md](../PROTOCOL.md) (I1–I21). 本 skill 不新增也不放寬任何 invariant：tier 機械原樣下沉到 level-1 執行；這裡定義的是疊在家族**外層**的 run 形狀——誰在哪層、判斷 token 花在哪、以及兩個 recorded opt-in（全部 MID 偏離 I19(a)；終審外派 TOP auditor、I21 ask 退役——session tier 不再是本形狀的前提）。外層 driver 有三個**平行同輩**：`spec-tdd-task-loop`（多 task 序列）、`spec-tdd-task-dag`（多 task 平行 DAG）、本 skill（單單元全委派）——三者互不引用、互不派工：loop / dag 的 level-1 跑的是 escalate 機械，不會派 sub-agent 執行本 skill；本 skill 也不依賴它們的本文（監視與恢復機械自足於本檔）。
 
 ## Overview
 
-單一已定案單元、一次全委派。主 session（supervisor）把整個 escalate 機械——sniff、選 tier、寫 acceptance test（RED）、派 encoding audit、派 nested implementer、親自驗證——**一次性**下沉給一個 MID level-1 subagent；自己在收尾只做一件事：**總複審**。經濟學：機械 token 全落在可拋棄的 MID context，TOP 判斷 token 集中花在唯一看得到全部 artifacts 的那一刻（終審）。
+單一已定案單元、一次全委派。主 session（supervisor）把整個 escalate 機械——sniff、選 tier、寫 acceptance test（RED）、派 encoding audit、派 nested implementer、親自驗證——**一次性**下沉給一個 MID level-1 subagent；自己在收尾只做三件事：**客觀項親跑、終審外派、findings 仲裁轉達**。經濟學：機械 token 全落在可拋棄的 MID context，TOP 判斷 token 花在一個 TOP-pinned 的終審 auditor dispatch 裡——**session 自己的 tier 從頭到尾無關緊要**（任何 tier 的 session 都能跑，`/model` 升級舞消失），深審的閱讀量也落在可拋棄的 auditor context，不灌進主 session。
 
-與 task-loop 的對比（為何這裡的 top **可以**深審、那裡被硬禁）：task-loop 跨多 task，頂層 context 是整個 phase 最稀缺資源，深審下沉給收盤批次審查（一個 dispatch）；本 skill 只有一個單元，頂層 context 便宜，**深審就是本 skill 存在的理由**——終審品質是這個 run 形狀唯一的加值點。
+與 task-loop 的對比（兩者收斂到同一個深審形狀）：task-loop 的收盤批次審查是 dispatch，本 skill 的終審也是 dispatch——**深審就是本 skill 存在的理由**，差異在這個 dispatch 補償的對象：task-loop 補的是跨 task 視角，本 skill 補的是**全部 MID 機械**的唯一 TOP 判斷點（編碼忠實度重讀是固定第一項）。外派同時買到兩件 in-session 形狀買不到的：**fresh-context 獨立性**（頂層是寫 requirement doc、做進場路由的利害關係人——家族自己的命題：設計者用建造時的同一組假設驗證自己的設計）與 **decline 洞的消失**（舊形狀非 top session 答 Continue 會變成 MID 自審＋揭露——外派後深審釘死 TOP，一個 dispatch 的 tier 無從 decline）。
 
 兩個 recorded opt-in（本 skill 形狀的既知代價；user 叫用本 skill 即成立，最終報告必須揭露）：
 
-1. **全部 MID（對 I19(a) 的明示偏離）。** level-1、nested implementer、encoding audit、lite fresh review **全部 MID**——整個 run 唯一的 TOP 判斷點是終審。代價如實記載：弱 test 會先驅動完整實作、到終審才被抓，修復走 findings 重派（比 I19(a) 的實作前攔截貴）。補償控制：總複審的第一項深審固定是 **acceptance test 編碼忠實度重讀**——原 TOP encoding audit 的職責由終審承接，不因省 dispatch 而消失。
-2. **I21 ask 移位到 review gate。** 進場只**靜默記錄**本 session tier；升級提示在終審前問（見總複審 0）。同意結構是兩筆帳：**機械跑 MID 的 decline 由 user 叫用本 skill 這個動作本身記錄**（與 opt-in 1 同源，invocation-based，不是被問出來的）；**審查的 tier** 才是那個 ask 的對象，在判斷真正發生的那一刻問。複審之前 top 的機械動作只有 template 驅動的 dispatch——進場路由與 requirement 落檔是少數保留的判斷，命名在此、不假裝不存在；I21 關切的是「判斷在什麼 tier 上執行」：機械判斷已被 invocation-decline 覆蓋、審查判斷由移位後的 ask 覆蓋。升級路徑（`/model` 同對話續行）與 decline 揭露照 I21 原樣——**是移位（對象縮到 review、同意機制從 ask 換成 invocation），不是放寬**。
+1. **全部 MID（對 I19(a) 的明示偏離）。** level-1、nested implementer、encoding audit、lite fresh review **全部 MID**——整個 run 唯一的 TOP 判斷點是終審。代價如實記載：弱 test 會先驅動完整實作、到終審才被抓，修復走 findings 重派（比 I19(a) 的實作前攔截貴）。補償控制：總複審的第一項深審固定是 **acceptance test 編碼忠實度重讀**——原 TOP encoding audit 的職責由終審（auditor dispatch）承接，不因省 dispatch 而消失。
+2. **終審外派 TOP auditor；I21 ask 退役（第二次移位）。** 深審改為 TOP-pinned dispatch，**session tier 從此不是本形狀的前提**——in-session 已無判斷密集點：頂層殘餘職務要嘛機械（客觀項親跑、brief 按固定 checklist 列 doc paths——I19(c)，不寫摘要不預消化），要嘛 user-owned（findings 仲裁**預設採納**；駁回必帶 auditor 缺的證據並上交 user；倚賴 grilling 意圖的歧義一律上交——I12）。同意是 invocation-based（與 opt-in 1 同源）：user 叫用本 skill 即同意審查跑在 TOP dispatch 而非 session 裡。既知代價：auditor 只見 persisted doc、不見 grilling 對話——意圖必須已活在 doc 裡（I17 的本來主張；doc 沒承載本身就是 finding），且頂層多管理一個可續背景 child。降級路徑：審查當口無法 dispatch（Agent tool 失效）→ 退回 in-session 終審，**該口 I21 ask 復活**（必問一次），揭露。**是收斂不是放寬**：舊形狀最弱的合法組態（非 top decline → MID session 自審）在新形狀下不存在。
 
 | 層 | 是誰 | 做 | 禁止 |
 |---|---|---|---|
-| 頂層 supervisor（主 session，TOP 或 recorded decline） | 進場路由、一次性 dispatch、回報轉達、**總複審**、findings 處置、**列 commit 清單交 user（不自動 commit）** | 跑機械（寫 test / 派 implementer / 期中驗證）、終審前深讀交付物、親手修 findings、**git 寫入（含 commit——除非 user 明示要求代勞）** |
+| 頂層 supervisor（主 session，**任意 tier**——本形狀無 session-tier 前提） | 進場路由、一次性 dispatch、回報轉達、**客觀項親跑**、**終審外派 dispatch（brief = 固定 checklist + doc paths）**、findings 仲裁（預設採納、異議上交）、**列 commit 清單交 user（不自動 commit）** | 跑機械（寫 test / 派 implementer / 期中驗證）、**in-session 深審（吸收審查——省一個 dispatch 的代價是判斷 tier 掉回 session）**、默默駁回 TOP auditor、親手修 findings、**git 寫入（含 commit——除非 user 明示要求代勞）** |
 | level-1 sub-agent（**MID**） | 單元 spec-tdd orchestrator（跑 escalate 機械）：sniff、選 tier、寫 acceptance test（RED）、派 encoding audit、派 level-2、親自驗證（re-run / hash / tier 要求的證據） | git 寫入、路由出 band（above-coverage → STOP 回報）、停下等 user（夠不到——回報即 ask） |
 | level-2 implementer（**MID**） | 實作到綠 + 自身 unit tests | 改 acceptance test（hash 鎖定）、git 寫入 |
+| 終審 auditor（**TOP**，read-only） | 深審四項（checklist 見總複審 2）＋ findings 修復後的 **delta 複審**（同一 auditor——adoption check 要記憶，I16） | 改任何檔案、重跑編譯（那是 session 的機械）、re-litigate user-owned 決策（I12） |
 
 **為何禁 self-testing（同一 agent 寫碼 + 寫測 + 自評）：circular reasoning**——實作者的盲點同時進入 code 與 test，green 是自我實現的。lite 路線的 solo 模式是入口 tier 的已知 trade，補償 = 強制 fresh-context review dispatch；**level-1 若無法派 nested dispatch（lite 的 review dispatch 也算），唯一合法行為是停下回報，不得退化成無 review 的 self-testing。**
 
 ## When to Use
 
-- 單一 settled 單元（requirement 已落檔、決定已收斂），想讓主 session 的判斷 token 只花在終審。
+- 單一 settled 單元（requirement 已落檔、決定已收斂），想讓主 session 的判斷 token 只花在仲裁與轉達——深審外派 TOP auditor，session tier 不設前提。
 - 接受「全部 MID」的代價：機械品質靠 tier 機械自身的結構保證（agent boundary、hash、XML 複核）＋終審把關，不靠 TOP 的期中判斷。
 - 主 session 還要在這個對話裡做很多別的事——run 完後 context 仍有存量。
 
@@ -39,14 +40,14 @@ description: Use when the user says "spec-tdd-supervisor", or wants ONE settled 
 - 純文件交付（無 production/test code 可測）→ tier 機械無適用對象，不進本 skill；直接派文件寫作 dispatch 或人工撰寫。
 - 上游依賴未定案、要對 mock 開發的單元 → 嚴格說不是 settled（契約未定）；先走 grill 收斂契約。User 明示對 mock 跑：驗證深度可降（user 拍板、揭露、真實依賴定案後回補——mock-first 的單元版），非默認。
 - Requirement fuzzy → `grill-spec-tdd`；fuzzy 且 blast-radius-critical → `adversarial-grill-spec-tdd`。Grill 完且 user 想要全委派形狀 → 再進本 skill。
-- 機械要在主 session 親跑（判斷全程 top context、實作前就攔弱 test）→ `/spec-tdd-escalate`。兩者的選擇題是**判斷 token 誰出**：escalate = 機械 TOP；supervisor = 機械 MID + 終審 TOP。
+- 機械要在主 session 親跑（判斷全程 top context、實作前就攔弱 test）→ `/spec-tdd-escalate`。兩者的選擇題是**判斷 token 誰出**：escalate = 機械 TOP；supervisor = 機械 MID + 終審 TOP dispatch（任何 tier session 可跑）。
 - Session 無法派 sub-agent（無 Agent tool / spawn depth 不足且無法修）→ `/spec-tdd-escalate` in-session，揭露降級。
 - 探索性 / 拋棄式程式碼 → 不需要任何 skill。
 
 ## Pre-flight（主 session）
 
 1. **進場路由。** 上面的 When/When-NOT 逐項過；進了本 skill 才續行。
-2. **Session tier 靜默記錄。** 記下本 session 跑的 model tier，**不問**——review gate 才問（opt-in 2）。
+2. **Session tier 不檢查、不記錄。** 本形狀無 session-tier 前提（opt-in 2）：深審在 TOP dispatch 裡，不在 session 裡。
 3. **Dispatch 能力檢查。** 主 session 需有 Agent tool；level-1 要派 level-2 → **`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`** 設在頂層啟動環境（settings 的 env 區塊或啟動 shell；某次 Bash call 裡 export 影響不了 spawn）。修不了 → 降級：改跑 `/spec-tdd-escalate` in-session，報告揭露。
 4. **Commit 模式（與 loop/dag 的差異——不自動 commit）。** Loop/dag 的 task 邊界 = commit 邊界，授權後由頂層自動落；本 skill 單一單元只有一個 commit，**預設 user 手動執行**：終審通過後頂層列交付檔案清單（含回寫後的 requirement doc），user 自己 commit、回報 hash，頂層補進最終報告與 RUN-STATE。**全鏈零 git 寫入**——頂層與所有 sub-agent 都不碰（read-only git 照常可用）。User 明示要求頂層代 commit → 照做，以披露模式記載（user 的決定權不因此條喪失）。
 5. **Requirement 落檔確認（I17）。** settled 結論必須已是 doc（requirement verbatim + 決定）；只在對話裡 = 沒落檔 → 先落檔再開跑（planning 不下沉——I19(a) 精神，頂層執筆）。Handoff 用 doc path（I19(c)），不貼全文。
@@ -62,7 +63,8 @@ description: Use when the user says "spec-tdd-supervisor", or wants ONE settled 
 ```
 ROLE: You are the spec-tdd orchestrator for ONE settled unit — the
 supervisor run-shape: the WHOLE machinery is delegated to you; the
-top-level session reserves itself for a final review. Run the
+top-level session will relay a TOP-tier final-audit dispatch at close
+(it does not review you in-session). Run the
 spec-tdd-escalate machinery for THIS unit only: sniff the requirement,
 pick the tier by stakes, write the acceptance test (RED, RED-purity
 checked), dispatch the encoding audit, dispatch a NESTED implementer
@@ -83,8 +85,9 @@ ORCHESTRATOR TIER CHECK — PRE-RESOLVED: treat the I21 pre-flight of
 escalate AND of the chosen tier as already answered-decline. No ask
 was surfaced to any user, and none was needed: the user's explicit
 invocation of the supervisor skill-shape IS the recorded decline
-(the machinery runs MID on purpose; the top session backstops
-judgment at its final review). Do NOT stop to ask about upgrading;
+(the machinery runs MID on purpose; a TOP-tier final-audit DISPATCH
+backstops judgment — not the session, whose own tier is irrelevant
+in this shape). Do NOT stop to ask about upgrading;
 carry "I21 decline recorded (supervisor all-MID opt-in, at
 invocation)" into your report disclosures.
 
@@ -205,7 +208,7 @@ the top's writeback.
 
 ## In-flight 監視（單 dispatch 範圍——本文自足，不引用其他 skill）
 
-三種失敗模式疊加可以燒掉整個下午：hard-fail（429 直接終止、有通知）、soft-wedge（推理退避迴圈：恆 running、零通知、transcript 停更）、zombie-wait（nested child 已靜默死亡，parent 健康地等一個永不返回的 Agent 呼叫——**Agent 呼叫不返回 ≠ child 活著**）。**零產出時長是第一級指標**；這是製程監視不是驗證動作——訊號全是客觀事實，無內容判讀。
+三種失敗模式疊加可以燒掉整個下午：hard-fail（429 直接終止、有通知）、soft-wedge（推理退避迴圈：恆 running、零通知、transcript 停更）、zombie-wait（nested child 已靜默死亡，parent 健康地等一個永不返回的 Agent 呼叫——**Agent 呼叫不返回 ≠ child 活著**）。**零產出時長是第一級指標**；這是製程監視不是驗證動作——訊號全是客觀事實，無內容判讀。本節機械同樣覆蓋**終審 auditor dispatch**（收案階段在飛的另一個背景 child）：read-only 深審用分鐘到數十分級的粗上限、三態判定同構；死亡重派一次為限（fresh 重派——auditor 的判斷倚賴 fresh context，無所繼承；findings 迴圈的 adoption check 因此中斷時，新 auditor 從 `FINAL-AUDIT.md` 重讀全部，揭露）。
 
 1. **定期檢查（checkpoint ladder，dispatch 當下預排整梯）。** 每 ~15 分（示例預設，user 可調）一個一次性喚醒，**梯次預排**而非單發鏈：細階排到預算視野 + 2–3 個粗階遠火（例 +90 分 / +3 時 / +5 時，例示）。**主 session 與池同命**——429 視窗內連頂層 turn 一起死，單發檢查點的 re-arm 前提（fire 了就能補排）當場破產，遠火是唯一不依賴任何成功 turn 的覆蓋。每個 rung 的 prompt 自足自廢：自載 RUN-STATE 路徑 + in-flight 判讀 + 「無 in-flight → 清殘餘檢查點收工」（防收案後 stray 遠火，也抗 context 壓縮）。喚醒落在凍結窗口內 = 0 秒陣亡、免費（被拒請求不燒 token）；落在額度恢復後 = 頂層自動拿回控制權。
 
@@ -227,7 +230,7 @@ Escalate 的 routing-hygiene ask 在 dispatched context 裡夠不到 user——I
 
 - **Sniff 缺口**（doc 只看起來 settled）→ 原樣轉達缺口清單，問 user「grill 先，還是 settled 續跑」：**settled** → 帶旗標重派（fresh level-1，handoff 註記 user 已核可 + 缺口清單，缺口在 Phase 1 可見）；**要 grill** → 退出本 skill 進 grill 前端。
 - **多單元真身**（doc 其實是 bug list / 切片 feature——template 的 band carve-out 攔下）→ 轉達，退出本 skill，改主 session 跑 `spec-tdd` multi-unit run。
-- **Above-band stakes**（adversarial 級）→ 轉達 stakes 依據（一行），問 user：**Confirm adversarial** → **退出本 skill**，standalone 跑 `spec-tdd-adversarial`（正常 top-session run——攻擊輪是小時級深度，不在 MID 經濟內承載；requirement doc 與任何已寫的 test 作為**參考輸入**交接——standalone run 走自己的 Phase 1（direct-arrival 形狀），MID 寫的 test 是待重推/強化的草稿，不是 intake）；**Downgrade → coverage**，帶 recorded call 重派，最終報告揭露。User 別的裁決照 I12 成立。
+- **Above-band stakes**（adversarial 級）→ 轉達 stakes 依據（一行），問 user：**Confirm adversarial** → **退出本 skill**，standalone 跑 `spec-tdd-adversarial`（正常 standalone tier run——攻擊輪是小時級深度，不在 MID 經濟內承載；本形狀 session 可能是任意 tier，adversarial 自己的 I21 pre-flight 在那邊照常接手；requirement doc 與任何已寫的 test 作為**參考輸入**交接——standalone run 走自己的 Phase 1（direct-arrival 形狀），MID 寫的 test 是待重推/強化的草稿，不是 intake）；**Downgrade → coverage**，帶 recorded call 重派，最終報告揭露。User 別的裁決照 I12 成立。
 - **No Agent tool** → 修 spawn depth / 環境後重派；不得讓 level-1 就地 self-testing。
 - **其他終態報告（catch-all）**——I9 breaker 打完的失敗報告（3 次修復未果，是設計內的正常結局）、SPEC-bucket 的決策需要（I10：re-open requirement 是 user 的 call）等一切非 GREEN、非上述各型的終態：**原樣轉達（帶客觀證據），user 拍板**。User 裁定的重派是 fresh mandate，不燒 watchdog 的重派上限。**計數分工，三本帳分開**：死亡重派（watchdog / 恢復程序）計上限 2；findings 迴圈的重派由總複審的一輪 bound 綁；user-mandated 重派由 user 的明示 call 成立（揭露）——不互相挪用。
 
@@ -241,30 +244,32 @@ Session 中斷 / context 損毀，run 停在半途。本 skill 沒有 board—�
 2. **Level-1 還活著 → 優先 SendMessage 續同一個 agent**（背景 dispatch 保留完整 context；429 中斷的既有規則：agent 死、session 活 → SendMessage 續）。掛掉的是 nested implementer → 恢復的 level-1 自己重派續作 implementer，下沉一層。
 3. **重派續作 level-1（keep-don't-rewrite）** — 附盤點結果（diff 檔案清單 + 範圍對照）＋「保留既有合理改動、只補缺口、不重寫」＋先讀 `.spec-tdd/POLICY-<unit>.md`（冷啟動的政策來源）＋ USER-FLAGGED GAPS 帶上。預算按剩餘範圍重給（繼承已燒穿的預算 = 秒殺）。
 4. **重新武裝** — checkpoint ladder 依新 dispatch 時刻重排整梯；RUN-STATE 補斷點紀錄（中斷時刻、已重派代次）。
+5. **終審階段中斷** — auditor 在飛 → 同規則 SendMessage 續優先（它的 context 有深審記憶）；`FINAL-AUDIT.md` 已寫（findings 全部或部分）→ 從檔案回收，不重派已完成的審查；audit 尚未派出 → 新 session 直接補派（客觀項重跑——機械便宜）。
 
 ## 總複審（review gate——本 skill 的核心）
 
-**0. Review-gate tier check（I21 移位後的落點）。** 非 top session → ONE ask：
+**0. Review-gate tier check——已退役（v1.23.0）。** 深審外派後，本形狀已無 in-session 判斷密集點：客觀項是機械、深審在 TOP dispatch 裡、仲裁預設採納且異議上交——I21 ask 的對象消失（opt-in 2 的帳，invocation-based 成立）。**唯一復活點**：審查當口無法 dispatch（Agent tool 失效）→ 退回 in-session 終審，該口必問一次 I21 ask，揭露。
 
-> ⚠ **Review-gate tier check** — the machinery ran MID by your opt-in; this review is the run's only TOP judgment point, and this session is not top-tier. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues — the upgrade covers exactly the review + report). **Continue** → review at this tier; the decline is disclosed in the final report.
-
-Top → 靜默。**兩筆同意帳在此分明**：機械跑 MID 的 decline 已由 user 叫用本 skill 時記錄（level-1 的 handoff 依此 pre-resolve，不問）；這裡問的是**審查本身的 tier**——對象與時點都不同，是本 run 唯一一次這個 ask，問完不得重複。
-
-**1. 客觀項（機械便宜，先跑）。**
+**1. 客觀項（機械便宜，先跑——數字不過，不燒 TOP audit dispatch）。**
    (a) **編譯**——主 module 的 compile + compileTestJava 親跑一次，綠才算數；
    (b) **檔案範圍**——`git diff --stat` + `git status --porcelain` 對 level-1 回報的 created/modified 清單；清單外改動先盤點（說明或回退）；untracked scratch（`.spec-tdd/`）除外；
    (c) **數字複核**——讀 JUnit XML（`build/test-results/test/*.xml`）逐類對回報數字；計數單位陷阱（method vs invocation）先換算再判；對不上不收案；
    (d) **hash 比對**——level-1 回報的 acceptance test dispatch 前 / 後 hash 字串相等（bit-identical，I4）；lite 路線除外——無 implementer dispatch 可夾 hash，I14 的 solo re-RED 紀律取代此項（回報「無 hash pair」即合規）。
 
-**2. 深審（TOP 判斷全花在這——本 skill 的加值點）。**
-   a. **Acceptance test 編碼忠實度重讀**（全部 MID 的補償控制，固定第一項）：每條 requirement 行都有辨別力的 assertion？舉一個「錯但合理」的實作能通過嗎？over-assertion / silent interpretation？——原由 I19(a) 釘 TOP 的 encoding audit（審查職責定義在 I13）在此形狀下的落點。
-   b. **Impl diff 正確性 + SPEC-DEFECT 掃視（I15）**：production 有沒有為遷就測試而彎的改動（test-defect 的痕跡）；diff 是否只在交付範圍內。
-   c. **揭露一致性**：tier 實用、doc 偏離、本地拍板——逐筆合理、**合起來**與 requirement / 決定矛盾嗎。
-   d. **殘餘風險盤點**：band cap、中途降級、未驗維度——全數進報告。
+**2. 深審——外派 TOP auditor dispatch（本 skill 的加值點；v1.23.0 起 in-session 深審退役）。**
+   - **Dispatch 規格**：**TOP**-pinned（I19(a) 正統——review dispatch 指名 top）、read-only、背景模式；派出當下向 user 宣告（審什麼、結果由通知抵達），**通知抵達前對 findings 一無所知——不報告、不預測**。RUN-STATE 補記 audit dispatch 時刻與 auditor 身分（session 中斷的續作帳）。
+   - **Brief = 固定 checklist + doc paths，不寫摘要、不預消化**（I19(c)——evidence as files；把框架權力從任何 tier 的 session 手裡拿走）：requirement doc 路徑、acceptance test 路徑、level-1 的 `REPORT.md`、JUnit XML 目錄、created/modified 檔案清單、hash pair（lite 路線附「無 hash pair」註記）。Checklist 逐字 = 下面 a–d 四項。
+   - **Auditor checklist（四項，固定順序）**：
+     a. **Acceptance test 編碼忠實度重讀**（全部 MID 的補償控制，固定第一項）：每條 requirement 行都有辨別力的 assertion？舉一個「錯但合理」的實作能通過嗎？over-assertion / silent interpretation？——原由 I19(a) 釘 TOP 的 encoding audit（審查職責定義在 I13）在此形狀下的落點。
+     b. **Impl diff 正確性 + SPEC-DEFECT 掃視（I15）**：production 有沒有為遷就測試而彎的改動（test-defect 的痕跡）；diff 是否只在交付範圍內。
+     c. **揭露一致性**：tier 實用、doc 偏離、本地拍板——逐筆合理、**合起來**與 requirement / 決定矛盾嗎。
+     d. **殘餘風險盤點**：band cap、中途降級、未驗維度——全數進報告。
+   - **產出與證據規則**：findings 全文寫入 `.spec-tdd/<unit>/FINAL-AUDIT.md`（resume substrate）＋回傳摘要；每筆 finding 帶 `file:line` 證據，每個「OK」寫明試過的攻擊（I16 規則——無企圖反例的 OK 是橡皮章）。Auditor 讀得到 XML 數字（brief 附路徑）但**不重跑編譯**——那是 session 的機械。
+   - **仲裁（findings 抵達後）**：**預設採納**；駁回必須帶 auditor 缺的證據並**上交 user**——任何 tier 的 session 不無聲否決 TOP auditor；倚賴 grilling 意圖、doc 未承載的歧義 → 一律上交 user（I12——auditor 只見 doc，意圖歧義不在它的判斷範圍）。
 
-**3. Findings 迴圈（頂層不親修）。** Finding → **SendMessage 給 level-1 續跑**（完成過的 agent 可續——它有 full context，最便宜的一路）或重派續作（它的 context 已不可用時，keep-don't-rewrite）；頂層只遞事實與 finding，I10 三 bucket 判讀是 level-1 的事。**Bound：一輪 fix → 複審 delta**（I16 慣例）；未收斂 → 升交 user 拍板，不無限循環。
+**3. Findings 迴圈（頂層只轉達，不親修；兩個可續 child）。** Finding → **SendMessage 給 level-1 續跑**（完成過的 agent 可續——它有 full context，最便宜的一路）或重派續作（它的 context 已不可用時，keep-don't-rewrite）；頂層只遞事實與 finding，I10 三 bucket 判讀是 level-1 的事。修復回報 → **同一個 auditor** SendMessage 複審 delta（adoption check 要記憶——I16 的本 skill 版：審過的人才知道 finding 是否真的被處理而非粉飾）；auditor 不可續時才 fresh 重派（新 auditor 從 `FINAL-AUDIT.md` 重讀全部，多一次閱讀成本，揭露）。**Bound：一輪 fix → delta 複審**（I16 慣例）；未收斂 → 升交 user 拍板，不無限循環。
 
-**4. 決策回寫 + commit 清單 + 最終報告。** Level-1 回報的 requirement-doc 編輯提案（DDL 偏差、本地拍板的規則）由頂層**套用回寫**——舊文劃刪除線備查、不直接刪除（家族慣例）；只留在對話裡 = 沒發生（I17 精神），下個 run 會按舊契約理解系統。**Commit 交 user 手動執行（預設）**：頂層列**交付檔案清單**（明列路徑，含回寫後的 requirement doc；`.spec-tdd/` 標記為 scratch 永不入清單——user 手動 commit 也不該 `git add -A`），user commit 後回報 hash，頂層補進最終報告與 RUN-STATE。User 明示要求頂層代 commit → 照做（明列檔名、禁 `git add -A`），以披露模式記載。最終報告必載：證據（XML 數字、hash）、揭露清單（tier 實用、**全部 MID opt-in**、review-gate decline if any、doc 偏離、本地拍板、re-test 建議、代 commit 披露 if any）、findings 處置、殘餘風險。
+**4. 決策回寫 + commit 清單 + 最終報告。** Level-1 回報的 requirement-doc 編輯提案（DDL 偏差、本地拍板的規則）由頂層**套用回寫**——舊文劃刪除線備查、不直接刪除（家族慣例）；只留在對話裡 = 沒發生（I17 精神），下個 run 會按舊契約理解系統。**Commit 交 user 手動執行（預設）**：頂層列**交付檔案清單**（明列路徑，含回寫後的 requirement doc；`.spec-tdd/` 標記為 scratch 永不入清單——user 手動 commit 也不該 `git add -A`），user commit 後回報 hash，頂層補進最終報告與 RUN-STATE。User 明示要求頂層代 commit → 照做（明列檔名、禁 `git add -A`），以披露模式記載。最終報告必載：證據（XML 數字、hash）、揭露清單（tier 實用、**全部 MID opt-in（機械）**、**終審 TOP audit dispatch（＋死亡重派 / fresh delta 複審 if any）**、doc 偏離、本地拍板、re-test 建議、代 commit 披露 if any）、findings 處置、殘餘風險。
 
 ## 中途變向（降 tier）
 
@@ -274,14 +279,17 @@ User 時間壓力中途降 tier → **雙通道**：SendMessage 送進背景 lev
 
 | Mistake | Fix |
 |---|---|
-| 頂層 dispatch 後開始讀 level-1 的 scratch / 期中深讀交付物 | 客觀訊號（heartbeat / XML / mtime / 回報轉達）以外止步——判斷留給終審，context 是終審的燃料 |
-| Agent call 省略 model 參數（靠預設值） | 靜默繼承 session model——TOP session 下整個 MID 經濟破功；每個 dispatch 明確指名 MID（I19(a) 的本 skill 版） |
+| 頂層 dispatch 後開始讀 level-1 的 scratch / 期中深讀交付物 | 客觀訊號（heartbeat / XML / mtime / 回報轉達）以外止步——深審是 auditor dispatch 的職責，期中深讀 = 搶跑判斷 + 白燒 context |
+| Agent call 省略 model 參數（靠預設值） | 靜默繼承 session model——level-1 與 nested children 指名 **MID**、終審 auditor 指名 **TOP**（I19(a) 的本 skill 版：兩個方向省略都破功） |
 | 頂層親自寫 acceptance test / 派 implementer / 跑驗證 | 機械全在 level-1；頂層跑機械 = 毀掉 run 形狀（判斷 token 燒在錯的地方） |
 | Level-1 停下問 tier 升級 / 自行換 tier | Template 已 pre-resolve（ORCHESTRATOR TIER CHECK + MODEL PIN）；重派時重申 handoff |
 | 採信 level-1 的口頭測試數字 | 讀 JUnit XML 逐類複核；單位換算（method vs invocation）後仍不符才是異常 |
 | Findings 頂層親手修 | SendMessage 續跑或重派——頂層只遞事實；親修 = agent boundary 崩塌 |
 | Computed adversarial 在本 skill 內將就跑 coverage | 退出 standalone 跑 `spec-tdd-adversarial`——攻擊輪不在 MID 經濟內承載；doc 與已寫 test 作為參考輸入交接（standalone run 走自己的 Phase 1） |
-| 非 top session 跳過 review-gate tier check | 必問一次（opt-in 2 的落點）；decline 揭露進報告 |
+| 為省一個 dispatch，頂層 in-session 自己深審 | 深審是 TOP dispatch——吸收審查 = 判斷 tier 掉回 session（v1.23.0 前的 decline 洞復活）；唯一例外：無法 dispatch 的降級路徑（I21 ask 復活、揭露） |
+| 頂層默默駁回 auditor 的 finding | 仲裁預設採納；駁回必帶 auditor 缺的證據並上交 user——任何 tier 的 session 不無聲否決 TOP auditor |
+| Audit brief 裡寫了摘要 / 預消化的結論 | 固定 checklist + doc paths（I19(c)）——摘要給了 session 框架權力，auditor 要讀原件 |
+| Findings 修完派 fresh auditor 複審 delta | Adoption check 要記憶（I16）——同一 auditor SendMessage 複審；auditor 不可續時才 fresh（從 FINAL-AUDIT.md 重讀全部，揭露） |
 | 頂層自己動了 git 寫入（「就一個 commit 順手掉了」） | 全鏈零 git 寫入：預設列清單交 user 手動 commit、回報 hash；代 commit 唯 user 明示要求，且以披露模式記載 |
 | 交付清單漏列或混入 scratch | 清單逐檔列絕對路徑（含回寫後的 requirement doc）；`.spec-tdd/` 標記 scratch 不入清單——清單是 user 手動 commit 的唯一輸入 |
 | Session 完全不能派 sub-agent 還硬跑本 skill | 降級 = `/spec-tdd-escalate` in-session，揭露；「頂層親跑機械」這個選項不存在 |
@@ -292,7 +300,9 @@ User 時間壓力中途降 tier → **雙通道**：SendMessage 送進背景 lev
 
 ## Red Flags — STOP
 
-- 頂層在終審前開始逐字深讀交付物 → STOP——context 留給終審；客觀訊號與回報轉達除外。
+- 頂層在終審前開始逐字深讀交付物 → STOP——深審是 auditor dispatch 的職責；客觀訊號與回報轉達除外。
+- 沒派終審 auditor（或 auditor 已死 / 通知未達）就想收案 → STOP——深審無 TOP dispatch 記錄 = v1.23.0 前的 decline 洞復活。
+- 正在駁回 auditor finding 而異議沒有上交 user → STOP——仲裁預設採納；駁回必帶證據上交（I12）。
 - Level-1 回報 self-testing，或沒有 Agent tool 還繼續 → run 作廢 / 修環境重派。
 - Acceptance test dispatch 前後非 bit-identical → I4 FAIL，走 TEST bucket——即使 re-run GREEN。
 - XML 數字對不上（單位換算後）→ 不收案，要求解釋或重跑。
