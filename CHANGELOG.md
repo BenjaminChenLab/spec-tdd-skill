@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Standing-rule note
 Two existing skill files changed, plus README-only documentation sync. **No routing text touched**: both skills' frontmatter descriptions and every When-Use / When-NOT condition are byte-identical — the change adds an audit-scope item and an internal merge-step routing for a NEW finding class; no entry/exit predicate, gate threshold, or agreement rule moved (a (f) finding enters the existing disagree-and-arbitrate machinery). PROTOCOL.md untouched: no new invariant — the absent/existing carve-out rides I12's existing letter (the auditor surfaces, the human decides), and the loop bound rides I16's audit-plus-one. No fixture arm asserts plan-audit checklist contents or merge-step finding-class routing; no fixture-suite rerun under the standing rule (the v1.24.0 precedent: an audit-scope addition with no routing-text change).
 
+## [1.26.1] - 2026-09-22
+
+### Changed
+- **`mideco` flag renamed to `eco`** (maintainer's call, same day as v1.26.0: the coined portmanteau MID+economy takes a two-step decode, against the family's flag-naming precedent — `timebox`/`dryout` name an INTENT in plain words, and `eco` does exactly that: token-economy mode, zero-step decode via the household "eco mode" concept, pairing with `timebox` as the two economy axes — wall-clock vs token cost). Rename only: every `mideco` occurrence in the v1.26.0 mechanics (task-loop's mode section incl. the template MODE field, task-dag's inheritance delta, README's rows) becomes `eco`; no rule, gate, tier pin, or bound moved. The v1.26.0 entry below keeps its original name (append-only); this entry is the rename record.
+
+### Standing-rule note
+Two existing skill files + README changed; **no routing text touched** — the flag token is not part of any description / When-Use / When-NOT predicate (it rides invocation args exactly as before, under the new token); PROTOCOL.md untouched; no fixture arm asserts flag tokens; no fixture-suite rerun under the standing rule (the v1.24.0 precedent). README version header 1.26.0 → 1.26.1.
+
 ## [1.26.0] - 2026-09-22
 
 ### Added
