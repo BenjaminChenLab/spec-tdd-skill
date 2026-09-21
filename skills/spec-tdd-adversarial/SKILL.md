@@ -53,13 +53,13 @@ As spec-tdd-coverage: ground it, behavioral black-box, MUST be RED (incl. the RE
 - **Seed the attacker**: list the wrong-but-plausible impls you most fear ("silently wraps on overflow," "skips nulls and nets the rest," "accepts mixed currency"). The seven hole classes above ride as default seeds too — round 1 should try the highest-yield classes first, not rediscover them.
 
 ### Phase 2 — Delegate implementation to a subagent
-Unchanged from spec-tdd-coverage: case-list BEFORE impl, acceptance test GREEN, unit tests red→green, per-class branch coverage with uncovered-line justifications — handoff carries the SPEC-DEFECT STOP clause (a defect in the TEST itself → the implementer reports SPEC-DEFECT — the correct outcome, not a failure to implement; production changes that exist solely to accommodate a test defect = a FAILED run; an arity/signature error on a symbol the requirement itself explicitly changes is NOT a test defect). The attacker is a THIRD party — not involved here.
+Unchanged from spec-tdd-coverage: case-list BEFORE impl, acceptance test GREEN, unit tests red→green, per-class branch coverage with uncovered-line justifications — handoff carries the SPEC-DEFECT STOP clause (a defect in the TEST itself → the implementer reports SPEC-DEFECT — the correct outcome, not a failure to implement; production changes that exist solely to accommodate a test defect = a FAILED run; an arity/signature error on a symbol the requirement itself explicitly changes is NOT a test defect) and the SCRATCH ROOT path rule rides it unchanged. The attacker is a THIRD party — not involved here.
 
 ### Phase 3 — Orchestrator verifies + dispatches the attacker
 spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dispatching the attacker; the implementer must NOT edit the acceptance test, and the attacker writes a separate wrong-impl and must not edit it either; only YOU may strengthen it — always through the batch verification below), but REPLACE the orchestrator's self gap-check with an independent attacker:
 1. Run the acceptance test + property tests yourself. Must be GREEN. (Property tests must have been RED before impl — else tautologies.)
 2. **SPEC-DEFECT sweep** (from spec-tdd Phase 3): diff the returned production changes against the spec/plan — the subject is changes to code this dispatch did not create; the tell is a change no production behavior needs, existing only to satisfy the acceptance test (helper/compat constructors, renamed public methods, logic beyond what the spec asks for). Any accommodation → fix the acceptance test (your artifact: correct it, re-hash, note the correction) and restore production to the spec'd shape. Do this BEFORE dispatching the attacker — Part A attacks test strength and Part B hunts branches; neither diffs production against the spec.
-3. **DISPATCH THE ADVERSARIAL SUBAGENT — TOP-TIER model** (independent context; review at attack grade — I19 names the top tier for every review/attack dispatch), from this template:
+3. **DISPATCH THE ADVERSARIAL SUBAGENT — TOP-TIER model** (independent context; review at attack grade — I19 names the top tier for every review/attack dispatch), from this template (fill its SCRATCH ROOT with the absolute repo-root path — the attacker works the real git tree, so its check is `git rev-parse --show-toplevel` equality):
 
    ```
    TASK: Attack an acceptance suite. You are an INDEPENDENT attacker — you did not write
@@ -96,6 +96,16 @@ spec-tdd-coverage's checks (so SPEC-INTEGRITY holds: re-hash A2 == A4 BEFORE dis
      - Progress log: APPEND one line per experiment/unit (never rewrite the file).
      - The BUILD is the only oracle — IDE diagnostics (e.g. Lombok false positives) are
        noise, never evidence.
+
+   SCRATCH ROOT: {absolute repo-root path} — every `.spec-tdd/` path you
+   write (backups under .spec-tdd/attack/round-N/, the hole report, your
+   progress log) is this prefix joined with a `/`, PASTED VERBATIM — never
+   retype it, never resolve it against your own cwd, never hand-compose
+   any other absolute form; mkdir -p plus output-redirect makes a typo'd
+   path silently succeed, materializing a parallel tree no one sees
+   (2026-09-18 W22 incident). Before the first such write: `git
+   rev-parse --show-toplevel` must equal SCRATCH ROOT — a mismatch is a
+   STOP-and-report, never a best-effort guess.
 
    RETURN: a HOLE REPORT file (.spec-tdd/attack/round-N-holes.md), one row per hole:
      id | unit/file | mutant (path + one-line description) | missing acceptance case (one

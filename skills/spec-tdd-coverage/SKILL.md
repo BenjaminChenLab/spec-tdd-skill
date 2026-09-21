@@ -37,6 +37,8 @@ As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED — incl
 
 **Dispatch model: MID tier, stated on the dispatch (I19)** — the acceptance test + top-tier reviewers enforce quality; an unstated model silently inherits the session's most expensive.
 
+**SCRATCH ROOT:** fill the handoff's SCRATCH ROOT with the absolute path of the tree the implementer works in — the repo root, or the unit's scratch-copy root in a parallel wave (a copy carries no `.git`, so the handoff's check falls back to a `pwd`-inside confirmation there).
+
 ```
 TASK: Implement {feature} so the acceptance test passes. Do NOT modify it — it is hashed and verified byte-for-byte on return;
 if it looks wrong, STOP and report — never silently weaken it.
@@ -51,6 +53,16 @@ implement the change.
 ACCEPTANCE TEST (RED): {file}
 INTENT: {1–3 sentences}
 READ FIRST: {entity/service/repo/pattern paths}
+
+SCRATCH ROOT: {absolute path of the tree you work in} — every `.spec-tdd/`
+path you write (your run log) is this prefix joined with a `/`, PASTED
+VERBATIM — never retype it, never resolve it against your own cwd, never
+hand-compose any other absolute form; mkdir -p plus output-redirect makes
+a typo'd path silently succeed, materializing a parallel tree no one sees
+(2026-09-18 W22 incident). Before the first such write, confirm you are
+working inside SCRATCH ROOT (in a git repo/worktree: `git rev-parse
+--show-toplevel` must equal it; otherwise `pwd` must be inside it) — a
+mismatch is a STOP-and-report, never a best-effort guess.
 
 BEFORE ANY IMPL — write a CASE-LIST of every branch + boundary you will cover:
   happy path; each branch (if/loop/null-guard/early-return/catch);

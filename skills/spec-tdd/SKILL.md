@@ -63,6 +63,8 @@ Arrived from a front-end that already surfaced this check? Skip it — never re-
 
 **Dispatch model: MID tier, stated on the dispatch (I19).** The implementer's tier is not a quality lever — the acceptance test enforces the spec and every reviewer of this output runs top-tier; an unstated model silently inherits the session's most expensive.
 
+**SCRATCH ROOT:** fill the handoff's SCRATCH ROOT with the absolute path of the tree the implementer works in — the repo root, or the unit's scratch-copy root in a parallel wave (a copy carries no `.git`, so the handoff's check falls back to a `pwd`-inside confirmation there).
+
 Handoff prompt:
 ```
 TASK: Implement {feature} so the acceptance test below passes.
@@ -75,6 +77,16 @@ ACCEPTANCE TEST (written, currently RED):
 INTENT (plain language): {1–3 sentences}
 
 READ FIRST: Entity {path}, Service {path}, Repository {path}, Pattern-to-follow {path}
+
+SCRATCH ROOT: {absolute path of the tree you work in} — every `.spec-tdd/`
+path you write (your run log) is this prefix joined with a `/`, PASTED
+VERBATIM — never retype it, never resolve it against your own cwd, never
+hand-compose any other absolute form; mkdir -p plus output-redirect makes
+a typo'd path silently succeed, materializing a parallel tree no one sees
+(2026-09-18 W22 incident). Before the first such write, confirm you are
+working inside SCRATCH ROOT (in a git repo/worktree: `git rev-parse
+--show-toplevel` must equal it; otherwise `pwd` must be inside it) — a
+mismatch is a STOP-and-report, never a best-effort guess.
 
 DO: 1) make acceptance test GREEN  2) add your own unit tests (red→green each)  3) follow existing conventions.
 CIRCUIT BREAKER: STOP if either fires — (a) the test still fails after 3 repair attempts, OR (b) **the same root cause appears on ANY two attempts** — same failing file:line AND same failing assertion (not necessarily consecutive; not a rephrased free-text trace). Don't burn a third attempt re-trying one identical misdiagnosis — each attempt must rest on a DIFFERENT root cause. Report a short structured diagnosis — tag it env/dependency (ERR-01), logic violation (ERR-02), or syntax/compile (ERR-03) — with a TRUNCATED trace and expected-vs-actual. Don't keep retrying.

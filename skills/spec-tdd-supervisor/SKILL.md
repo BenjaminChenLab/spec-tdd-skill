@@ -54,7 +54,7 @@ description: Use when the user says "spec-tdd-supervisor", or wants ONE settled 
 
 ## The dispatch（一次性，背景模式）
 
-用下面的 template 派 level-1（**背景模式**——blocking 呼叫讓頂層不可達不可監視）。**Agent call 的 model 參數必須明確指名 MID tier**（harness-relative，例如 sonnet）——省略 = 靜默繼承 session model，session 若是 TOP 則整個 MID 經濟當場破功（I19(a) 每 dispatch 指名 model 的本 skill 版：這裡指名的是 MID）。template 內 `{family root}`、doc 路徑縮寫一律還原為絕對路徑（sub-agent 的 cwd 不可依賴）；`{unit}` 由頂層定一個 kebab-case 單元名（如 `payment-retry`），全 run 一致使用。
+用下面的 template 派 level-1（**背景模式**——blocking 呼叫讓頂層不可達不可監視）。**Agent call 的 model 參數必須明確指名 MID tier**（harness-relative，例如 sonnet）——省略 = 靜默繼承 session model，session 若是 TOP 則整個 MID 經濟當場破功（I19(a) 每 dispatch 指名 model 的本 skill 版：這裡指名的是 MID）。template 內 `{family root}`、doc 路徑縮寫一律還原為絕對路徑（sub-agent 的 cwd 不可依賴；template 的 **SCRATCH ROOT** 欄填本 run 的 scratch 根目錄絕對路徑 = repo root）；`{unit}` 由頂層定一個 kebab-case 單元名（如 `payment-retry`），全 run 一致使用。
 
 派出當下，頂層執筆 `.spec-tdd/<unit>/RUN-STATE.md`：unit 名、requirement doc 路徑、dispatch 時刻、預期時長（依單元尺寸估——tier 此時未知，level-1 路由後對齊 tier 預算）、commit 模式（預設 manual；user 明示要求代 commit 時記錄）。**這是本 skill 的 re-arm base**：session 中斷後的重新武裝、續作重派、凍結記帳都以它為準（本 skill 沒有 task 邊界、沒有總表——這一頁就是狀態載體）。
 
@@ -105,6 +105,9 @@ tool too).
 REQUIREMENT DOC: {absolute path} — READ IT FIRST; it is settled
 (requirement verbatim + decisions). Path shorthand maps to:
 {abbreviation → absolute path}.
+
+SCRATCH ROOT: {absolute path} — paste-verbatim anchor for EVERY
+`.spec-tdd/` path in this prompt (repo root).
 
 USER-FLAGGED GAPS: {none | gap list + the user's recorded
 "settled, route" call}. If present, the requirement only LOOKS
@@ -164,8 +167,22 @@ each delivered file): 1) touch `.spec-tdd/<unit>/HEARTBEAT` (create the
 directory if missing; touch or an equivalent write) — when the touch
 coincides with entering a wait, write into the file: "waiting:
 <child-id> expected-done <time>"; 2) re-read
-`.spec-tdd/POLICY-<unit>.md` — an ABSENT file means no policy (not an
-error); a PRESENT file overrides TIER BAND above, DOWNGRADE-ONLY.
+`.spec-tdd/POLICY-<unit>.md` — ABSENT means ONLY a confirmed
+file-not-found (e.g. `test -f` fails); any OTHER read error is a STOP,
+not "no policy"; a PRESENT file overrides TIER BAND above,
+DOWNGRADE-ONLY; 3) PATH RULE (every `.spec-tdd/` path in this prompt —
+the touch, the POLICY re-read, every scratch write, incl. RETURN's logs
+and REPORT.md): form it by prefixing SCRATCH ROOT from your brief,
+joined with a `/`, PASTED VERBATIM — never retype it, never resolve it
+against your own cwd, never hand-compose any other absolute form;
+mkdir -p plus output-redirect makes a typo'd absolute path silently
+succeed, materializing a parallel tree whose heartbeat the watchdog
+never sees (2026-09-18 W22 incident). Before the first such write:
+`git rev-parse --show-toplevel` must equal SCRATCH ROOT — a mismatch is
+a STOP-and-report, never a best-effort guess. Carry SCRATCH ROOT and
+this PATH RULE verbatim into every nested brief you compose
+(implementer, reviewer, attacker): their templates' `.spec-tdd/`
+shorthand is anchored by YOUR pasted root, never their own cwd.
 
 NESTED DISPATCHES (any nested child — your implementer on tiers above
 lite; your fresh-context reviewer on lite): dispatch each nested child
@@ -258,13 +275,13 @@ Session 中斷 / context 損毀，run 停在半途。本 skill 沒有 board—�
 
 **2. 深審——外派 TOP auditor dispatch（本 skill 的加值點；v1.23.0 起 in-session 深審退役）。**
    - **Dispatch 規格**：**TOP**-pinned（I19(a) 正統——review dispatch 指名 top）、read-only、背景模式；派出當下向 user 宣告（審什麼、結果由通知抵達），**通知抵達前對 findings 一無所知——不報告、不預測**。RUN-STATE 補記 audit dispatch 時刻與 auditor 身分（session 中斷的續作帳）。
-   - **Brief = 固定 checklist + doc paths，不寫摘要、不預消化**（I19(c)——evidence as files；把框架權力從任何 tier 的 session 手裡拿走）：requirement doc 路徑、acceptance test 路徑、level-1 的 `REPORT.md`、JUnit XML 目錄、created/modified 檔案清單、hash pair（lite 路線附「無 hash pair」註記）。Checklist 逐字 = 下面 a–d 四項。
+   - **Brief = 固定 checklist + doc paths，不寫摘要、不預消化**（I19(c)——evidence as files；把框架權力從任何 tier 的 session 手裡拿走）：requirement doc 路徑、acceptance test 路徑、level-1 的 `REPORT.md`、JUnit XML 目錄、created/modified 檔案清單、hash pair（lite 路線附「無 hash pair」註記）、**`FINAL-AUDIT.md` 的絕對路徑（top 貼上——auditor 的唯一寫入落點）**。Checklist 逐字 = 下面 a–d 四項。
    - **Auditor checklist（四項，固定順序）**：
      a. **Acceptance test 編碼忠實度重讀**（全部 MID 的補償控制，固定第一項）：每條 requirement 行都有辨別力的 assertion？舉一個「錯但合理」的實作能通過嗎？over-assertion / silent interpretation？——原由 I19(a) 釘 TOP 的 encoding audit（審查職責定義在 I13）在此形狀下的落點。
      b. **Impl diff 正確性 + SPEC-DEFECT 掃視（I15）**：production 有沒有為遷就測試而彎的改動（test-defect 的痕跡）；diff 是否只在交付範圍內。
      c. **揭露一致性**：tier 實用、doc 偏離、本地拍板——逐筆合理、**合起來**與 requirement / 決定矛盾嗎。
      d. **殘餘風險盤點**：band cap、中途降級、未驗維度——全數進報告。
-   - **產出與證據規則**：findings 全文寫入 `.spec-tdd/<unit>/FINAL-AUDIT.md`（resume substrate）＋回傳摘要；每筆 finding 帶 `file:line` 證據，每個「OK」寫明試過的攻擊（I16 規則——無企圖反例的 OK 是橡皮章）。Auditor 讀得到 XML 數字（brief 附路徑）但**不重跑編譯**——那是 session 的機械。
+   - **產出與證據規則**：findings 全文寫入 `.spec-tdd/<unit>/FINAL-AUDIT.md`（resume substrate；路徑以 brief 內給定的絕對路徑為準——SCRATCH ROOT 貼上、不重打，**auditor 不自行組路徑**）＋回傳摘要；每筆 finding 帶 `file:line` 證據，每個「OK」寫明試過的攻擊（I16 規則——無企圖反例的 OK 是橡皮章）。Auditor 讀得到 XML 數字（brief 附路徑）但**不重跑編譯**——那是 session 的機械。
    - **仲裁（findings 抵達後）**：**預設採納**；駁回必須帶 auditor 缺的證據並**上交 user**——任何 tier 的 session 不無聲否決 TOP auditor；倚賴 grilling 意圖、doc 未承載的歧義 → 一律上交 user（I12——auditor 只見 doc，意圖歧義不在它的判斷範圍）。
 
 **3. Findings 迴圈（頂層只轉達，不親修；兩個可續 child）。** Finding → **SendMessage 給 level-1 續跑**（完成過的 agent 可續——它有 full context，最便宜的一路）或重派續作（它的 context 已不可用時，keep-don't-rewrite）；頂層只遞事實與 finding，I10 三 bucket 判讀是 level-1 的事。修復回報 → **同一個 auditor** SendMessage 複審 delta（adoption check 要記憶——I16 的本 skill 版：審過的人才知道 finding 是否真的被處理而非粉飾）；auditor 不可續時才 fresh 重派（新 auditor 從 `FINAL-AUDIT.md` 重讀全部，多一次閱讀成本，揭露）。**Bound：一輪 fix → delta 複審**（I16 慣例）；未收斂 → 升交 user 拍板，不無限循環。

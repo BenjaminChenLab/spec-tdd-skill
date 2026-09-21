@@ -70,7 +70,7 @@ tier 為 `spec-tdd-adversarial` 時,level-1 內部再派 attacker / dry-loop aud
 ## The loop(每 task 一輪)
 
 1. **選 task + 驗錨點。** 依總表依賴順序取下一個;前一個 task 落地後 file:line 會漂移——快速驗 doc 錨點仍準,不準先修 doc(以 method 名重錨)。狀態區標 in-flight。
-2. **Dispatch level-1(TOP)。** 用下面的 template。doc 內的路徑縮寫必須在 prompt 裡**還原為絕對路徑**(sub-agent 的 cwd 不可依賴);template 的 `{family root}` 亦同——填 skill family 安裝位置的絕對路徑。Dispatch 時刻與交付類別記入狀態區 in-flight 列(watchdog 的武裝基準,見專節)。
+2. **Dispatch level-1(TOP)。** 用下面的 template。doc 內的路徑縮寫必須在 prompt 裡**還原為絕對路徑**(sub-agent 的 cwd 不可依賴);template 的 `{family root}` 亦同——填 skill family 安裝位置的絕對路徑;template 的 **SCRATCH ROOT** 欄填本 run 的 scratch 根目錄絕對路徑(常規 = repo root)。Dispatch 時刻與交付類別記入狀態區 in-flight 列(watchdog 的武裝基準,見專節)。
 3. **回報後跑輕量 gate**(下節)。gate 不過 → 帶**客觀證據**重派(編譯錯誤全文、清單外檔案、XML 數字落差);三 bucket routing(I10)是 level-1 內部的事,頂層只遞事實不代判。
 4. **決策回寫 + 狀態區更新。** User 在 task 進行中拍板的業務決策,**即時**寫進權威文件決定區(編號續接),並更新相關 task doc 內文——舊方案劃刪除線備查,不直接刪除。決策只存在對話裡 = 沒發生(session 會被清除/壓縮)。
 5. **Commit(頂層獨佔,依 pre-flight 授權)。** **明確列檔名**,嚴禁 `git add -A` / `git add .`——工作目錄必有 sub-agent 的 untracked scratch(`.spec-tdd/` 等),會被吃進 commit。**權威計畫文件本輪的更新(狀態區、決定區新決策)與 task doc 修改同一個 commit**——回滾某個 task 時,它的狀態列與決策紀錄跟著回滾,狀態區才不會宣稱一個已被還原的 task 是 done。Subject 一行。Task 邊界 = commit 邊界 = 回滾單位。狀態區補 commit hash。
@@ -102,6 +102,10 @@ TASK DOC: {absolute path} — READ IT FIRST; it is self-contained (goal,
 scope, current-state anchors, design notes, full contract incl. DDL,
 acceptance criteria, risks, rollback). Doc path shorthand maps to:
 {abbreviation → absolute path}.
+
+SCRATCH ROOT: {absolute path} — paste-verbatim anchor for EVERY
+`.spec-tdd/` path in this prompt (repo root; under task-dag's wave
+reuse, the assigned worktree root).
 
 FAMILY FILES (if the skill is not invocable in your runtime, READ these
 from disk and follow them — the machinery lives there, not in this prompt):
@@ -146,9 +150,23 @@ on a nested dispatch, after each completed long tool run, after each
 delivered file): 1) touch `.spec-tdd/<task>/HEARTBEAT` (create the
 directory if missing; touch or an equivalent write) — when the touch
 coincides with entering a wait, write into the file: "waiting: <child-id>
-expected-done <time>"; 2) re-read `.spec-tdd/POLICY-<task>.md` — an ABSENT
-file means no policy (not an error); a PRESENT file overrides TIER BAND
-above, DOWNGRADE-ONLY (raising waits for the next task boundary).
+expected-done <time>"; 2) re-read `.spec-tdd/POLICY-<task>.md` — ABSENT
+means ONLY a confirmed file-not-found (e.g. `test -f` fails); any OTHER
+read error is a STOP, not "no policy"; a PRESENT file overrides TIER
+BAND above, DOWNGRADE-ONLY (raising waits for the next task boundary);
+3) PATH RULE (every `.spec-tdd/` path in this prompt — the touch, the
+POLICY re-read, every scratch write, incl. RETURN's logs): form it by
+prefixing SCRATCH ROOT from your brief, joined with a `/`, PASTED
+VERBATIM — never retype it, never resolve it against your own cwd, never
+hand-compose any other absolute form; mkdir -p plus output-redirect makes
+a typo'd absolute path silently succeed, materializing a parallel tree
+whose heartbeat the watchdog never sees (2026-09-18 W22 incident).
+Before the first such write: `git rev-parse --show-toplevel` must equal
+SCRATCH ROOT — a mismatch is a STOP-and-report, never a best-effort
+guess. Carry SCRATCH ROOT and this PATH RULE verbatim into every nested
+brief you compose (implementer, reviewer, attacker): their templates'
+`.spec-tdd/` shorthand is anchored by YOUR pasted root, never their own
+cwd.
 
 NESTED DISPATCHES (any nested child — your implementer on tiers above
 lite; your fresh-context reviewer on lite): dispatch each nested child in

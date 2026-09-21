@@ -39,7 +39,7 @@ description: Use when driving a multi-task feature phase whose WALL-CLOCK matter
 - 每個平行 task:`git worktree add .spec-tdd/worktrees/<id> -b task-dag/<id>`(從波起點 HEAD)。tier 層的 worktree 禁令(「worktree 從 HEAD 分枝,未提交工作帶不過去」)在此**不成立**——乾淨樹上 HEAD 就是全部;這是兩層前提的差異,不是放寬。
 - **文件權威在 real tree**:task doc 與計畫文件以 real tree 為權威(dispatch prompt 指 real-tree 絕對路徑,唯讀);worktree 只承載 production/test code 與 build 產物(**純文件 task 的交付文件除外**——隨 worktree 承載、波末 merge 回真樹,路徑級核對於 merge 後真樹執行)。波中 user 拍板回寫 real tree 後,影響在飛兄弟 → SendMessage 送達(同中途變向);送不進 → 該 task **merge 前對照決定區補驗**。
 - Level-1 全程在 worktree 內(程式碼工作):RED→level-2→GREEN→驗證、XML 數字全在自己的樹。Sub-agent 照舊禁 git 寫入;**worktree 的建/併/清是頂層獨佔職責**。
-- Dispatch template 沿用 task-loop 全文,加註一行:WAVE(siblings in flight: <ids> — 預期檔案欄互斥,禁觸其檔)。
+- Dispatch template 沿用 task-loop 全文,加註一行:WAVE(siblings in flight: <ids> — 預期檔案欄互斥,禁觸其檔);**SCRATCH ROOT 填該 task 的 worktree 根目錄**(頂層所切,絕對路徑已知——level-1 全程在 worktree 內、watchdog 也讀該樹;誤填 repo root 會讓每張卡卡在 rev-parse 門前,而「填 repo root + agent 留在 real tree」的雙重故障會靜默重現 W22 的 stale-heartbeat 形狀)。
 - **波末序列 merge**:各 branch 依總表順序 `git merge --no-ff task-dag/<id>`——每個 merge commit = 該 task 的 commit 邊界。衝突(互斥規則下不應發生)→ STOP 交 human。**board 更新無法搭 merge commit(merge hash 要 merge 後才存在)→ 波末最後一個 merge 後立一個 board commit**(狀態區 hashes、決定區、模式切換揭露)。**回滾單位 = merge commit + 其後 board commit,兩步一起 revert**——只 revert merge 會留一個宣稱 done 的 board。
 - **波末 gate(merge 後,真樹)**:既有輕量 gate(compile 兩項 + diff 範圍)**加第四項「波聯集測試 run」**——該波全部 task 的相關 test classes 聯集,真樹跑一次(每波一次,仍遠省於序列的每 task 一次;**純文件 task 的數字項由路徑級核對取代,同 task-loop gate 第 5 項;無測試者不進聯集**)。頂層親跑此 run 是 gate 的明定例外(性質同 compile:新資訊、無既有 XML 可複核;同「重跑全套於診斷時例外」的形狀),證據 = 該 run 的 XML 數字。聯集 run 本身即該波最終 run,XML 覆蓋陷阱不適用於它。
 - **波末一併重驗下一波全部 task docs 的錨點**(以 method 名重錨)——一波多 task 同時落地,漂移大於序列。
