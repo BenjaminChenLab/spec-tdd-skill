@@ -11,7 +11,7 @@ description: Use when the user says "spec-2nd-opinion", or a plan/design/orderin
 
 Same-context blind spots are the failure mode this skill exists to catch: the session that designed the plan verified it with the same assumptions it was built on. **Independence is the one thing a diligent same-context agent cannot give itself.** You dispatch ONE read-only auditor with a falsifiable brief; the plan ships only when you and the auditor agree.
 
-**Core principle: audit, then gate.** The auditor verifies *facts and interactions* (claims vs the actual codebase, blueprint-vs-code drift, cross-item risks, ordering) — never re-litigates user-owned decisions (the WHAT, I12's territory): those ride the brief as "pending user decisions" and the auditor may only flag their *consequences*.
+**Core principle: audit, then gate.** The auditor verifies *facts, interactions, and grill coverage* (claims vs the actual codebase, blueprint-vs-code drift, cross-item risks, ordering, dimensions the plan decides nothing about — the question nobody asked) — never re-litigates user-owned decisions (the WHAT, I12's territory): pending decisions ride the brief and the auditor may only flag their *consequences*; an **absent** decision is surfaced as a new pending one, never proposed-and-settled (flagging the gap is fact-hunting; filling it is the human's).
 
 ## When to Use
 - User says `spec-2nd-opinion`.
@@ -44,7 +44,7 @@ The brief is the auditor's entire world. It must contain, in order:
 1. **Background** — repos/paths involved, established facts *each with its evidence* (log analysis, DB query, file:line — the auditor re-verifies what's cheap, takes the rest as given and says so).
 2. **The plan under audit** — the work items, the proposed order, and the rationale — stated as-is, never pre-defended.
 3. **Claims-to-verify** — the falsifiable factual assertions the plan rests on, each with a pointer (file/symbol/table) where checkable.
-4. **Checklist** — at minimum: (a) per-claim verification, (b) blueprint-vs-code drift (docs older than recent changes to the same region — check dates/commits), (c) cross-item interaction risks, (d) ordering verdict with the strongest counter-argument, (e) one risk nobody listed.
+4. **Checklist** — at minimum: (a) per-claim verification, (b) blueprint-vs-code drift (docs older than recent changes to the same region — check dates/commits), (c) cross-item interaction risks, (d) ordering verdict with the strongest counter-argument, (e) one risk nobody listed, (f) **grill-coverage hunt** — a materially-relevant dimension the plan has NO decision on (the question nobody asked: rollout window, abuse/fraud, scale, state transitions — materiality, not exhaustion), surfaced as a **pending decision** with its consequence, never proposed-and-settled (absence is a fact to flag; the WHAT is the human's, I12).
 5. **Output format demanded** — per item: VERDICT (confirmed / refuted / partially) + `file:line` evidence; final section "AUDITOR POSITION": agree / disagree with the plan + required amendments + missed risks. **Every "OK" must name the attack attempted** (I16's rule — no rubber-stamping).
 
 Never include expected verdicts or your confidence — that's contamination, not context.
@@ -59,6 +59,7 @@ Never include expected verdicts or your confidence — that's contamination, not
 ### Step 3 — Merge the verdicts (the gate)
 - **Agree** (auditor's position endorses the plan, no critical claim refuted) → Step 4.
 - **Disagree** → surface it per point: who claimed what, the auditor's evidence, your position. Then either (a) you side with the auditor with stated reasons and amend the plan, (b) you defend your position with evidence the auditor lacked, or (c) it's genuinely the user's call — ask. Amended points may get **ONE targeted re-audit** (fresh context, scoped to the amendments, the disagreement history written into the brief). The bound is I16's — audit plus one re-audit, never a loop — the auditor is deliberately FRESH, a stated deviation: I16 keeps the same auditor because adoption-check needs its memory, while an amended point is a new claim to verify and freshness serves that (adversarial-grill's contrast: attack wants freshness, adoption-check wants memory).
+- **Grill-coverage finding** (a (f)-class gap — the plan decides nothing about a material dimension) → the audit caught the grill under-asking at the cheapest moment, pre-implementation. Route: surface the gap to the user — the dimension is theirs to decide (I12), never silently defaulted into the plan — settle it via the grill family (or inline if the user answers directly), fold the decision in as an attributed amendment, then the amended points get the same **ONE targeted re-audit** bound above. A gap surfaced and then absorbed with a silent default is the fuzz again, one layer deeper.
 
 ### Step 4 — Present the FINAL PLAN
 Format: the items and order; the rationale; **audit amendments integrated and attributed** ("per audit: …" — never silently absorbed); pending user decisions restated; residual risks the audit surfaced but did not block on. **Write the final plan back to the persisted doc** — amendments folded in with their attribution, superseded text struck through, not deleted (task-loop's write-back shape): the handoff moves by doc path (I19(c)), and a doc still holding the pre-audit version is exactly the blueprint-vs-reality drift this skill audits in others. Then STOP — this skill plans, it does not implement; hand off explicitly (e.g. to the implementation flow of the user's choosing).
@@ -67,6 +68,7 @@ Format: the items and order; the rationale; **audit amendments integrated and at
 | Mistake | Fix |
 |---|---|
 | Auditing a plan with open decision gaps | Grill first. An audit certifies a settled plan, not a draft. |
+| A grill-coverage finding answered by the orchestrator picking the answer | The gap goes to the user / grill family; the decision folds in attributed, then ONE targeted re-audit on the amended points. Absorbing it silently re-creates the fuzz. |
 | Letting the auditor re-litigate user decisions | The brief scopes it: pending decisions' *consequences* only, the WHAT is the human's (I12). |
 | Pre-digesting verdicts into the brief ("I'm confident X is fine, just check") | State the plan and claims; never expected verdicts. The auditor judges or the independence was theater. |
 | Reporting/predicting audit results before the notification | You know nothing until the notification. Tell the user it's running and wait. |

@@ -9,7 +9,7 @@ description: Use when the user says "spec-3rd-opinion", or a settled plan needs 
 
 ## Overview
 
-Two independent eyes are better than one — unless both share a lens. `spec-3rd-opinion` dispatches **two auditors concurrently with deliberately different briefs**: a **standard verifier** (verify the claims, check drift, judge the ordering — `spec-2nd-opinion`'s audit) and an **adversarial hunter** (assume the plan is flawed until proven otherwise; its value is finding what everyone else missed). The plan ships only when **all three positions agree** — yours, the verifier's, the hunter's.
+Two independent eyes are better than one — unless both share a lens. `spec-3rd-opinion` dispatches **two auditors concurrently with deliberately different briefs**: a **standard verifier** (verify the claims, check drift, judge the ordering, hunt grill-coverage gaps — `spec-2nd-opinion`'s audit) and an **adversarial hunter** (assume the plan is flawed until proven otherwise; its value is finding what everyone else missed). The plan ships only when **all three positions agree** — yours, the verifier's, the hunter's.
 
 **Core principle: lens diversity, concurrent dispatch.** The two auditors never see each other, never run sequentially (a second brief written after reading the first report inherits its blind spots through you), and never share a template. What stays correlated is what gets asked in the first place — the adversarial brief exists to widen exactly that.
 
@@ -20,6 +20,7 @@ Two independent eyes are better than one — unless both share a lens. `spec-3rd
 - **Brief B (adversarial hunter)**: same background and same plan-under-audit (identical raw material — different questions). Its checklist is reframed adversarially:
   - "Assume the plan is flawed until proven otherwise."
   - Hunt hidden risks, blueprint-vs-reality drift, unstated assumptions — especially ones the planner has no incentive to check (fields the plan's predicates depend on being reliably populated; watermarks/queues/state another item silently mutates; a skip-flag colliding with a force-requeue).
+  - **Hunt the question nobody asked** — a materially-relevant dimension the plan has NO decision on (grill-coverage gap, the standard lens's (f)); surface it as a pending decision with its consequence, never propose-and-settle (I12).
   - **Argue the strongest case AGAINST the ordering, then state whether it survives.**
   - **Deliver at least one interaction risk nobody listed** — or state honestly, after N genuinely distinct attempts, that none was found (a forced fake finding is worse than none).
   - Same evidence rules: per-item VERDICT + `file:line`; every "OK" names the attack attempted.
@@ -45,7 +46,7 @@ Attribute amendments to their source lens ("per the standard audit: …", "per t
 | Merging on the first notification while the second still runs | Wait for both. A partial merge bends toward whichever report you've read. |
 | Counting two "partially agree" as agreement | The gate is three explicit endorsements. Partial = resolve or disclose as a residual. |
 | Rewarding the hunter for volume (finding something, anything) | A forced fake finding wastes a re-audit round; "searched honestly, found none" is a legitimate verdict — the brief says so explicitly. |
-| Letting the adversarial mandate leak into re-litigating user decisions | Adversarial applies to facts/risks/ordering — the WHAT stays the human's (I12). |
+| Letting the adversarial mandate leak into re-litigating user decisions | Adversarial applies to facts/risks/ordering/grill coverage — re-arguing a DECIDED point and settling an UNDECIDED one both cross the line: surface the gap, the WHAT stays the human's (I12). |
 
 ## Red Flags — STOP (beyond spec-2nd-opinion's)
 - About to merge verdicts with only one auditor's notification on record.

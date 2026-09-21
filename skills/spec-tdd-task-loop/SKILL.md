@@ -17,12 +17,23 @@ description: Use when driving a whole MULTI-TASK feature phase — a task plan s
 | 層 | 是誰 | 做 | 禁止 |
 |---|---|---|---|
 | 頂層 orchestrator | 主 session(program conductor)| 跨 task 流程、輕量 gate、狀態區維護、決策回寫、commit | 深度 code review、親自跑測試、寫 acceptance test、實作 |
-| level-1 sub-agent(**TOP**,I19)| 單 task 的 spec-tdd orchestrator(跑 escalate 機械)| 寫 acceptance test(RED)、encoding audit、派 level-2、親自驗證(re-run / coverage / hash)、tier 要求的攻擊輪;lite 路線:solo 實作 + fresh-context review dispatch(該 tier 自身的機械形狀) | 自己實作 production code(非 lite tier——例外見 template 的 TIER BAND)、git 寫入 |
+| level-1 sub-agent(**TOP**,I19;**mideco 例外——全 MID + 每卡 TOP 終審,見專節**)| 單 task 的 spec-tdd orchestrator(跑 escalate 機械)| 寫 acceptance test(RED)、encoding audit、派 level-2、親自驗證(re-run / coverage / hash)、tier 要求的攻擊輪;lite 路線:solo 實作 + fresh-context review dispatch(該 tier 自身的機械形狀) | 自己實作 production code(非 lite tier——例外見 template 的 TIER BAND)、git 寫入 |
 | level-2 implementer(**MID**,I19)| 實作者 | 實作到綠 + 自身 unit tests | 改 acceptance test(hash 鎖定)、git 寫入 |
 
 tier 為 `spec-tdd-adversarial` 時,level-1 內部再派 attacker / dry-loop auditor——**adversarial 不在迴圈內承載**(見 Pre-flight 3 的 tier band):critical 單元的預設路徑是**拉出迴圈 standalone 跑**(Phase 0 sniff 預拉、路由點發現即 STOP 回報),留在 loop 內跑 coverage 需 user 明示並進殘餘風險清單。
 
 **為何禁 self-testing(同一 agent 寫碼 + 寫測 + 自評):circular reasoning。** 實作者的盲點會同時進入 code 與 test,green 是自我實現的。分離 implementer 與 orchestrator,讓 acceptance test 在實作存在前由不同 context 鎖定——hash 鎖定驗收測試、dispatch 前後 bit-identical 驗證(I4,在 level-1 執行)。這是整個家族存在的原因。在 task loop 裡,高於 lite 的 tier 同樣不可讓步;**lite 的 solo 模式是入口 tier 的已知 trade,自 v1.20.0 起在 loop 內重新可用**(補償 = 強制 fresh-context review dispatch——迴圈經濟學定調:小卡不付雙 context 稅);**level-1 若無法派 nested dispatch(lite 的 review dispatch 也算),唯一合法的行為是停下回報,不得退化成無 review 的 self-testing。**
+
+## Mideco 模式(`mideco` flag——supervisor 形狀的每卡經濟模式,opt-in 試行)
+
+**`mideco` flag**(`/spec-tdd-task-loop mideco <phase>`):args 含 token `mideco` 即生效(從 phase 描述剝除);**不帶 token 的 run 逐字元照舊**。機制 = `spec-tdd-supervisor` 的每單元經濟形狀套到每張卡:**機械全 MID,每卡唯一 TOP 判斷點移到收尾的 read-only 終審**。為何是 opt-in flag 而非預設:`dryout`/`timebox` 先例——經濟模式先試行、以 real-run 數據決定轉正,試行 knob 見本節末。
+
+- **每卡的 dispatch 經濟**:level-1 與其全部 nested dispatch(encoding audit、lite 的 fresh review、implementer)**全 MID**——每個 Agent call 指名 MID,不省略(省略 = 靜默繼承 session model,兩個方向都破功);template 的 MODE 欄帶 MODEL PIN 與 I21 pre-resolve(supervisor 的形狀)。每卡 TOP 從 2(level-1 + encoding audit)降為 1(終審)。
+- **每卡 TOP 終審(gate 之後、commit 之前)**:輕量 gate 1–4 過 → 頂層派**一個 TOP read-only 終審 dispatch**(背景模式;派出當下向 user 宣告審什麼,通知抵達前不報告不預測)。Brief = 固定 checklist + doc paths、不寫摘要不預消化(I19(c)):task doc 路徑、acceptance test 路徑、level-1 的 `REPORT.md`(mideco 的 RETURN 加寫此檔——終審與 session 中斷的 substrate)、JUnit XML 目錄、created/modified 清單、hash pair(lite 路線附「無 hash pair」註記)、`FINAL-AUDIT.md` 絕對路徑(頂層貼上——auditor 的唯一寫入落點,不自行組路徑)。Checklist 四項逐字 = supervisor 總複審的 a–d,**第一項固定是 acceptance test 編碼忠實度重讀**(all-MID 的補償控制——原 I19(a) 釘 TOP 的 encoding audit 職責由終審承接)。證據規則:每筆 finding 帶 `file:line`、每個 OK 寫明試過的攻擊(I16)。
+- **Findings 迴圈(bound 一輪)**:SendMessage 續 level-1 修(不可續才重派續作,keep-don't-rewrite)→ **同一個 auditor** delta 複審(adoption check 要記憶,I16)→ 未收斂升交 user,不無限循環。仲裁 default-adopt:駁回必帶 auditor 缺的證據並上交;倚賴 grilling 意圖的歧義一律上交(I12——auditor 只見 doc)。
+- **收案順序**:gate 1–4 → 終審收斂(或升交)→ 才 commit——task 在終審收斂前維持 in-flight;**未審先 commit = 無 TOP 判斷點的 all-MID,是降級不是省**。純文件 task 不進終審(無 test 可審;維持縮形 gate——supervisor 的 When-NOT 同款)。
+- **不變的東西**:tier band(lite…coverage)與 adversarial 逃生口、Phase 0(頂層執筆,I19(a))、**I21 ask 照常**(session 仍握 Phase 0 拆解與 board 判斷——mideco 只動每卡 dispatch 經濟,不動 session 的判斷前提)、輕量 gate 項目、**收盤批次審查照常且是加法不是替代**(per-task 終審抓單卡洞、收盤抓跨卡洞,兩者並存)、watchdog(終審 dispatch 註冊**唯讀型**:預算 = 派出時明訂的分鐘到數十分粗上限;死亡 fresh 重派一次,新 auditor 從 `FINAL-AUDIT.md` 重讀全部,揭露)。
+- **既知代價(如實記載,supervisor opt-in 的 ×N 版)與試行 knob**:弱 test 會先驅動完整實作、到終審才被抓——修復走 findings 重派,比 I19(a) 的實作前攔截貴;findings 迴圈的牆鐘與 session 的 default-adopt 仲裁負載逐卡疊加。**試行 knob:findings-round 發生率 × 每輪成本 vs TOP 節省**——phase 報告記終審輪數、findings 數、重派數;幾個 real phase 後決定是否轉正(dag 的 top-context ×N quota 痛點是最大受益者,見 dag delta)。
 
 ## When to Use
 
@@ -85,8 +96,25 @@ NESTED implementer via the Agent tool, and verify it yourself (re-run GREEN,
 hash check, tier-required verification). Invoke the /spec-tdd-escalate skill
 BY NAME if it is available in your runtime. If it is not, do NOT improvise
 a lighter version from this prompt — read FAMILY FILES below and run that
-machinery exactly. You are level-1; your implementer is level-2 (MID-tier
-dispatch, I19).
+machinery exactly.
+
+MODEL PIN — MODE: {default | mideco}. default: you run TOP and your
+implementer is level-2 MID (I19); your encoding-audit / fresh-review
+dispatch is TOP (I19(a)). mideco: you AND every dispatch you make
+(encoding audit, lite fresh reviewer, implementer) run the MID tier —
+name it explicitly in every Agent call, never let one silently inherit
+the session model. The judgment backstop is a TOP-tier read-only
+final-audit dispatch the TOP-LEVEL session runs over your deliverable
+at task close, before commit — you never see it, and it changes
+nothing in your machinery. ORCHESTRATOR TIER CHECK — PRE-RESOLVED
+under mideco (the user's flag invocation IS the recorded decline:
+all-MID machinery with a TOP final-audit backstop): do NOT stop to
+ask about upgrading; carry "I21 decline recorded (mideco all-MID
+opt-in, at invocation)" into your report disclosures. mideco adds one
+RETURN duty: WRITE your full RETURN report to
+.spec-tdd/<task>/REPORT.md (SCRATCH ROOT-anchored) — the final audit's
+brief references it by path, and it is the audit-phase resume
+substrate.
 
 No self-testing OUTSIDE the lite tier. Same-context test+implementation is
 circular reasoning: the implementer's blind spots enter both the code and
@@ -223,6 +251,8 @@ Level-1 回報後、commit 前,頂層親自:
 
 **不做的**:深度 code review(下沉給 level-1 的 audit / 攻擊輪;跨 task 深審另由收盤批次審查承接,見專節)、親自跑測試(level-1 已跑,XML 在)、重跑全套(gate 失敗需要診斷時例外)。頂層做主觀審查不是勤快,是浪費:它沒有 level-1 的 full context,結論不會比 sub-agent 的 audit 輪好,卻燒掉最稀缺的 context。頂層的價值在**客觀性與連續性**,不在深度。
 
+**mideco 模式的收案步(gate 1–5 之後、commit 之前)**:派每卡 TOP 終審 dispatch,findings 收斂(或升交 user)才算收案(brief / checklist / findings bound 見 Mideco 模式節);純文件 task 不進終審(維持縮形 gate)。
+
 ## 數字複核紀律
 
 - **規則:sub-agent 回報的測試數字一律讀 JUnit XML 複核,不採信口頭。** 實測兩次踩到口頭數字錯:一次回報 165、XML 實為 163;一次回報「+6 個新測試(21+6=27)」、XML 實為 30。
@@ -349,6 +379,8 @@ Session 中斷 / context 損毀,task 停在半途:
 | 追 LSP / jdtls 的「method undefined」假錯 | BUILD 是唯一 oracle(I19(f));以 gradle compile / test 為準。 |
 | Tier 降級 / doc 偏離 / 本地拍板沒有揭露 | Disclosure 慣例:全部明列由頂層 / user 複審——doc 是契約,未揭露的偏離讓契約失效。 |
 | Task doc 寫「DDL 同前案」「見需求文件」 | 自足性:完整契約一次給全;dispatch prompt 把路徑縮寫還原為絕對路徑。 |
+| mideco 開著,Agent call 沒指名 MID(靜默繼承 session model) | mideco 的 MODEL PIN:level-1 與全部 nested 指名 MID——省略在兩個方向都破功(TOP 帳單回來,或形狀靜默跑錯)。 |
+| mideco 下 gate 過了直接 commit,沒等每卡終審 | 收案順序 = gate → 終審收斂 → commit;未審先 commit = 無 TOP 判斷點的 all-MID,是降級不是省。 |
 
 ## Red Flags — STOP
 
@@ -366,3 +398,4 @@ Session 中斷 / context 損毀,task 停在半途:
 - 頂層把 liveness 檢查延伸成內容判讀(開始讀 wedged agent 的產出判斷「做對了沒」)→ STOP——監視止於客觀事實(mtime / git status / 進程 / 狀態列),確診後走程序,不是驗屍。
 - 卡已停滯超過 wall-clock 預算仍在「再等等」→ STOP——預算是硬上限,終止重派;重派已達 2 次上限 → 升交 user。
 - Level-1 路由發現 stakes 超過 coverage 卻默默開工 → STOP 重派——先回報、頂層拉出 loop(standalone);in-loop 的 critical 降級需要 user 明示。
+- mideco 模式,commit 前沒有該卡終審通知在案(或終審 dispatch 已死 / 靜默)→ STOP——死審不是同意審;fresh 重派一次後仍無 → 回報 user。

@@ -7,6 +7,8 @@ description: Use when driving a multi-task feature phase whose WALL-CLOCK matter
 
 **REQUIRED BASE:** `spec-tdd-task-loop` — read it first; every rule there applies unchanged(三層分工、輕量 gate、Phase 0 拆解 bootstrap、數字複核、mock-first、續作、揭露、commit 紀律)。本 skill 是它的**平行 overlay**:任務總表從序列佇列升級為相依 DAG,不相依且檔案互斥的 task 成波並行。不新增也不減弱驗證強度——只壓縮牆鐘(波末聯集測試 run 補回平行失去的那份,見下)。
 
+**`mideco` 繼承(task-loop 的 Mideco 模式全段適用)**:每卡機械全 MID + 每卡 TOP 終審(gate 之後、merge 之前)——平行波是 mideco 的最大受益者:**波內 top-context ×N 的 quota 壓力消失**(波的機械全 MID;每卡終審是短的 read-only TOP,隨卡收斂交錯跑,不併發成波)。終審在**該卡的 worktree 內收斂**(diff、XML、`REPORT.md` 全用該 worktree 路徑;`FINAL-AUDIT.md` 落該卡 worktree 的 scratch——SCRATCH ROOT 填 worktree 根的既有規則),收斂後才進波末 merge;波末聯集 run 與收盤批次審查不變(加法不是替代)。
+
 ## When to Use(vs task-loop)
 
 - 時間敏感 + DAG 有真實可平行結構(非鏈)→ 本 skill。平行同時乘上**限額壓力(×N,上限 3)與頂層 context 開銷**(狀態列流量、波管理、逐兄弟處置)——context 緊張的 phase,序列更省。
@@ -67,6 +69,7 @@ description: Use when driving a multi-task feature phase whose WALL-CLOCK matter
 | revert merge commit 而留下其後的 board commit | 回滾單位 = merge commit + board commit 兩步一起;board 宣稱 done 而程式已回滾 = 狀態區說謊。 |
 | 未授權 commit 下硬開平行 | 平行模式不可用,自動退化全序列並揭露——DAG 的 commit 是頂層的 merge,無手動路。 |
 | 把 worktree 內的 task doc 當權威版本 | 文件權威在 real tree(dispatch 指 real-tree 路徑,唯讀);波中決策 SendMessage 送達,送不進 merge 前補驗。 |
+| mideco 下終審讀 real-tree 路徑(卡還沒 merge,real tree 沒有它的產出) | 終審在該卡 worktree 內收斂:diff、XML、`REPORT.md`、`FINAL-AUDIT.md` 全用 worktree 路徑;merge 後才存在的東西不是它的審查對象。 |
 
 ## Red Flags — STOP(delta)
 
