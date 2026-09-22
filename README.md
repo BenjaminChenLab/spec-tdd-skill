@@ -1,16 +1,33 @@
 # spec-tdd — test-first development skills for Claude Code
 
-**Version 1.27.0** · [Protocol](skills/PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
+**Version 1.27.1** · [Protocol](skills/PROTOCOL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
 
 A family of [Claude Code](https://claude.com/claude-code) skills enforcing **a protocol for preventing correlated test/implementation failure in AI-generated software** (the technical name for the *green lie*). Executable specifications, agent-boundary isolation, and independent verification for agentic TDD.
 
-> **New here?** Skip the map: `/spec-tdd-escalate <feature>` reads your spec, checks it's actually settled, and routes to the right tier for you. Come back for the chart when you want manual control.
+> **New here?** One command, the whole pipeline: `/spec-tdd-manager <your feature>` walks it end to end — grills what's fuzzy, breaks it into tasks, audits the plan with an independent read-only auditor, then delegates the implementation (mid-tier machinery, top-tier reviews). **You show up exactly twice**: approve the decisions, approve the plan + route + go. Come back for the chart when you want manual control.
+
+## One command, the whole pipeline
+
+```text
+/spec-tdd-manager add coupon discounts to checkout
+
+  S0  resume check   — left artifacts on disk? it picks up there
+  S1  grill       →  Gate 1 · you approve the decisions
+  S2+3 size & split — one unit, or a task plan authored for you
+  S4  audit         — an independent TOP-tier auditor attacks the plan
+  Gate 2          →  you approve plan + route + go
+  S5  implement     — supervisor / task-loop eco / task-dag eco
+```
+
+That is the daily surface. The thirteen skills under the hood — a verification ladder, front-ends, three delegation drivers — are machinery the manager invokes by name; you'll rarely type them yourself. Special shapes route themselves too (a plain bug batch goes to the lightweight multi-unit run; a money/auth/data-loss path escalates to the independent-attacker tier; an interrupted run resumes from disk). The rest of this README is what's underneath, and why each piece exists.
 
 ## The problem: the green lie
 
 Let one agent write both the tests and the code and you get the **green lie** — tests that pass only because the same mind wrote both, so they mirror the implementation's assumptions, skip the edges it forgot, and assert tautologies. The suite goes green; the code is still wrong. **You let the same brain be both referee and player.**
 
 Most TDD guidance fights this with *prompting* — exhorting the agent to stay objective. Same agent, same context, trying not to fool itself. Under pressure, it loses.
+
+One recorded instance, from the family's own lab ([2026-09-05 lean-lab run](docs/specs/2026-09-05-v116-lean-lab.md)): a fee-rounding spec said "nearest 10, halfway up". The test author and the implementer were **two fresh, independent contexts** — and both independently read the clause as toward +∞ for negatives: **−145 → −140**. GREEN delivered; the hidden oracle said the seeded caller's real shape is mirror-about-zero: **−145 → −150**. Two independent minds, one shared misread — the green lie survives even an agent boundary, which is why the family layers more than the boundary (the rest of this README).
 
 ## The fix: an agent boundary
 
@@ -109,7 +126,7 @@ flowchart TD
 
 ## The family
 
-Thirteen skills, organized as **a verification ladder + six front-ends + three parallel outer drivers — multi-task serial ([`spec-tdd-task-loop`](skills/spec-tdd-task-loop/SKILL.md)), multi-task parallel-DAG ([`spec-tdd-task-dag`](skills/spec-tdd-task-dag/SKILL.md)), and single-unit full delegation ([`spec-tdd-supervisor`](skills/spec-tdd-supervisor/SKILL.md))** — `grill-spec-tdd` (grill a fuzzy requirement, gate the spec, then route), `adversarial-grill-spec-tdd` (fuzzy **+ critical**: grill, independent auditor attacks the decisions before the gate and the final-spec test before dispatch), `spec-tdd-escalate` (route a settled requirement, no grilling), the two **plan-audit front-ends** `spec-2nd-opinion` / `spec-3rd-opinion` (independent read-only auditors verify a settled plan's facts/drift/interactions/ordering/grill coverage **before implementation**; gate on agreement — two or three opinions), and the **full-pipeline front door** `spec-tdd-manager` (the whole running order in one invocation — grill → breakdown → audit → routed implementation):
+Thirteen skills — you'll type one of them. The full map, for when you want manual control: **a verification ladder + six front-ends + three parallel outer drivers — multi-task serial ([`spec-tdd-task-loop`](skills/spec-tdd-task-loop/SKILL.md)), multi-task parallel-DAG ([`spec-tdd-task-dag`](skills/spec-tdd-task-dag/SKILL.md)), and single-unit full delegation ([`spec-tdd-supervisor`](skills/spec-tdd-supervisor/SKILL.md))** — `grill-spec-tdd` (grill a fuzzy requirement, gate the spec, then route), `adversarial-grill-spec-tdd` (fuzzy **+ critical**: grill, independent auditor attacks the decisions before the gate and the final-spec test before dispatch), `spec-tdd-escalate` (route a settled requirement, no grilling), the two **plan-audit front-ends** `spec-2nd-opinion` / `spec-3rd-opinion` (independent read-only auditors verify a settled plan's facts/drift/interactions/ordering/grill coverage **before implementation**; gate on agreement — two or three opinions), and the **full-pipeline front door** `spec-tdd-manager` (the whole running order in one invocation — grill → breakdown → audit → routed implementation):
 
 | Skill | Role |
 |---|---|
@@ -229,10 +246,12 @@ The install ships `PROTOCOL.md` too (it lives in `skills/`), so the skills' prot
 Then invoke in Claude Code with `/<skill-name> <feature>`, e.g.:
 
 ```
-/grill-spec-tdd add coupon discounts to checkout (Java/Spring, Order at src/main/.../Order.java)
+/spec-tdd-manager add coupon discounts to checkout (Java/Spring, Order at src/main/.../Order.java)
 ```
 
 ## A quick walkthrough
+
+The under-the-hood view — what the manager and the drivers run for you inside one unit:
 
 1. **Grill** — `grill-spec-tdd` grounds in the codebase first, then interrogates every dimension in rounds (business logic, boundaries, state transitions, NFRs, security/fraud). It asks **decisions, not facts** — whatever the code/docs already answer is investigated, never asked of you — and every question carries a recommended answer, so your reply is a veto ("all defaults except 3"), not an essay.
 2. **Gate the SPEC** — the grilled decisions (plain language, amendments welcome) + the tier choice surface for ONE human OK **before any test is written**; the approved + amended decisions are the **final spec**, persisted as a doc by default (`docs/specs/…` — say the word to skip).

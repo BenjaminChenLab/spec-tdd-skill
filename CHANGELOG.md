@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.1] - 2026-09-22
+
+### Changed
+- **README front-door rewrite — the deferred newcomer patch, executed same-day on the maintainer's trigger** (his day-one verdict on v1.27.0: 「這支變成全功能入口了. 沒有學習曲線」 — superseding the trio-front-door shape recorded 2026-09-19; the one-door shape is both simpler and gentler: `spec-tdd-manager` accepts a fuzzy conversational requirement, where the old pointer `spec-tdd-escalate` demanded a settled doc). Changes, all README-only: (1) the "New here?" pointer switches escalate → manager with the two-gates promise ("you show up exactly twice"); (2) new **"One command, the whole pipeline"** section right after the intro — the S0–S5 stage strip with the two gates marked, the "thirteen skills are invoked machinery" reframe, and the special-shapes note (bug batch → multi-unit run; money/auth/data-loss → attacker tier; interrupted → resume from disk); (3) the **−145 → −140 incident** added as the visceral closer of "The problem: the green lie" — grounded verbatim in the lean-lab run record ([docs/specs/2026-09-05-v116-lean-lab.md](docs/specs/2026-09-05-v116-lean-lab.md) P5: author + implementer, two fresh contexts, independently read "halfway up" as toward-+∞ for negatives; GREEN delivered; hidden oracle said mirror-about-zero) — showing the green lie survives even the agent boundary, which motivates the layered defenses the rest of the README documents; (4) the family opener reframed ("Thirteen skills — you'll type one of them. The full map, for when you want manual control: …"); (5) the walkthrough framed as the under-the-hood view; (6) the installation example switched to `/spec-tdd-manager …`. No skill files touched; the deep sections (architecture, family table, costs, tree, superpowers comparison, testing) preserved as the "powerful" half of the pitch.
+
+### Standing-rule note
+README-only, docs-only release — **fixture rerun skipped per the standing rule** (v1.21.1 precedent). Version header 1.27.0 → 1.27.1.
+
 ## [1.27.0] - 2026-09-22
 
 ### Added
