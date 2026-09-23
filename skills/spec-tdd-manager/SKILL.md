@@ -18,11 +18,11 @@ description: Use when the user says "spec-tdd-manager", or wants ONE feature wal
 1. **Sequence-and-route-only**（escalate route-only 原則的推廣）。本 skill 擁有的是「下一站是誰」與「兩個 gate」，不是任何機械。
 2. **先拆再審。** 多工時計畫本體（三件套 + task docs）先行，審計審的是**實作真正消費的成品**；之後帶著三件套進 task-loop，Phase 0 由它自己的進場條件（三件套已在 → 跳過）省掉第二道計畫審查——**一次 TOP 審查抵兩道**（2nd-opinion + Phase 0 step 3），這是本 skill 對多工 phase 的主要經濟學。審計 brief 追加拆解維度屬 2nd-opinion checklist 的 "at minimum" 合法擴充。
 3. **兩個 gate，不多不少。** Gate 1 繼承自 grill（spec gate——方向核准，家族 invariant）；Gate 2 是本 skill 唯一自有的 ask（最終計畫 + 審計結論 + 實作路由 + 開工，一次核准）。拆解不另設 gate——任務總表併入 Gate 2 一起呈現。
-4. **零新增偏離（per audit 修訂措辭）。** 拆解頂層執筆（I19(a) 字面）、審計 brief 組裝在 session（2nd-opinion 原文）、一切被叫 skill 原文照跑——PROTOCOL 不動、既有十二支不動。實作段**恒走 eco 經濟**是既有 opt-in（v1.26.0 的 invocation token）的沿用，非新偏離：user 叫本 skill 即成立（supervisor 原生即此形狀，loop/dag 帶 `eco` token），phase 報告照目標 skill 的既有揭露義務。
+4. **零新增偏離（per audit 修訂措辭）。** 拆解頂層執筆（I19(a) 字面）、審計 brief 組裝在 session（2nd-opinion 原文）、一切被叫 skill 原文照跑——PROTOCOL 不動、既有十二支不動。實作段**恒走 eco 經濟**是既有 opt-in（v1.26.0 的 invocation token）的沿用，非新偏離：user 叫本 skill 即成立（supervisor 原生即此形狀，loop/dag 帶 `eco` token），phase 報告照目標 skill 的既有揭露義務。**`longrun` 旗標另含兩個 recorded opt-in**（S3 起草、S4 審計跑委派，見該節）；不帶旗標時本柱原樣成立。
 
 **階段邊界 = session 邊界。** 每段產出都是落檔文件（spec doc、三件套、審計回寫）：任何階段之間可以 `/clear` 換 session 再叫本 skill——S0 從磁上文件續跑，不重做（I17 精神：只在對話裡 = 不存在）。
 
-**Ask 帳（誠實清單）。** Gate 1（grill 的）、Gate 2（自有）、I21 tier check（本 skill 進場問一次，handoff 沿路抑制重問；**已知摩擦，per audit 記載**：task-loop 的 pre-flight 無 skip 條款——非 top session 已答過仍可能重問一次，照答即可、揭露）、目標 skill 自帶的 ask（loop 的 commit 授權、dag 的時段模式）。除此之外全自動——每個自動決定一行宣告 + 一行理由，不問。
+**Ask 帳（誠實清單）。** Gate 1（grill 的）、Gate 2（自有）、I21 tier check（本 skill 進場問一次，handoff 沿路抑制重問；**已知摩擦，per audit 記載**：task-loop 的 pre-flight 無 skip 條款——非 top session 已答過仍可能重問一次，照答即可、揭露）、目標 skill 自帶的 ask（loop 的 commit 授權、dag 的時段模式）。除此之外全自動——每個自動決定一行宣告 + 一行理由，不問（`longrun` 旗標不新增 ask；dispatch ≠ ask）。
 
 ## When to Use
 
@@ -40,7 +40,7 @@ description: Use when the user says "spec-tdd-manager", or wants ONE feature wal
 
 ## Pre-flight — orchestrator tier check (I21)
 
-Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解、S4 brief 組裝與仲裁、S2/S5 路由判斷都在 orchestrator 自己的 context 執行；I19 釘住每個 dispatch 的 tier，但沒有東西能升級 session 本身。**Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解、S4 brief 組裝與仲裁、S2/S5 路由判斷都在 orchestrator 自己的 context 執行（**帶 `longrun` 旗標時，S3 起草與 S4 審計跑的判斷移入 TOP-pinned dispatch——旗標叫用 = recorded consent；session 保留的判斷：grill 對話、Gate 1/2、路由、user findings 轉達**）；I19 釘住每個 dispatch 的 tier，但沒有東西能升級 session 本身。**Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
 
 > ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
 
@@ -59,6 +59,7 @@ Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解�
 
 ## S1 — Grill（需要時；Gate 1 在此）
 
+- 帶 `longrun` 旗標 → grounding 先行委派（見 §longrun）；對話、提問、建議、Gate 1 不變。
 - 進場是**對話需求**（無 doc）→ 需要 grill：critical 謂詞（a silent wrong result MOVES money / CHANGES authorization / IRREVERSIBLY corrupts data）命中 → `adversarial-grill-spec-tdd`；否則 `grill-spec-tdd`。其 Phase 1 的 spec gate 即 **Gate 1**。**grill 只跑 Phase 1（per audit 修訂）**——其 Phase 2（寫 acceptance test）與 Phase 3（叫 tier）由本流程的 S2–S5 取代：test 由下游機械撰寫、路由是本 skill 的 S5 表；唯一例外是全 adversarial feature 出場時的 Phase 3 路由再利用（見 When-NOT）。
 - 進場帶 **doc 宣稱 settled**（user 手上的文件，或 S0 判定已有的 spec doc）→ fuzziness sniff（escalate I20 的形狀）：乾淨 → 宣告跳過 grill；有缺口 → ONE ask（grill 補談，還是 settled 續跑）——settled 成立即續（I12），缺口旗標隨行交給下游。grill gate 落檔的 FINAL SPEC 由建構即已決——sniff 對它靜默通過，不另設旁路。
 - **Gate 1 的包加一行（審計預告，per audit 修訂為條件式）。** grill 的 gate 呈現裡附加：「審計：2nd / 3rd（理由：決定 D_k 帶 IRREVERSIBLE tag）」——**僅在管線續行時出現**（全 adversarial feature 已由 grill Phase 3 出場，不預告不會花的審計）；3rd 的兩倍 TOP 成本在**花錢前**可見、可否決。settled 進場（無 Gate 1）時，本 skill 自行掃 spec doc 的**不可逆形狀**（資料遷移 / DDL、對外契約、安全姿態、錢移動語義），掃描結果分兩支：**不可逆但非全 adversarial** → 3rd 觸發，一行宣告；**全 adversarial 形狀** → 出管道宣告（standalone tier run；escalate 的 adversarial confirm 慣例照家族規則）。user 當場可改（他們的 call 恆成立），不另設 ask。
@@ -73,7 +74,7 @@ Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解�
 
 ## S3 — 拆解（僅多工；頂層執筆 — I19(a)）
 
-依 task-loop **Phase 0 / Pre-flight 5–6** 的格式，由本 session 執筆（planning 不下沉；事實偵察可派 read-only Explore，task-loop 原文允許）：
+依 task-loop **Phase 0 / Pre-flight 5–6** 的格式，由本 session 執筆（planning 不下沉；事實偵察可派 read-only Explore，task-loop 原文允許；**帶 `longrun` 旗標 → 起草委派、session 呈現層審閱——supersede 本行「由本 session 執筆」，見 §longrun**）：
 
 - **權威計畫三件套**：需求本文、決定區（既有決定沉澱為 D1… 續接編號）、任務總表狀態區（全部 pending）。
 - **每 task 一份自足 doc**（欄位照 task-loop Pre-flight 6：目標與非目標、現況錨點 file:line + method 名、設計要點、完整外部契約一次給全、交付檔案清單、驗收標準、風險與回滾）。
@@ -83,6 +84,7 @@ Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解�
 
 ## S4 — 獨立審計
 
+- 帶 `longrun` 旗標 → 審計跑委派（見 §longrun）。
 - Invoke **`spec-2nd-opinion`**（IRREVERSIBLE 觸發 → **`spec-3rd-opinion`**，預告見 S1）。
 - **brief 的 checklist 追加拆解維度**（2nd-opinion 的 "at minimum" 允許）：task 覆蓋率（每條需求有 task 接）、漏 task、依賴順序正確性、task-doc 自足性、粒度變形、預期檔案欄互斥。
 - 2nd / 3rd-opinion 的機械**原文照跑**：brief 組裝（Step 1，session 的活）、auditor dispatch、merge、disagreement 仲裁、grill-coverage finding 的 user 路由（I12）、回寫（struck-through 備查）、ONE targeted re-audit bound。
@@ -115,6 +117,17 @@ Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解�
 - **eco 恒走**（invocation-based consent；supervisor 原生即此形狀）。
 - **叫用 = 交棒。** phase 的續作、watchdog、commit 授權、中途變向、收盤批次審查，全部是目標 skill 的事。`<phase>` 帶 doc 路徑 + 一行 phase 描述（handoff 走 doc path，I19(c)）。
 
+## longrun 模式 — context-longevity 旗標
+
+`/spec-tdd-manager longrun` — 選配旗標。**不帶旗標的 run 與前述各節逐 byte 相同**；帶旗標時 S1 grounding、S3 起草、S4 審計跑改為委派形狀；S2、Gate 2、S5、兩個 gate 的呈現與核准不變。動機：**壓低主 session 的 context 面積以走更久**——不是省 token（邊界複製使 total 花費與 wall-clock 上升；帶旗標即承接此 trade）。**旗標叫用 = 對被委派判斷段（S3 起草、S4 仲裁）的 recorded consent**（loop `eco` 同款；Pre-flight 對 session 剩餘判斷照常適用）。
+
+- **S1 grounding → read-only MID dispatch**（法源：task-loop Phase 0「盤 codebase 錨點可派 read-only Explore 代跑偵查」＋ grill 原文 "(or dispatched)"——grounding 事實蒐集不是 I19(a) 的 planning 對象）。產出**事實摘要落檔**（spec doc 同目錄——settled 進場即其所在；fuzzy 進場為專案 spec 慣例目錄，doc 落檔時同處）：已確立事實每條 `file:line`、相關 symbol/table/config、鄰近慣例、blast-radius 相關表面、**coverage statement（自報沒涵蓋什麼）**；禁止結論與建議——下判斷即規劃下漏。grill 以摘要為底，保留**抽取權**（決策關鍵的特定檔可自讀；例外，非 bulk read 後門）與**續問權**（SendMessage 續問同一 agent；I18 照成立）。**帶旗標重進 + digest 已在 → 重用不重派，一行揭露。**摘要路徑 = S3 brief 輸入、S0 續跑素材。
+- **S3 起草 → TOP-pinned 背景起草 dispatch**（recorded opt-in #1，旗標下 supersede S3 的「由本 session 執筆」；補償 = TOP pin + S4 審計本就攻拆解維度 + Gate 2）。brief = FINAL SPEC 路徑 + 摘要路徑 + Phase 0 / Pre-flight 5–6 格式 + 每卡 sniff + dag 兩欄；三件套與每份 task doc **落磁碟**，外加 **claims 附錄**（可證偽主張 `file:line`，供 S4 brief 引用）。**完成時在計畫文件蓋「draft complete (YYYY-MM-DD)」戳——無戳視為 partial，S0 不送審、續派起草。**adversarial 發現 → STOP 回報（報告即 ask，top 轉達 user；機器 say-so 不啟動）。session 只做**呈現層審閱與修改**（修改 = attributed delta）。**單元路線（S3 跳過）此項不適用。**
+- **S4 審計跑 → TOP-pinned 背景 runner dispatch**（recorded opt-in #2；補償 = TOP pin + I12 硬 carve-out + Gate 2 ＋**獨立性折損知情**：claims 附錄由起草者自撰，受審者對審題的框架力上升——界：checklist 維度 manager 固定、auditor 自擁 (b)(e)(f) 維度、無旗標時 claims 亦為 session 自撰，折損限於 distiller grounding）。runner 從磁碟絕對路徑讀 `spec-2nd-opinion` / `spec-3rd-opinion` SKILL.md **原文照跑**（task-loop 交棒模式，被叫 skill 零改動）；brief 素材 = 三件套 + claims 附錄 + pending decisions，拆解維度照 S4 追加。**findings↔修正↔re-audit 迴圈全在 runner 體內**：findings 落檔（I19(b)）；需改三件套時 top 只搬路徑——一行 SendMessage 給起草 dispatch（有作者 context），改完落檔 + delta 摘要，一行叫 runner 複核；**單元路線無 drafter——spec-doc 修正由 session 做（attributed delta）。**runner 的 announce-to-user 步降級為 session 的 at-dispatch 一行宣告（I19(e) 形狀，揭露）。**RETURN 只有三樣：final plan 路徑、Gate 2 三件套（verdict、已摺入修正歸因、殘餘風險）、user 決策類 findings 原文**（I12：runner 永不代決，轉達 user）。收案 stamp 由 runner 寫，session 驗戳才進 Gate 2。**Gate 2 當場實質變更的 targeted re-audit：session 直接派 fresh scoped auditor**（2nd-opinion 的 deliberate-fresh 字面）。環境前提 `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`（runner 體內要派 auditor child；loop 同款）。**溢位 = STOP 回報**（user 裁定 2026-09-24）：嚴禁 truncate、嚴禁把三件套 digest 進 brief（no-digests 規則）；session 接手裁量——/clear 分段或不帶旗標重跑該段。
+- **靜默死亡紀律**（三種 dispatch 一體，2nd-opinion 級：粗界——runner 界 tens-of-minutes——＋ ONE fresh re-dispatch（nothing inherited，揭露）＋ 停等）：**死 ≠ 無 findings**。
+- **不可委派清單（恆在 session）**：grill 對話與建議、Gate 1、S2 路由、user 決策類 findings 的轉達、Gate 2 呈現與核准、S5 交棒。
+- 續跑時旗標重帶；摘要與 findings 文件都是 S0 的磁上素材。**混合模式續跑（旗標沒重帶）→ 一行揭露，不擋。**
+
 ## Common Mistakes
 
 | Mistake | Fix |
@@ -131,6 +144,9 @@ Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解�
 | 自行加第三個 gate（拆解後再確認一次） | 兩個 gate 是設計；任務總表併入 Gate 2 呈現 |
 | eco 沒帶 loop/dag token | 叫本 skill = 選 eco 經濟；token 恒帶，phase 報告照目標 skill 揭露義務 |
 | adversarial 級硬塞 eco 管道 | 出管道 standalone——小時級攻擊深度不在承載範圍 |
+| longrun 下 session 自己 bulk-read codebase（繞過 digest） | digest 為底、重用不重派；targeted read 是決策關鍵單檔的例外，不是 bulk 後門 |
+| runner 在自己體內消化 user 決策類 findings | I12 carve-out：此類 findings 原文必須回 top 轉達；runner 永不代決 |
+| 委派 dispatch 靜默死亡被當「無 findings / 已收案」 | ONE fresh re-dispatch + 揭露；仍死停等——死 ≠ 無 findings |
 
 ## Red Flags — STOP
 
@@ -141,3 +157,4 @@ Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解�
 - 不可逆標籤在案卻只排 2nd（無 user 否決紀錄）→ STOP。
 - 帶著未收斂的審計 disagreement 開工 → STOP。
 - 發現自己正在發明流程表以外的階段或 ask → STOP——流程表是閉集：S0–S5 + 兩個 gate，其餘交給被叫的 skill。
+- `longrun` 旗標下，session 正在親自偵查（S3 前讀整片 code）或重組 S4 brief 全文 → STOP——旗標的目的正在被自己吃掉（digest / claims 附錄就是為此存在）。
