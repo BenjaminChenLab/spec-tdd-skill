@@ -31,7 +31,7 @@ recommendations taken)
    route-only, no-grill contract is its whole value), and a CLAUDE.md personal
    rule (routing logic with no reviewed home — improvised per run, the failure
    mode the family exists to prevent).
-2. **Decomposition seam — 先拆再審 (decompose first, then audit).** The manager
+2. **Decomposition seam — decompose first, then audit.** The manager
    authors the Phase-0-shape trio + task docs in-session, sends THAT to the
    2nd-opinion audit (brief extended by the decomposition dimensions — legal
    under the checklist's "at minimum"), then enters the driver with the trio

@@ -1,79 +1,79 @@
 ---
 name: spec-tdd-task-dag
-description: Use when driving a multi-task feature phase whose WALL-CLOCK matters and the task plan is a dependency DAG — independent tasks run as parallel waves on a task-loop substrate (authoritative plan doc + per-task commits). Parallel multiplies quota pressure ×N (cap 3, user-adjustable); the serial sibling spec-tdd-task-loop is the 429-safe mode; a plain multi-unit bug batch is NOT this skill. Triggers on parallel tasks, dependency graph, task waves, wall-clock pressure, 時段自動切換, DAG 排程.
+description: Use when driving a multi-task feature phase whose WALL-CLOCK matters and the task plan is a dependency DAG — independent tasks run as parallel waves on a task-loop substrate (authoritative plan doc + per-task commits). Parallel multiplies quota pressure ×N (cap 3, user-adjustable); the serial sibling spec-tdd-task-loop is the 429-safe mode; a plain multi-unit bug batch is NOT this skill. Triggers on parallel tasks, dependency graph, task waves, wall-clock pressure, auto time-band switching, DAG scheduling.
 ---
 
 # spec-tdd-task-dag
 
-**REQUIRED BASE:** `spec-tdd-task-loop` — read it first; every rule there applies unchanged(三層分工、輕量 gate、Phase 0 拆解 bootstrap、數字複核、mock-first、續作、揭露、commit 紀律)。本 skill 是它的**平行 overlay**:任務總表從序列佇列升級為相依 DAG,不相依且檔案互斥的 task 成波並行。不新增也不減弱驗證強度——只壓縮牆鐘(波末聯集測試 run 補回平行失去的那份,見下)。
+**REQUIRED BASE:** `spec-tdd-task-loop` — read it first; every rule there applies unchanged (the three-layer division of labor, the lightweight gate, the Phase 0 breakdown bootstrap, number recheck, mock-first, resume, disclosure, commit discipline). This skill is its **parallel overlay**: the task table upgrades from a serial queue to a dependency DAG, and tasks that are independent and file-disjoint run as parallel waves. No verification strength added or reduced — only wall-clock compressed (the wave-end union test run pays back what parallelism dropped, see below).
 
-**`eco` 繼承(task-loop 的 Eco 模式全段適用)**:每卡機械全 MID + 每卡 TOP 終審(gate 之後、merge 之前)——平行波是 eco 的最大受益者:**波內 top-context ×N 的 quota 壓力消失**(波的機械全 MID;每卡終審是短的 read-only TOP,隨卡收斂交錯跑,不併發成波)。終審在**該卡的 worktree 內收斂**(diff、XML、`REPORT.md` 全用該 worktree 路徑;`FINAL-AUDIT.md` 落該卡 worktree 的 scratch——SCRATCH ROOT 填 worktree 根的既有規則),收斂後才進波末 merge;波末聯集 run 與收盤批次審查不變(加法不是替代)。
+**`eco` inheritance (task-loop's Eco mode section applies in full)**: per-card machinery all MID + a per-card TOP final audit (after the gate, before the merge) — parallel waves are eco's biggest beneficiary: **the wave's top-context ×N quota pressure disappears** (the wave's machinery is all MID; the per-card final audit is a short read-only TOP, running staggered as cards converge, never concurrent as a wave). The final audit converges **inside that card's worktree** (diff, XML, `REPORT.md` all use that worktree's paths; `FINAL-AUDIT.md` lands in that card's worktree scratch — the existing rule that SCRATCH ROOT takes the worktree root), and only after convergence does the card enter the wave-end merge; the wave-end union run and the closing batch review are unchanged (additive, not substitutes).
 
-## When to Use(vs task-loop)
+## When to Use (vs task-loop)
 
-- 時間敏感 + DAG 有真實可平行結構(非鏈)→ 本 skill。平行同時乘上**限額壓力(×N,上限 3)與頂層 context 開銷**(狀態列流量、波管理、逐兄弟處置)——context 緊張的 phase,序列更省。
-- 鏈狀相依 / task 數少 / 429 易觸發時段想保守 / 要最簡機制 → `spec-tdd-task-loop`。**序列不是舊行為,是 ×1 限額壓力的安全模式**:平行把 token 吞吐乘上併發數,易觸發時段(如白天尖峰)一個一個慢做,離峰(如半夜)再全速跑 DAG——模式本來就是時段的函數。
+- Time-sensitive + the DAG has a genuinely parallel structure (not a chain) → this skill. Parallel multiplies **quota pressure (×N, cap 3) and top-level context overhead** at once (status-row traffic, wave management, per-sibling handling) — for a context-tight phase, serial is cheaper.
+- Chain-shaped dependencies / few tasks / conservative in 429-prone hours / wanting the simplest machinery → `spec-tdd-task-loop`. **Serial is not the old behavior — it is the ×1-quota-pressure safe mode**: parallel multiplies token throughput by the concurrency; in trigger-prone hours (e.g. daytime peak) go one at a time, and run the DAG full-speed in off-peak (e.g. overnight) — the mode is a function of the time band in the first place.
 
 **When NOT to use:**
-- 多單元 bug batch 的平行波(無 task-loop 基座:無權威計畫文件、無 per-task commit)→ `spec-tdd` 的 **multi-unit** 平行波。
+- Parallel waves of a multi-unit bug batch (no task-loop substrate: no authoritative plan doc, no per-task commits) → `spec-tdd`'s **multi-unit** parallel waves.
 
-## Board 升級:任務總表 = DAG
+## Board upgrade: the task table = a DAG
 
-- 每列加兩欄:**depends-on**(空 = 根)與**預期改動檔案**(Phase 0 拆解一併產出)。
-- Phase 0 的 fresh-context review 因此多一個攻擊維度:**相依邊正確性 + 預期檔案欄的互斥性**。
-- **波計算 = 拓撲分組 + 預期檔案欄互斥檢查。** 欄位重疊的兩個 task 不進同波,即使邏輯不相依——共檔 = 序列鏈(tier 層 multi-unit 波的實戰規則上抬)。互斥排除的是**文字 merge 衝突**;**語意互毀(零共檔仍互相改變行為)不能由互斥排除**,由波末聯集 run 兜底(下節)。
+- Each row gains two columns: **depends-on** (empty = root) and **expected files** (produced by the Phase 0 breakdown together with the rest).
+- Phase 0's fresh-context review thereby gains one more attack dimension: **dependency-edge correctness + the expected-files column's disjointness**.
+- **Wave computation = topological grouping + the expected-files disjointness check.** Two tasks whose columns overlap never share a wave, even if logically independent — shared files = a serial chain (the tier layer's multi-unit wave rule, lifted). What disjointness excludes is **textual merge conflicts**; **semantic interference (zero shared files yet each changes the other's behavior) cannot be excluded by disjointness** — it is backstopped by the wave-end union run (next section).
 
-## Pre-flight:模式 ask(task-loop 的 asks 之後,加一問)
+## Pre-flight: the mode ask (after task-loop's asks, one more question)
 
-展示波結構(如「3 波:[T01,T03]→[T02,T04,T05]→[T06]」),四選:
+Present the wave structure (e.g. "3 waves: [T01,T03] → [T02,T04,T05] → [T06]"), four options:
 
-- **全平行** — 建議離峰時段;**全序列** — 行為等同 task-loop,429 易觸發時段的安全選擇;
-- **逐波選** — 每波邊界問一次平行或序列;
-- **自動時段** — 你報一次尖峰/離峰時段(例:「10:00–22:00 尖峰走序列,其餘平行」——**時段是你的限額經驗,skill 不預設**),之後每波邊界按本地時間自動切換,每次切換在 board 揭露。切換於波邊界生效,**在飛的波不中途殺**。
+- **All-parallel** — recommended for off-peak hours; **all-serial** — behavior identical to task-loop, the safe choice in 429-prone hours;
+- **Per-wave choice** — ask at every wave boundary, parallel or serial;
+- **Auto time band** — you report the peak/off-peak bands once (e.g. "10:00–22:00 peak, run serial; otherwise parallel" — **the bands are your quota experience; the skill presets nothing**), then every wave boundary switches automatically by local time, each switch disclosed on the board. Switching takes effect at wave boundaries; **an in-flight wave is never killed mid-flight**.
 
-鏈狀 DAG(無可平行者)→ 此問靜默跳過。**併發上限 3(user 可調)**:同一波最多 3 個 task 同跑(每 task 內部還有 2–3 個 nested dispatch,最多 ≈9 條 agent 流),超過的波內分批輪轉。
+A chain-shaped DAG (nothing parallelizable) → this ask is silently skipped. **Concurrency cap 3 (user-adjustable)**: at most 3 tasks running per wave (each task internally still has 2–3 nested dispatches, at most ≈9 agent streams); an overflowing wave rotates in batches.
 
-**授權耦合(task-loop pre-flight 2)**:未授權頂層 commit → **平行模式不可用,自動退化全序列**——DAG 的 task commit 是頂層執行的 `git merge`,無「暫停交 user 手動 commit」的對應形狀;退化要揭露。
+**Authorization coupling (task-loop pre-flight 2)**: without top-commit authorization → **parallel mode is unavailable, automatically degrading to all-serial** — the DAG's task commits are top-executed `git merge`s; there is no "pause and hand to the user for a manual commit" counterpart shape; the degradation is disclosed.
 
-## 平行波執行(worktree 隔離)
+## Parallel wave execution (worktree isolation)
 
-- **波起點樹必乾淨,且要驗不是宣稱**:切 worktree 前頂層親跑 `git status`——非 scratch 殘留(untracked scratch 除外)→ STOP 先收乾淨。
-- 每個平行 task:`git worktree add .spec-tdd/worktrees/<id> -b task-dag/<id>`(從波起點 HEAD)。tier 層的 worktree 禁令(「worktree 從 HEAD 分枝,未提交工作帶不過去」)在此**不成立**——乾淨樹上 HEAD 就是全部;這是兩層前提的差異,不是放寬。
-- **文件權威在 real tree**:task doc 與計畫文件以 real tree 為權威(dispatch prompt 指 real-tree 絕對路徑,唯讀);worktree 只承載 production/test code 與 build 產物(**純文件 task 的交付文件除外**——隨 worktree 承載、波末 merge 回真樹,路徑級核對於 merge 後真樹執行)。波中 user 拍板回寫 real tree 後,影響在飛兄弟 → SendMessage 送達(同中途變向);送不進 → 該 task **merge 前對照決定區補驗**。
-- Level-1 全程在 worktree 內(程式碼工作):RED→level-2→GREEN→驗證、XML 數字全在自己的樹。Sub-agent 照舊禁 git 寫入;**worktree 的建/併/清是頂層獨佔職責**。
-- Dispatch template 沿用 task-loop 全文,加註一行:WAVE(siblings in flight: <ids> — 預期檔案欄互斥,禁觸其檔);**SCRATCH ROOT 填該 task 的 worktree 根目錄**(頂層所切,絕對路徑已知——level-1 全程在 worktree 內、watchdog 也讀該樹;誤填 repo root 會讓每張卡卡在 rev-parse 門前,而「填 repo root + agent 留在 real tree」的雙重故障會靜默重現 W22 的 stale-heartbeat 形狀)。
-- **波末序列 merge**:各 branch 依總表順序 `git merge --no-ff task-dag/<id>`——每個 merge commit = 該 task 的 commit 邊界。衝突(互斥規則下不應發生)→ STOP 交 human。**board 更新無法搭 merge commit(merge hash 要 merge 後才存在)→ 波末最後一個 merge 後立一個 board commit**(狀態區 hashes、決定區、模式切換揭露)。**回滾單位 = merge commit + 其後 board commit,兩步一起 revert**——只 revert merge 會留一個宣稱 done 的 board。
-- **波末 gate(merge 後,真樹)**:既有輕量 gate(compile 兩項 + diff 範圍)**加第四項「波聯集測試 run」**——該波全部 task 的相關 test classes 聯集,真樹跑一次(每波一次,仍遠省於序列的每 task 一次;**純文件 task 的數字項由路徑級核對取代,同 task-loop gate 第 5 項;無測試者不進聯集**)。頂層親跑此 run 是 gate 的明定例外(性質同 compile:新資訊、無既有 XML 可複核;同「重跑全套於診斷時例外」的形狀),證據 = 該 run 的 XML 數字。聯集 run 本身即該波最終 run,XML 覆蓋陷阱不適用於它。
-- **波末一併重驗下一波全部 task docs 的錨點**(以 method 名重錨)——一波多 task 同時落地,漂移大於序列。
-- Worktree 回收:確認 branch 已全併、殘留僅 scratch/build → `git worktree remove --force` + 刪 branch(level-1 必留 scratch 與 build 產物,乾淨 remove 必被拒;Windows 上另有 gradle daemon 檔案鎖)。
-- **迴圈牆**:wave N 的 worktree 從 merge 完的 wave N−1 HEAD 切出 → 每 task 的「單一 run 涵蓋全部相關 test class」template 規定驗證了**所有前波**測試;**同波兄弟間**的交叉綠由波末聯集 run 兜底(語意互毀不能由檔案互斥排除)。聯集 run 全綠 → 無殘餘。
-- **收盤批次審查**(task-loop 收盤程序)在**全部波 merge 完、總表 all-done 後**於 real tree 執行——波邊界不觸發它(它看的正是整個 phase 的累積效應,不是單波)。其 fix rows 進 DAG 照常排:**depends-on 與預期檔案欄要補**(空 = 根);收斂補輪範圍限 fix rows 的 diff。
-- **Watchdog 訊號路徑與產出軸都在 worktree 內**:level-1 全程在 worktree,heartbeat / POLICY 檔、工作樹 diff(vs 波起點 HEAD)、build/test 輸出全部讀**該 worktree** 的路徑(worktree 是頂層切的,絕對路徑已知)——讀 real-tree 對應路徑永遠 stale,每張超過門檻的平行卡都會誤報。檢查點**一次喚醒服務全部 in-flight**(不逐卡排——×N 平行下頂層 context 經濟);zombie 發生在 worktree 內 → 復活嘗試與續作重派都在該 worktree 接手,路徑不變。**冷 worktree 的第一次 build 是冷的**(無 daemon 快取)——平行 task 的預算要把 cold build 計入,否則開工即超支。
-- **梯次預排與凍結 SOP(繼承 task-loop watchdog 規則 1–2 與 429 段,此處只記波形 delta)**:平行本就乘上限額壓力(×N,上限 3)——遠火與凍結程序在 dag 是常態路徑不是邊角。細階視野 = 在飛卡預算的**最大值**,每次波 dispatch 補滿梯次;**凍結連波邊界一起凍**——凍結期到期的 wave dispatch 順延,第一個成功 turn 先收單(凍結期完工的兄弟卡、到期未派的波、board 對帳)再判讀與排波;凍結扣除**逐卡**適用——不同池兄弟在頂層凍結期間照跑在 dag 是常態,收單先於三態的價值高於序列。
+- **The wave-start tree must be clean, and verified, not assumed**: before cutting worktrees the top personally runs `git status` — non-scratch residue (untracked scratch excepted) → STOP; clean it first.
+- Each parallel task: `git worktree add .spec-tdd/worktrees/<id> -b task-dag/<id>` (from the wave-start HEAD). The tier layer's worktree ban ("a worktree branches from HEAD; uncommitted work doesn't transfer") **does not hold here** — on a clean tree, HEAD is everything; this is a difference of premises between the two layers, not a relaxation.
+- **Document authority lives in the real tree**: task docs and the plan doc are authoritative in the real tree (the dispatch prompt points at real-tree absolute paths, read-only); the worktree carries only production/test code and build outputs (**pure-docs tasks' deliverable documents excepted** — they ride the worktree and merge back into the real tree at wave end; the path-level check runs on the real tree after the merge). When a user decision made mid-wave is written back to the real tree and affects in-flight siblings → deliver by SendMessage (same as mid-run redirection); undeliverable → that task **re-verifies against the decisions section before its merge**.
+- Level-1 works entirely inside the worktree (code work): RED → level-2 → GREEN → verification, XML numbers all in its own tree. Sub-agents stay git-write-banned; **creating/merging/cleaning worktrees is the top's exclusive duty**.
+- The dispatch template is task-loop's verbatim, plus one line: WAVE (siblings in flight: <ids> — expected-files columns are disjoint; touching their files is banned); **SCRATCH ROOT takes that task's worktree root** (cut by the top, absolute path known — level-1 lives in the worktree the whole way and the watchdog reads that tree too; wrongly filling the repo root wedges every card at the rev-parse gate, and the double fault of "repo root filled + agent staying in the real tree" silently reproduces the W22 stale-heartbeat shape).
+- **Wave-end serial merges**: each branch in task-table order, `git merge --no-ff task-dag/<id>` — each merge commit = that task's commit boundary. A conflict (which should not happen under the disjointness rule) → STOP, hand to a human. **Board updates cannot ride the merge commit (the merge hash only exists after the merge) → right after the wave's last merge, one board commit** (status-section hashes, decisions section, mode-switch disclosures). **The rollback unit = the merge commit + the board commit after it, both reverted together** — reverting only the merge leaves a board claiming done.
+- **The wave-end gate (after the merges, in the real tree)**: the existing lightweight gate (the two compile items + diff scope) **plus a fourth item, "the wave-union test run"** — the union of the wave's every task's related test classes, run once in the real tree (once per wave, still far cheaper than serial's once per task; **a pure-docs task's numbers item is replaced by the path-level check, as in task-loop gate item 5; testless tasks don't enter the union**). The top personally running this run is a named gate exception (the same nature as compile: new information, no existing XML to recheck; the same shape as the "re-running the full suite is a diagnostic exception" rule), evidence = that run's XML numbers. The union run itself is the wave's final run; the XML-coverage trap does not apply to it.
+- **At wave end, re-verify the anchors of ALL next-wave task docs at once** (re-anchored by method name) — a wave lands many tasks simultaneously; drift is larger than serial's.
+- Worktree reclamation: branches all merged, residue only scratch/build → `git worktree remove --force` + delete the branch (level-1 always leaves scratch and build outputs, so a clean remove is always refused; on Windows there are also gradle daemon file locks).
+- **The regression wall**: wave N's worktree is cut from the merged wave N−1 HEAD → the template's "one run covering all related test classes" per task verifies **all previous waves'** tests; cross-green **among same-wave siblings** is backstopped by the wave-end union run (semantic interference cannot be excluded by file disjointness). Union run all green → no residue.
+- **The closing batch review** (task-loop's closing procedure) runs in the real tree **after all waves are merged and the table is all-done** — wave boundaries don't trigger it (what it looks at is exactly the whole phase's accumulated effect, not one wave). Its fix rows enter the DAG as usual: **depends-on and expected-files columns must be filled** (empty = root); the convergence re-round is scoped to the fix rows' diffs.
+- **Watchdog signal paths and output axes live inside the worktree**: level-1 stays in the worktree the whole way — heartbeat / POLICY files, tree diff (vs the wave-start HEAD), build/test outputs all read **that worktree's** paths (the worktree was cut by the top; the absolute path is known) — reading the real tree's counterpart paths is forever stale, and every parallel card past its threshold would false-alarm. Checkpoints: **one wakeup serves all in-flight** (not scheduled per card — the top's context economics under ×N parallelism); a zombie inside a worktree → the revival attempt and the continuation re-dispatch take over in that same worktree, paths unchanged. **A cold worktree's first build is cold** (no daemon cache) — a parallel task's budget must count the cold build, or it overruns the moment it starts.
+- **The pre-scheduled ladder and the freeze SOP (inheriting task-loop watchdog rules 1–2 and the 429 section; only the wave-shape delta recorded here)**: parallel already multiplies quota pressure (×N, cap 3) — far-fires and the freeze procedure are the normal path in dag, not a corner. The fine-rung horizon = the **maximum** of the in-flight cards' budgets; top the ladder up at every wave dispatch; **a freeze freezes wave boundaries too** — wave dispatches falling due during the freeze are deferred; the first successful turn collects first (sibling cards completed during the freeze, waves due but not dispatched, board reconciliation) before judging and scheduling waves; the freeze deduction applies **per card** — sibling cards on different pools running while the top is frozen is the norm in dag; collect-before-judge is worth more here than in serial.
 
-## 續作(波中斷)
+## Resume (a wave interrupted)
 
-- Board 的 in-flight 可能是**一整波**:每個 worktree 獨立續作——429 死一個不影響兄弟(SendMessage 續該 agent,worktree 狀態即盤點結果);merge 前死的,branch 保留待恢復續跑;merge 完死的,等同 task-loop 的單 task 續作。
-- 波內單一 agent 429 陣亡、剩餘量小 → 同 task-loop 規則:等重置 SendMessage 續同一 agent,或立即重派續作 agent 接手該 worktree;**頂層親手收尾在這裡同樣硬禁**——worktree 狀態就是現成的盤點指標,連改了什麼都在 branch diff 裡。波的其他 task 不受影響:不需要等,也不需要殺兄弟。
-- 模式切換(逐波/自動時段)於波邊界生效,在飛波不中途殺;走 task-loop 的中途變向慣例,board 揭露。
+- The board's in-flight may be **a whole wave**: each worktree resumes independently — a 429 killing one doesn't touch the siblings (SendMessage resumes that agent; the worktree's state is the inventory result); one dying before its merge → the branch is kept, waiting for recovery to continue; one dying after its merge → identical to task-loop's single-task resume.
+- One agent in a wave dying of 429 with little remaining work → task-loop's rule: wait for reset and SendMessage-resume the same agent, or immediately re-dispatch a continuation agent taking over that worktree; **the top finishing the work by hand is equally hard-banned here** — the worktree's state is a ready-made inventory metric; even what changed is in the branch diff. The wave's other tasks are unaffected: no waiting, and no killing siblings.
+- Mode switches (per-wave / auto time band) take effect at wave boundaries; an in-flight wave is never killed mid-flight; task-loop's mid-run redirection conventions apply, disclosed on the board.
 
-## Common Mistakes(delta)
+## Common Mistakes (delta)
 
 | Mistake | Fix |
 |---|---|
-| 把預期檔案欄重疊的兩個 task 放同波 | 波成員 = 拓撲獨立 + 檔案欄互斥,缺一不可;共檔 → 序列鏈。 |
-| 429 易觸發時段硬開全平行 | 序列 = ×1 限額壓力;平行 ×N(上限 3)。模式該隨時段選——自動時段模式就是為此。 |
-| 信任 worktree 內綠燈,跳過波末 gate(含聯集 run) | 檔案互斥只排除文字衝突;語意互毀靠波末聯集 run 兜底——它是 gate 必經項,不是可選項。 |
-| Sub-agent 在 worktree 裡動 git | 禁令不變;worktree 建/merge/清是頂層獨佔。 |
-| 波內兄弟陣亡,頂層吸收它的剩餘工作 | 硬禁(繼承 task-loop 規則)——重派續作 agent 接該 worktree;波的其他 task 不受影響,不需要等也不需要殺。 |
-| revert merge commit 而留下其後的 board commit | 回滾單位 = merge commit + board commit 兩步一起;board 宣稱 done 而程式已回滾 = 狀態區說謊。 |
-| 未授權 commit 下硬開平行 | 平行模式不可用,自動退化全序列並揭露——DAG 的 commit 是頂層的 merge,無手動路。 |
-| 把 worktree 內的 task doc 當權威版本 | 文件權威在 real tree(dispatch 指 real-tree 路徑,唯讀);波中決策 SendMessage 送達,送不進 merge 前補驗。 |
-| eco 下終審讀 real-tree 路徑(卡還沒 merge,real tree 沒有它的產出) | 終審在該卡 worktree 內收斂:diff、XML、`REPORT.md`、`FINAL-AUDIT.md` 全用 worktree 路徑;merge 後才存在的東西不是它的審查對象。 |
+| Putting two tasks with overlapping expected-files columns in one wave | Wave membership = topologically independent + file-column disjoint, both required; shared files → a serial chain. |
+| Forcing all-parallel in 429-prone hours | Serial = ×1 quota pressure; parallel ×N (cap 3). The mode should follow the time band — the auto-band mode exists for exactly this. |
+| Trusting the in-worktree green, skipping the wave-end gate (incl. the union run) | File disjointness excludes only textual conflicts; semantic interference is backstopped by the wave-end union run — it is a mandatory gate item, not optional. |
+| A sub-agent touching git inside the worktree | The ban is unchanged; worktree create/merge/clean is the top's exclusive duty. |
+| A sibling in the wave dying and the top absorbing its remaining work | Hard ban (task-loop's rule inherited) — re-dispatch a continuation agent to take that worktree; the wave's other tasks are unaffected: no waiting, no killing. |
+| Reverting the merge commit but leaving the board commit after it | The rollback unit = merge commit + board commit, both together; a board claiming done while the code is rolled back = the status section lying. |
+| Forcing parallel on without commit authorization | Parallel mode is unavailable; automatically degrades to all-serial, disclosed — the DAG's commits are the top's merges; there is no manual path. |
+| Treating the worktree's copy of a task doc as the authoritative version | Document authority lives in the real tree (dispatch points at real-tree paths, read-only); mid-wave decisions delivered by SendMessage, undeliverable → re-verified before the merge. |
+| Under eco, the final audit reading real-tree paths (the card hasn't merged; the real tree doesn't hold its output) | The final audit converges inside that card's worktree: diff, XML, `REPORT.md`, `FINAL-AUDIT.md` all use worktree paths; what only exists after the merge is not its review object. |
 
-## Red Flags — STOP(delta)
+## Red Flags — STOP (delta)
 
-- 同波兩個 task 的 diff 出現同一檔案 → 互斥宣稱破產,STOP,該 task 移出波序列重排。
-- 切 worktree 前 `git status` 有非 scratch 殘留 → STOP 收乾淨再切(波起點必乾淨是前提,不是假設)。
-- 波末聯集 run 有任何紅 → STOP 診斷(語意互毀真發生了);全綠前不立 board commit。
-- 自動時段切換未揭露於 board → 補揭露;切換紀錄屬 phase 報告。
+- The same file appearing in two same-wave tasks' diffs → the disjointness claim is bankrupt; STOP; move that task out of the wave and reschedule serially.
+- Non-scratch residue in `git status` before cutting worktrees → STOP; clean it before cutting (a clean wave-start tree is a premise, not an assumption).
+- Any red in the wave-end union run → STOP and diagnose (semantic interference actually happened); no board commit before all green.
+- An auto-band switch not disclosed on the board → add the disclosure; switch records belong to the phase report.

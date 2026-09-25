@@ -1,160 +1,160 @@
 ---
 name: spec-tdd-manager
-description: Use when the user says "spec-tdd-manager", or wants ONE feature walked end-to-end through the family's whole running order as a single invocation — inventory-resume → grill the requirement if fuzzy (the grill's spec gate is Gate 1) → size route (one unit vs multi-task) → top-layer breakdown in the Phase-0 shape (authoritative plan trio + self-contained task docs, dag-ready columns) → independent plan audit via spec-2nd-opinion (auto-escalates to spec-3rd-opinion when any decision carries an IRREVERSIBLE blast-radius tag) → ONE merged go-ahead gate (final plan + audit verdict + implementation route) → delegated implementation (spec-tdd-supervisor / spec-tdd-task-loop eco / spec-tdd-task-dag eco). A sequence-and-route-only pipeline front door: it owns the two gates and the stage handoffs, nothing else — every mechanism lives in the invoked skill. NOT for routing one settled requirement to a tier (spec-tdd-escalate), NOT for plain multi-unit bug batches (spec-tdd's multi-unit run), NOT for standalone plan audits (spec-2nd/3rd-opinion), NOT for resuming an in-flight implementation phase (invoke the driver skill directly), NOT for adversarial-grade features (standalone tier run). Triggers on 全流程一條龍, grill 到實作一把抓, end-to-end feature management, one command from requirement to landing, 流程經理, 給我管到底.
+description: Use when the user says "spec-tdd-manager", or wants ONE feature walked end-to-end through the family's whole running order as a single invocation — inventory-resume → grill the requirement if fuzzy (the grill's spec gate is Gate 1) → size route (one unit vs multi-task) → top-layer breakdown in the Phase-0 shape (authoritative plan trio + self-contained task docs, dag-ready columns) → independent plan audit via spec-2nd-opinion (auto-escalates to spec-3rd-opinion when any decision carries an IRREVERSIBLE blast-radius tag) → ONE merged go-ahead gate (final plan + audit verdict + implementation route) → delegated implementation (spec-tdd-supervisor / spec-tdd-task-loop eco / spec-tdd-task-dag eco). A sequence-and-route-only pipeline front door: it owns the two gates and the stage handoffs, nothing else — every mechanism lives in the invoked skill. NOT for routing one settled requirement to a tier (spec-tdd-escalate), NOT for plain multi-unit bug batches (spec-tdd's multi-unit run), NOT for standalone plan audits (spec-2nd/3rd-opinion), NOT for resuming an in-flight implementation phase (invoke the driver skill directly), NOT for adversarial-grade features (standalone tier run). Triggers on the full pipeline in one go, grill to implementation all in one hand, end-to-end feature management, one command from requirement to landing, process manager, manage it to the end for me.
 ---
 
 # spec-tdd-manager
 
-**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — the front-ends (`grill-spec-tdd`, `adversarial-grill-spec-tdd`, `spec-tdd-escalate`, `spec-2nd-opinion`, `spec-3rd-opinion`), the tiers (`spec-tdd-lite` / `spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`), the outer drivers (`spec-tdd-task-loop` / `spec-tdd-task-dag` / `spec-tdd-supervisor`), and [PROTOCOL.md](../PROTOCOL.md) (I1–I21). 本 skill 不新增也不放寬任何 invariant：它是疊在整個家族**最外層**的純 sequencer——階段接力、自動選路、兩個 gate。所有機械活在被叫的 skill 裡；本 skill 親手跑任何機械（寫 acceptance test、深審、實作）= 越權走樣。
+**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — the front-ends (`grill-spec-tdd`, `adversarial-grill-spec-tdd`, `spec-tdd-escalate`, `spec-2nd-opinion`, `spec-3rd-opinion`), the tiers (`spec-tdd-lite` / `spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`), the outer drivers (`spec-tdd-task-loop` / `spec-tdd-task-dag` / `spec-tdd-supervisor`), and [PROTOCOL.md](../PROTOCOL.md) (I1–I21). This skill adds no new invariant and relaxes none: it is a pure sequencer layered on the **very outside** of the whole family — stage relays, auto routing, two gates. All machinery lives in the invoked skills; this skill personally running any machinery (writing acceptance tests, deep review, implementation) = an out-of-authority deformation.
 
 ## Overview
 
-一件 feature 的全流程經理：從需求進場到實作落地，同一張流程表跑到底——
+One feature's full-pipeline manager: from requirement intake to implementation landing, one running order to the end —
 
-**S0 盤點**（續跑起點）→ **S1 grill**（需要時；Gate 1 = grill 的 spec gate）→ **S2 尺寸路由**（單元 or 多工）→ **S3 拆解**（僅多工；頂層執筆）→ **S4 獨立審計**（2nd/3rd-opinion）→ **Gate 2：合併開工 gate**（唯一自有 ask）→ **S5 實作交棒**（supervisor / task-loop eco / task-dag eco）。
+**S0 inventory** (the resume starting point) → **S1 grill** (when needed; Gate 1 = the grill's spec gate) → **S2 size route** (one unit or many tasks) → **S3 breakdown** (multi-task only; top-authored) → **S4 independent audit** (2nd/3rd-opinion) → **Gate 2: the merged go-ahead gate** (the only ask it owns) → **S5 implementation hand-off** (supervisor / task-loop eco / task-dag eco).
 
-四根設計柱：
+Four design pillars:
 
-1. **Sequence-and-route-only**（escalate route-only 原則的推廣）。本 skill 擁有的是「下一站是誰」與「兩個 gate」，不是任何機械。
-2. **先拆再審。** 多工時計畫本體（三件套 + task docs）先行，審計審的是**實作真正消費的成品**；之後帶著三件套進 task-loop，Phase 0 由它自己的進場條件（三件套已在 → 跳過）省掉第二道計畫審查——**一次 TOP 審查抵兩道**（2nd-opinion + Phase 0 step 3），這是本 skill 對多工 phase 的主要經濟學。審計 brief 追加拆解維度屬 2nd-opinion checklist 的 "at minimum" 合法擴充。
-3. **兩個 gate，不多不少。** Gate 1 繼承自 grill（spec gate——方向核准，家族 invariant）；Gate 2 是本 skill 唯一自有的 ask（最終計畫 + 審計結論 + 實作路由 + 開工，一次核准）。拆解不另設 gate——任務總表併入 Gate 2 一起呈現。
-4. **零新增偏離（per audit 修訂措辭）。** 拆解頂層執筆（I19(a) 字面）、審計 brief 組裝在 session（2nd-opinion 原文）、一切被叫 skill 原文照跑——PROTOCOL 不動、既有十二支不動。實作段**恒走 eco 經濟**是既有 opt-in（v1.26.0 的 invocation token）的沿用，非新偏離：user 叫本 skill 即成立（supervisor 原生即此形狀，loop/dag 帶 `eco` token），phase 報告照目標 skill 的既有揭露義務。**`longrun` 旗標另含兩個 recorded opt-in**（S3 起草、S4 審計跑委派，見該節）；不帶旗標時本柱原樣成立。
+1. **Sequence-and-route-only** (a generalization of escalate's route-only principle). What this skill owns is "who is the next station" and "the two gates" — no machinery.
+2. **Break down first, then audit.** On the multi-task path the plan body (the trio + task docs) comes first, and the audit reviews **the finished artifact implementation actually consumes**; the trio then enters task-loop, whose Phase 0 is skipped by its own entry condition (trio present → skip) — removing the second plan review — **one TOP audit in place of two** (2nd-opinion + Phase 0 step 3); this is this skill's main economics for multi-task phases. Extending the audit brief with the decomposition dimensions is a legal "at minimum" expansion of 2nd-opinion's checklist.
+3. **Two gates, no more, no less.** Gate 1 is inherited from grill (the spec gate — direction approval, a family invariant); Gate 2 is this skill's only owned ask (final plan + audit verdict + implementation route + go-ahead, one approval). The breakdown gets no separate gate — the task table rides Gate 2's presentation.
+4. **Zero new deviations (wording per the audit).** The breakdown is top-authored (I19(a)'s letter), the audit brief is assembled in-session (2nd-opinion's letter), and every invoked skill runs verbatim — PROTOCOL untouched, the existing twelve untouched. The implementation stage **always riding eco economics** is a reuse of the existing opt-in (v1.26.0's invocation token), not a new deviation: it holds the moment the user invokes this skill (supervisor is natively this shape; loop/dag carry the `eco` token), and the phase report follows the target skill's existing disclosure duties. **The `longrun` flag carries two additional recorded opt-ins** (S3 drafting, S4 audit-running delegated — see that section); without the flag this pillar stands as-is.
 
-**階段邊界 = session 邊界。** 每段產出都是落檔文件（spec doc、三件套、審計回寫）：任何階段之間可以 `/clear` 換 session 再叫本 skill——S0 從磁上文件續跑，不重做（I17 精神：只在對話裡 = 不存在）。
+**Stage boundaries = session boundaries.** Every stage's output is an on-disk document (spec doc, trio, audit write-back): between any two stages you can `/clear`, switch sessions, and re-invoke this skill — S0 resumes from the documents on disk, nothing redone (the spirit of I17: existing only in the conversation = does not exist).
 
-**Ask 帳（誠實清單）。** Gate 1（grill 的）、Gate 2（自有）、I21 tier check（本 skill 進場問一次，handoff 沿路抑制重問；**已知摩擦，per audit 記載**：task-loop 的 pre-flight 無 skip 條款——非 top session 已答過仍可能重問一次，照答即可、揭露）、目標 skill 自帶的 ask（loop 的 commit 授權、dag 的時段模式）。除此之外全自動——每個自動決定一行宣告 + 一行理由，不問（`longrun` 旗標不新增 ask；dispatch ≠ ask）。
+**Ask ledger (the honest list).** Gate 1 (grill's), Gate 2 (owned), the I21 tier check (asked once on this skill's entry, suppressed downstream along the handoff; **known friction, per the audit's record**: task-loop's pre-flight has no skip clause — a non-top session that already answered may still be asked once more; just answer, and disclose), the target skills' own asks (loop's commit authorization, dag's time-band mode). Everything else is automatic — every automatic decision gets a one-line announcement + a one-line rationale, never an ask (the `longrun` flag adds no ask; dispatch ≠ ask).
 
 ## When to Use
 
-- 一個 feature 想從需求到落地一個指令走完，只在兩個 gate 出現。
-- 進場素材不限：對話裡的 fuzzy 需求、已落檔的 settled spec、或介於其間。
+- One feature you want walked from requirement to landing in a single invocation, appearing only at the two gates.
+- Entry material unrestricted: a fuzzy requirement in the conversation, a settled spec already on file, or anything between.
 
 **When NOT to use — route elsewhere:**
 
-- 只想路由一個 settled 需求到 tier、不要計畫審計 → `spec-tdd-escalate`。
-- 純 bug 清單 / multi-unit batch（多個獨立小修正）→ `spec-tdd` 的 **multi-unit run**（user 裁定 2026-09-22：manager 的價值在 feature 的計畫審計，batch 不需要 per-task commit / board / watchdog / 每卡終審）。
-- 只想審計既有計畫、不實作 → `spec-2nd-opinion` / `spec-3rd-opinion` 直接。
-- 實作 phase 已在飛（board / RUN-STATE 有 in-flight）→ 直接叫該 driver 續作（S0 也只會指路，不重跑前置）。
-- 整個 feature 是 adversarial 級 → grill 照走，但實作**出管道** standalone 跑 tier（grill Phase 3 的路由與確認機制照舊）——小時級攻擊深度不在 eco 經濟與本流程的承載範圍。
-- 探索性 / 拋棄式程式碼 → 不需要任何 skill。
+- You only want to route one settled requirement to a tier, no plan audit → `spec-tdd-escalate`.
+- A pure bug list / multi-unit batch (many independent small fixes) → `spec-tdd`'s **multi-unit run** (user ruling 2026-09-22: manager's value is a feature's plan audit; a batch needs no per-task commit / board / watchdog / per-card final audit).
+- You only want an existing plan audited, not implemented → `spec-2nd-opinion` / `spec-3rd-opinion` directly.
+- The implementation phase is already in flight (board / RUN-STATE has in-flight) → invoke that driver directly for the resume (S0 would only point the way, not rerun the preamble).
+- The whole feature is adversarial-grade → grill still runs, but implementation **exits the pipeline** to a standalone tier run (grill Phase 3's routing and confirmation machinery stays as-is) — hours-level attack depth is not carried by the eco economics or this pipeline.
+- Exploratory / throwaway code → no skill needed.
 
 ## Pre-flight — orchestrator tier check (I21)
 
-Before any work, check the model THIS session runs as. 本 skill 的 S3 拆解、S4 brief 組裝與仲裁、S2/S5 路由判斷都在 orchestrator 自己的 context 執行（**帶 `longrun` 旗標時，S3 起草與 S4 審計跑的判斷移入 TOP-pinned dispatch——旗標叫用 = recorded consent；session 保留的判斷：grill 對話、Gate 1/2、路由、user findings 轉達**）；I19 釘住每個 dispatch 的 tier，但沒有東西能升級 session 本身。**Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+Before any work, check the model THIS session runs as. This skill's S3 breakdown, S4 brief assembly and arbitration, and S2/S5 routing judgments all execute in the orchestrator's own context (**with the `longrun` flag, S3 drafting and S4 audit-running judgment move into TOP-pinned dispatches — the flag's invocation = recorded consent; the judgment the session keeps: the grill conversation, Gates 1/2, routing, user-finding relays**); I19 pins every dispatch's tier, but nothing can upgrade the session itself. **Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
 
 > ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
 
-已在本次對話問過（本 skill 或被叫的 skill）→ 跳過，永不重問；handoff 紀錄沿路攜帶，decline 進最終報告揭露。
+Already asked in this conversation (by this skill or an invoked skill) → skip, never re-ask; the handoff record carries it along, and the decline goes into the final report's disclosures.
 
-## S0 — 進場盤點（續跑起點）
+## S0 — entry inventory (the resume starting point)
 
-純文件盤點，一行宣告推斷結果：
+A pure document inventory; announce the conclusion in one line:
 
-- **FINAL SPEC doc 已在** → 走 S1 的 sniff 路線（乾淨 → 宣告跳過 grill，進 S2），並補做不可逆形狀掃描（S1 末段）。
-- **三件套已在** → 已審計回寫過（修正歸因、struck-through 在檔）→ Gate 2；未審計 → S4。
-- **任一 driver 的 board / RUN-STATE in-flight** → 指路：叫該 driver 續作，本 skill 不重跑前置階段。
-- **全無** → S1。
+- **FINAL SPEC doc present** → take S1's sniff route (clean → announce grill skipped, enter S2), plus run the irreversible-shape scan (end of S1).
+- **Trio present** → already audited and written back (amendment attribution, struck-through on file) → Gate 2; not audited → S4.
+- **Any driver's board / RUN-STATE in flight** → point the way: invoke that driver to resume; this skill reruns no preamble stages.
+- **None of these** → S1.
 
-分支優先序（per audit 修訂）：**三件套存在 > spec doc 存在**——兩者並存（S3 後常態）走三件套分支，不重跑 grill、不重拆。文件互相矛盾 / 多份同日 spec 無法判定 → 問一次（罕見）。grill 中斷重進 = 對話即不存在，從 S1 重來（I17）。
+Branch priority (per the audit's revision): **trio present > spec doc present** — when both exist (the norm after S3) take the trio branch; no grill rerun, no re-breakdown. Documents contradicting each other / multiple same-day specs with no way to decide → ask once (rare). A grill interrupted and re-entered = the conversation never existed; restart from S1 (I17).
 
-## S1 — Grill（需要時；Gate 1 在此）
+## S1 — Grill (when needed; Gate 1 lives here)
 
-- 帶 `longrun` 旗標 → grounding 先行委派（見 §longrun）；對話、提問、建議、Gate 1 不變。
-- 進場是**對話需求**（無 doc）→ 需要 grill：critical 謂詞（a silent wrong result MOVES money / CHANGES authorization / IRREVERSIBLY corrupts data）命中 → `adversarial-grill-spec-tdd`；否則 `grill-spec-tdd`。其 Phase 1 的 spec gate 即 **Gate 1**。**grill 只跑 Phase 1（per audit 修訂）**——其 Phase 2（寫 acceptance test）與 Phase 3（叫 tier）由本流程的 S2–S5 取代：test 由下游機械撰寫、路由是本 skill 的 S5 表；唯一例外是全 adversarial feature 出場時的 Phase 3 路由再利用（見 When-NOT）。
-- 進場帶 **doc 宣稱 settled**（user 手上的文件，或 S0 判定已有的 spec doc）→ fuzziness sniff（escalate I20 的形狀）：乾淨 → 宣告跳過 grill；有缺口 → ONE ask（grill 補談，還是 settled 續跑）——settled 成立即續（I12），缺口旗標隨行交給下游。grill gate 落檔的 FINAL SPEC 由建構即已決——sniff 對它靜默通過，不另設旁路。
-- **Gate 1 的包加一行（審計預告，per audit 修訂為條件式）。** grill 的 gate 呈現裡附加：「審計：2nd / 3rd（理由：決定 D_k 帶 IRREVERSIBLE tag）」——**僅在管線續行時出現**（全 adversarial feature 已由 grill Phase 3 出場，不預告不會花的審計）；3rd 的兩倍 TOP 成本在**花錢前**可見、可否決。settled 進場（無 Gate 1）時，本 skill 自行掃 spec doc 的**不可逆形狀**（資料遷移 / DDL、對外契約、安全姿態、錢移動語義），掃描結果分兩支：**不可逆但非全 adversarial** → 3rd 觸發，一行宣告；**全 adversarial 形狀** → 出管道宣告（standalone tier run；escalate 的 adversarial confirm 慣例照家族規則）。user 當場可改（他們的 call 恆成立），不另設 ask。
+- With the `longrun` flag → grounding is delegated first (see §longrun); the conversation, the questions, the recommendations, Gate 1 unchanged.
+- Entry is a **conversational requirement** (no doc) → grill needed: the critical predicate (a silent wrong result MOVES money / CHANGES authorization / IRREVERSIBLY corrupts data) hits → `adversarial-grill-spec-tdd`; otherwise `grill-spec-tdd`. Its Phase 1's spec gate IS **Gate 1**. **Grill runs Phase 1 only (per the audit's revision)** — its Phase 2 (writing the acceptance test) and Phase 3 (invoking a tier) are superseded by this pipeline's S2–S5: the test is written by the downstream machinery, the routing is this skill's S5 table; the sole exception is the Phase 3 routing reuse when an all-adversarial feature exits (see When-NOT).
+- Entry brings a **doc claiming to be settled** (a document in the user's hands, or a spec doc S0 determined present) → fuzziness sniff (escalate I20's shape): clean → announce grill skipped; gaps → ONE ask (grill to fill them, or settled and continue) — settled holds and you continue (I12), the gap flags riding along to the downstream. A FINAL SPEC landed by the grill gate is decided by construction — the sniff passes it silently; no bypass is created.
+- **One added line in the Gate 1 bundle (the audit preview; made conditional by the audit's revision).** Append to grill's gate presentation: "Audit: 2nd / 3rd (reason: decision D_k carries an IRREVERSIBLE tag)" — **present only when the pipeline continues** (an all-adversarial feature already exited via grill Phase 3; don't preview an audit that won't be spent); the 3rd's double-TOP cost is visible and vetoable **before the spend**. On settled entry (no Gate 1), this skill scans the spec doc's **irreversible shapes** itself (data migration / DDL, external contracts, security posture, money-movement semantics), the scan branching two ways: **irreversible but not all-adversarial** → 3rd triggers, announced in one line; **all-adversarial shape** → exit announcement (standalone tier run; escalate's adversarial-confirm convention per family rules). The user may change it on the spot (their call always stands); no separate ask.
 
-## S2 — 尺寸路由
+## S2 — size route
 
-- **多工**：特徵切片、預期 > 1 個自足單元 → 進 S3。**純 bug 清單（multi-unit batch）不在本 skill**——直接導 `spec-tdd` 的 multi-unit run 出場（user 裁定 2026-09-22：manager 的價值在 feature 的計畫審計，batch 走家族既有較輕形狀）。
-- **單元**：單一自足單元 → 跳過 S3（plan under audit = spec doc 本身，S4 照跑）。
-- **adversarial 級** → S2 不重判（per audit 修訂）：grilled 進場已在 Gate 1 由 grill Phase 3 出場；settled 進場由 S1 掃描出場。**晚發現**的 adversarial（S3 critical-surface sniff 全數 pulled、或審計揭示）→ 走 S5 表的出場列。
+- **Multi-task**: feature slices, more than one self-contained unit expected → S3. **A pure bug list (multi-unit batch) is not this skill** — route it straight out to `spec-tdd`'s multi-unit run (user ruling 2026-09-22: manager's value is a feature's plan audit; a batch takes the family's existing lighter shape).
+- **One unit**: a single self-contained unit → skip S3 (the plan under audit = the spec doc itself; S4 still runs).
+- **Adversarial-grade** → S2 does not re-judge (per the audit's revision): grilled entries already exited at Gate 1 via grill Phase 3; settled entries exited by the S1 scan. **Late-discovered** adversarial (S3's critical-surface sniff pulls them all, or the audit reveals one) → take the exit row of the S5 table.
 
-一行宣告 + 一行理由，不問。
+One-line announcement + one-line rationale, no ask.
 
-## S3 — 拆解（僅多工；頂層執筆 — I19(a)）
+## S3 — breakdown (multi-task only; top-authored — I19(a))
 
-依 task-loop **Phase 0 / Pre-flight 5–6** 的格式，由本 session 執筆（planning 不下沉；事實偵察可派 read-only Explore，task-loop 原文允許；**帶 `longrun` 旗標 → 起草委派、session 呈現層審閱——supersede 本行「由本 session 執筆」，見 §longrun**）：
+In the format of task-loop's **Phase 0 / Pre-flight 5–6**, authored by this session (planning never sinks; fact recon may go to a read-only Explore, as task-loop's letter allows; **with the `longrun` flag → drafting delegated, session does presentation-level review — superseding this line's "authored by this session", see §longrun**):
 
-- **權威計畫三件套**：需求本文、決定區（既有決定沉澱為 D1… 續接編號）、任務總表狀態區（全部 pending）。
-- **每 task 一份自足 doc**（欄位照 task-loop Pre-flight 6：目標與非目標、現況錨點 file:line + method 名、設計要點、完整外部契約一次給全、交付檔案清單、驗收標準、風險與回滾）。
-- 總表加 dag 的兩欄：**depends-on** 與**預期改動檔案**——Gate 2 改路由（loop ↔ dag）零成本。
-- **Critical-surface sniff**（Phase 0 機械）：adversarial 級 task 在總表標 pulled/external，standalone 跑，commit 照常落 task 邊界。
-- 檔案路徑依專案慣例（I17：project convention wins）。
+- **The authoritative plan trio**: the requirement body, the decisions section (existing decisions settled as D1… numbering continued), the task-table status section (all pending).
+- **One self-contained doc per task** (fields per task-loop Pre-flight 6: goal and non-goals, current-state anchors file:line + method names, design notes, the complete external contract given in full at once, the deliverable file list, acceptance criteria, risks and rollback).
+- The task table gains dag's two columns: **depends-on** and **expected files** — switching the Gate 2 route (loop ↔ dag) costs zero.
+- **Critical-surface sniff** (Phase 0's machinery): adversarial-grade tasks marked pulled/external in the table, run standalone, commits still landing at task boundaries.
+- File paths follow the project's convention (I17: project convention wins).
 
-## S4 — 獨立審計
+## S4 — independent audit
 
-- 帶 `longrun` 旗標 → 審計跑委派（見 §longrun）。
-- Invoke **`spec-2nd-opinion`**（IRREVERSIBLE 觸發 → **`spec-3rd-opinion`**，預告見 S1）。
-- **brief 的 checklist 追加拆解維度**（2nd-opinion 的 "at minimum" 允許）：task 覆蓋率（每條需求有 task 接）、漏 task、依賴順序正確性、task-doc 自足性、粒度變形、預期檔案欄互斥。
-- 2nd / 3rd-opinion 的機械**原文照跑**：brief 組裝（Step 1，session 的活）、auditor dispatch、merge、disagreement 仲裁、grill-coverage finding 的 user 路由（I12）、回寫（struck-through 備查）、ONE targeted re-audit bound。
-- 單元路線（S3 跳過）：claims-vs-codebase、blueprint-vs-code drift、grill-coverage hunt 照跑——計畫 = spec doc。
-- **收案 stamp（續跑依據，per audit 修訂）。** 合意成立時，session 在計畫文件（三件套或 spec doc）記一行：「per audit (spec-2nd-opinion, YYYY-MM-DD): agreed, no amendments」（有修正時既有回寫已是磁上痕跡）。乾淨合意不留痕 = `/clear` 後與「沒審過」位元組相同——I17 形狀的洞。
+- With the `longrun` flag → the audit run is delegated (see §longrun).
+- Invoke **`spec-2nd-opinion`** (IRREVERSIBLE trigger → **`spec-3rd-opinion`**, previewed in S1).
+- **The brief's checklist gains the decomposition dimensions** (allowed by 2nd-opinion's "at minimum"): task coverage (every requirement has a task), missing tasks, dependency-order correctness, task-doc self-containment, granularity deformation, expected-file column disjointness.
+- 2nd / 3rd-opinion's machinery **runs verbatim**: brief assembly (Step 1, the session's living work), the auditor dispatch, the merge, disagreement arbitration, the grill-coverage finding's user routing (I12), write-back (struck-through for the record), the ONE targeted re-audit bound.
+- Single-unit route (S3 skipped): claims-vs-codebase, blueprint-vs-code drift, grill-coverage hunt all run — the plan = the spec doc.
+- **The close stamp (the resume basis, per the audit's revision).** When agreement holds, the session records one line in the plan document (the trio or the spec doc): "per audit (spec-2nd-opinion, YYYY-MM-DD): agreed, no amendments" (with amendments, the existing write-back is already the on-disk trace). A clean agreement leaving no trace = byte-identical to "never audited" after `/clear` — an I17-shaped hole.
 
-## Gate 2 — 合併開工 gate（唯一自有 ask）
+## Gate 2 — the merged go-ahead gate (the only ask it owns)
 
-一次呈現：
+Presented at once:
 
-1. **最終計畫**——多工：任務總表（id + 白話名稱 + 一行）＋ pulled/external 標記；單元：單元範圍一行。不可逆標記點名。
-2. **審計結論**——verdict、已摺入的修正（歸因「per audit: …」，絕不默默吸收）、殘餘風險。
-3. **實作路由 + 一行理由**（S5 表）。
-4. **開工核准。**
+1. **The final plan** — multi-task: the task table (id + plain-language name + one line each) + pulled/external marks; one unit: the unit scope in one line. Irreversible tags named.
+2. **The audit verdict** — verdict, folded amendments (attributed "per audit: …", never silently absorbed), residual risks.
+3. **The implementation route + one-line rationale** (the S5 table).
+4. **The go-ahead approval.**
 
-- user 修正計畫 → 摺入 + 揭露；實質變更（動到 audited claims）→ 2nd-opinion 的一次 targeted re-audit bound 照用。
-- 路由否決 → 同表重算（例：補「有時間壓力」→ dag eco）。
-- **通過 stamp（per audit 修訂）。** 核可後、S5 叫用前，計畫文件補一行：「Gate 2 approved (YYYY-MM-DD): route = <choice>」——核可只活在對話 = `/clear` 後重問。
-- **Gate 2 未過，不得叫任何實作 skill。**
+- The user amends the plan → fold in + disclose; a substantive change (touching audited claims) → 2nd-opinion's ONE targeted re-audit bound applies.
+- The route vetoed → recompute on the same table (e.g. adding "there is time pressure" → dag eco).
+- **The pass stamp (per the audit's revision).** After approval, before the S5 invocation, the plan document gains one line: "Gate 2 approved (YYYY-MM-DD): route = <choice>" — an approval living only in the conversation = re-asked after `/clear`.
+- **Gate 2 not passed → no implementation skill may be invoked.**
 
-## S5 — 實作交棒
+## S5 — implementation hand-off
 
-| 形狀 | 叫用 |
+| Shape | Invocation |
 |---|---|
-| 單元、非 adversarial | `spec-tdd-supervisor`（requirement doc = spec doc；I17 已滿足；其 pre-flight 照跑） |
-| 多工、預設 | `spec-tdd-task-loop eco <phase>`（序列 = ×1 限額壓力的 429 安全模式；Windows worktree 摩擦是已知 dag knob，預設偏序列） |
-| 多工 + 真 DAG + user 明示時間壓力 | `spec-tdd-task-dag eco <phase>`（其時段模式 ask 照跑，本 skill 不預答） |
-| adversarial 級（晚發現：S3 sniff 全數 pulled、或審計揭示） | 出管道：standalone tier run，doc 交接 |
+| One unit, non-adversarial | `spec-tdd-supervisor` (requirement doc = spec doc; I17 already satisfied; its pre-flight runs as usual) |
+| Multi-task, default | `spec-tdd-task-loop eco <phase>` (serial = the ×1-quota-pressure 429-safe mode; Windows worktree friction is a known dag knob, defaulting to serial) |
+| Multi-task + a true DAG + the user's stated time pressure | `spec-tdd-task-dag eco <phase>` (its own time-band mode ask runs; this skill never pre-answers) |
+| Adversarial-grade (late-discovered: the S3 sniff pulled them all, or the audit revealed one) | out of the pipeline: standalone tier run, doc handover |
 
-- **eco 恒走**（invocation-based consent；supervisor 原生即此形狀）。
-- **叫用 = 交棒。** phase 的續作、watchdog、commit 授權、中途變向、收盤批次審查，全部是目標 skill 的事。`<phase>` 帶 doc 路徑 + 一行 phase 描述（handoff 走 doc path，I19(c)）。
+- **eco always rides** (invocation-based consent; supervisor is natively this shape).
+- **Invocation = hand-off.** The phase's resume, watchdog, commit authorization, mid-run redirection, closing batch review are all the target skill's business. `<phase>` carries the doc path + a one-line phase description (the handoff uses the doc path, I19(c)).
 
-## longrun 模式 — context-longevity 旗標
+## longrun mode — the context-longevity flag
 
-`/spec-tdd-manager longrun` — 選配旗標。**不帶旗標的 run 與前述各節逐 byte 相同**；帶旗標時 S1 grounding、S3 起草、S4 審計跑改為委派形狀；S2、Gate 2、S5、兩個 gate 的呈現與核准不變。動機：**壓低主 session 的 context 面積以走更久**——不是省 token（邊界複製使 total 花費與 wall-clock 上升；帶旗標即承接此 trade）。**旗標叫用 = 對被委派判斷段（S3 起草、S4 仲裁）的 recorded consent**（loop `eco` 同款；Pre-flight 對 session 剩餘判斷照常適用）。
+`/spec-tdd-manager longrun` — an optional flag. **Runs without the flag are byte-identical to the sections above**; with the flag, S1 grounding, S3 drafting, and the S4 audit run become delegated shapes; S2, Gate 2, S5, and the two gates' presentation and approval are unchanged. Motive: **shrink the main session's context footprint so the run lives longer** — not token economy (boundary duplication raises total spend and wall-clock; carrying the flag accepts that trade). **The flag's invocation = recorded consent for the delegated judgment stages (S3 drafting, S4 arbitration)** (loop `eco`'s shape; the Pre-flight keeps applying to the judgment the session still holds).
 
-- **S1 grounding → read-only MID dispatch**（法源：task-loop Phase 0「盤 codebase 錨點可派 read-only Explore 代跑偵查」＋ grill 原文 "(or dispatched)"——grounding 事實蒐集不是 I19(a) 的 planning 對象）。產出**事實摘要落檔**（spec doc 同目錄——settled 進場即其所在；fuzzy 進場為專案 spec 慣例目錄，doc 落檔時同處）：已確立事實每條 `file:line`、相關 symbol/table/config、鄰近慣例、blast-radius 相關表面、**coverage statement（自報沒涵蓋什麼）**；禁止結論與建議——下判斷即規劃下漏。grill 以摘要為底，保留**抽取權**（決策關鍵的特定檔可自讀；例外，非 bulk read 後門）與**續問權**（SendMessage 續問同一 agent；I18 照成立）。**帶旗標重進 + digest 已在 → 重用不重派，一行揭露。**摘要路徑 = S3 brief 輸入、S0 續跑素材。
-- **S3 起草 → TOP-pinned 背景起草 dispatch**（recorded opt-in #1，旗標下 supersede S3 的「由本 session 執筆」；補償 = TOP pin + S4 審計本就攻拆解維度 + Gate 2）。brief = FINAL SPEC 路徑 + 摘要路徑 + Phase 0 / Pre-flight 5–6 格式 + 每卡 sniff + dag 兩欄；三件套與每份 task doc **落磁碟**，外加 **claims 附錄**（可證偽主張 `file:line`，供 S4 brief 引用）。**完成時在計畫文件蓋「draft complete (YYYY-MM-DD)」戳——無戳視為 partial，S0 不送審、續派起草。**adversarial 發現 → STOP 回報（報告即 ask，top 轉達 user；機器 say-so 不啟動）。session 只做**呈現層審閱與修改**（修改 = attributed delta）。**單元路線（S3 跳過）此項不適用。**
-- **S4 審計跑 → TOP-pinned 背景 runner dispatch**（recorded opt-in #2；補償 = TOP pin + I12 硬 carve-out + Gate 2 ＋**獨立性折損知情**：claims 附錄由起草者自撰，受審者對審題的框架力上升——界：checklist 維度 manager 固定、auditor 自擁 (b)(e)(f) 維度、無旗標時 claims 亦為 session 自撰，折損限於 distiller grounding）。runner 從磁碟絕對路徑讀 `spec-2nd-opinion` / `spec-3rd-opinion` SKILL.md **原文照跑**（task-loop 交棒模式，被叫 skill 零改動）；brief 素材 = 三件套 + claims 附錄 + pending decisions，拆解維度照 S4 追加。**findings↔修正↔re-audit 迴圈全在 runner 體內**：findings 落檔（I19(b)）；需改三件套時 top 只搬路徑——一行 SendMessage 給起草 dispatch（有作者 context），改完落檔 + delta 摘要，一行叫 runner 複核；**單元路線無 drafter——spec-doc 修正由 session 做（attributed delta）。**runner 的 announce-to-user 步降級為 session 的 at-dispatch 一行宣告（I19(e) 形狀，揭露）。**RETURN 只有三樣：final plan 路徑、Gate 2 三件套（verdict、已摺入修正歸因、殘餘風險）、user 決策類 findings 原文**（I12：runner 永不代決，轉達 user）。收案 stamp 由 runner 寫，session 驗戳才進 Gate 2。**Gate 2 當場實質變更的 targeted re-audit：session 直接派 fresh scoped auditor**（2nd-opinion 的 deliberate-fresh 字面）。環境前提 `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3`（runner 體內要派 auditor child；loop 同款）。**溢位 = STOP 回報**（user 裁定 2026-09-24）：嚴禁 truncate、嚴禁把三件套 digest 進 brief（no-digests 規則）；session 接手裁量——/clear 分段或不帶旗標重跑該段。
-- **靜默死亡紀律**（三種 dispatch 一體，2nd-opinion 級：粗界——runner 界 tens-of-minutes——＋ ONE fresh re-dispatch（nothing inherited，揭露）＋ 停等）：**死 ≠ 無 findings**。
-- **不可委派清單（恆在 session）**：grill 對話與建議、Gate 1、S2 路由、user 決策類 findings 的轉達、Gate 2 呈現與核准、S5 交棒。
-- 續跑時旗標重帶；摘要與 findings 文件都是 S0 的磁上素材。**混合模式續跑（旗標沒重帶）→ 一行揭露，不擋。**
+- **S1 grounding → read-only MID dispatch** (legal basis: task-loop Phase 0's "inventory codebase anchors — a read-only Explore may run the recon" + grill's letter "(or dispatched)" — grounding's fact gathering is not I19(a)'s planning object). The output is a **facts digest landed on disk** (same directory as the spec doc — where a settled entry already keeps it; for fuzzy entry, the project's spec-convention directory, the same place the doc lands): each established fact with `file:line`, relevant symbol/table/config, neighboring conventions, blast-radius surfaces, a **coverage statement (self-reporting what it does NOT cover)**; conclusions and recommendations forbidden — judging is planning leaking downward. Grill works from the digest, keeping **pull rights** (decision-critical specific files may be read directly; an exception, not a bulk-read backdoor) and **follow-up rights** (SendMessage to keep querying the same agent; I18 stands as usual). **Re-entering with the flag + digest already present → reuse, don't re-dispatch, disclosed in one line.** The digest path = an S3 brief input, S0 resume material.
+- **S3 drafting → TOP-pinned background drafter dispatch** (recorded opt-in #1, superseding S3's "authored by this session" under the flag; compensation = the TOP pin + the S4 audit already attacking the decomposition dimensions + Gate 2). Brief = the FINAL SPEC path + the digest path + the Phase 0 / Pre-flight 5–6 format + the per-card sniff + the two dag columns; the trio and every task doc are **written to disk**, plus a **claims annex** (falsifiable claims with `file:line`, for the S4 brief to reference). **On completion, stamp "draft complete (YYYY-MM-DD)" in the plan document — no stamp = partial; S0 sends nothing to audit and re-dispatches the drafter.** An adversarial discovery → STOP and report (the report IS the ask; the top relays to the user; a machine's say-so never launches). The session does **presentation-level review and amendments only** (amendments = attributed deltas). **The single-unit route (S3 skipped) does not use this item.**
+- **S4 audit run → TOP-pinned background runner dispatch** (recorded opt-in #2; compensation = the TOP pin + the I12 hard carve-out + Gate 2 + **an informed-consent line on the independence regression**: the claims annex is authored by the drafter, raising the auditee's framing power over the audit's questions — bounded by: the checklist dimensions are manager-fixed, the auditor owns its (b)(e)(f) dimensions, and without the flag the claims are session-authored too, so the regression is limited to the distiller grounding). The runner reads `spec-2nd-opinion` / `spec-3rd-opinion`'s SKILL.md from disk by absolute path and **runs it verbatim** (the task-loop handoff pattern; the invoked skills untouched); brief material = the trio + the claims annex + pending decisions, the decomposition dimensions added as in S4. **The findings↔amend↔re-audit loop lives entirely inside the runner**: findings land as files (I19(b)); when the trio needs changes the top only relays paths — a one-line SendMessage to the drafter dispatch (which holds the author's context), the change lands on disk + a delta summary, a one-line call for the runner to re-check; **the single-unit route has no drafter — spec-doc amendments are made by the session (attributed deltas)**. The runner's announce-to-user step degrades to the session's one-line at-dispatch announcement (the I19(e) shape, disclosed). **The RETURN is exactly three things: the final plan path, the Gate 2 triple (verdict, folded amendments with attribution, residual risks), and user-owned findings verbatim** (I12: the runner never decides; relay to the user). The close stamp is runner-written; the session verifies the stamp before Gate 2. **A targeted re-audit for a substantive change made AT Gate 2: the session dispatches a fresh scoped auditor directly** (2nd-opinion's deliberate-fresh letter). Environment premise `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=3` (the runner dispatches an auditor child internally; the loop's same requirement). **Overflow = STOP and report** (user ruling 2026-09-24): truncate-never; never digest the trio into the brief (the no-digests rule); the session arbitrates — /clear between stages, or re-run that leg without the flag.
+- **Silent-death discipline** (all three dispatches alike, 2nd-opinion class: coarse bound — the runner's in tens-of-minutes — + ONE fresh re-dispatch (nothing inherited, disclosed) + stall-report): **dead ≠ no findings**.
+- **The non-delegable list (always in the session)**: the grill conversation and its recommendations, Gate 1, S2 routing, the relaying of user-owned findings, Gate 2's presentation and approval, the S5 hand-off.
+- On resume, re-carry the flag; the digest and findings documents are S0's on-disk material. **Mixed-mode resume (the flag not re-carried) → one-line disclosure, not blocking.**
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---|---|
-| 本 skill 親手寫 acceptance test / 深審 / 實作 | Sequence-and-route-only——機械在被叫的 skill 裡；越權即走樣 |
-| 先審高階 blueprint，再讓 Phase 0 重拆重審 | 先拆再審：審的是三件套本體；Phase 0 由進場條件跳過，每個多工 phase 省一道 TOP 審查 |
-| Gate 2 未過就叫實作 skill | 開工 gate 是唯一實作授權點（never-code-before-approval 的家族落點） |
-| 3rd 升級在審計後才揭露 | Gate 1 的包先行預告（settled 進場則一行宣告）——花錢前可見可否決 |
-| 審計未合意（disagreement 未決）就進 Gate 2 | 2nd-opinion 的 gate 是合意不是報告；未合意先仲裁或上交 |
-| 對已落檔 spec 重新盤問（沒跑 sniff） | I20：乾淨即續行；user 的 settled call 成立 |
-| grill 後照著它的 Phase 2/3 跑（寫 test、直叫 tier） | grill 只跑 Phase 1（gate = Gate 1）；Phase 2/3 由 S2–S5 取代——唯一例外是 adversarial 出場的路由再利用（per audit 修訂） |
-| 純 bug 清單導入 loop eco | 出場：`spec-tdd` multi-unit run（user 裁定 2026-09-22）；batch 不需要 per-task commit / board / watchdog |
-| 磁上已有產物還重跑前置階段 | S0：落檔即存在，續跑不重做 |
-| 自行加第三個 gate（拆解後再確認一次） | 兩個 gate 是設計；任務總表併入 Gate 2 呈現 |
-| eco 沒帶 loop/dag token | 叫本 skill = 選 eco 經濟；token 恒帶，phase 報告照目標 skill 揭露義務 |
-| adversarial 級硬塞 eco 管道 | 出管道 standalone——小時級攻擊深度不在承載範圍 |
-| longrun 下 session 自己 bulk-read codebase（繞過 digest） | digest 為底、重用不重派；targeted read 是決策關鍵單檔的例外，不是 bulk 後門 |
-| runner 在自己體內消化 user 決策類 findings | I12 carve-out：此類 findings 原文必須回 top 轉達；runner 永不代決 |
-| 委派 dispatch 靜默死亡被當「無 findings / 已收案」 | ONE fresh re-dispatch + 揭露；仍死停等——死 ≠ 無 findings |
+| This skill personally writing acceptance tests / deep-reviewing / implementing | Sequence-and-route-only — the machinery lives in the invoked skills; exceeding authority deforms the run |
+| Auditing the high-level blueprint first, then letting Phase 0 re-break and re-audit it | Break down first, then audit: what's audited is the trio itself; Phase 0 skips by its entry condition — every multi-task phase saves one TOP audit |
+| Invoking an implementation skill before Gate 2 passes | The go-ahead gate is the only implementation authorization point (the family-side landing of never-code-before-approval) |
+| The 3rd upgrade disclosed only after the audit | The Gate 1 bundle previews it first (settled entry: a one-line announcement) — visible and vetoable before the spend |
+| Entering Gate 2 with the audit not in agreement (a disagreement unresolved) | 2nd-opinion's gate is agreement, not a report; without agreement, arbitrate first or go up |
+| Re-interrogating an on-disk spec (without running the sniff) | I20: clean → proceed; the user's settled call stands |
+| After grill, following its Phase 2/3 (writing tests, invoking a tier directly) | Grill runs Phase 1 only (gate = Gate 1); Phases 2/3 are superseded by S2–S5 — the sole exception is the routing reuse on an adversarial exit (per the audit's revision) |
+| A pure bug list routed into loop eco | Out it goes: `spec-tdd`'s multi-unit run (user ruling 2026-09-22); a batch needs no per-task commit / board / watchdog |
+| Re-running preamble stages when on-disk artifacts already exist | S0: landed = exists; a resume doesn't redo |
+| Adding a third gate yourself (one more confirmation after the breakdown) | Two gates is the design; the task table rides Gate 2's presentation |
+| eco without the loop/dag token | Invoking this skill = choosing eco economics; the token always rides; the phase report follows the target skill's disclosure duties |
+| An adversarial-grade feature forced into the eco pipeline | Out of the pipeline, standalone — hours-level attack depth is out of scope |
+| Under longrun, the session bulk-reading the codebase itself (bypassing the digest) | The digest is the base; reuse, don't re-dispatch; a targeted read is the exception for decision-critical single files, not a bulk backdoor |
+| A runner digesting user-owned findings inside itself | The I12 carve-out: such findings' verbatim text must return to the top for relaying; the runner never decides |
+| A delegated dispatch dying silently and being read as "no findings / closed" | ONE fresh re-dispatch + disclosure; still dead → stall-report — dead ≠ no findings |
 
 ## Red Flags — STOP
 
-- 正在寫 acceptance test、派 implementer、深讀交付物 → STOP——不是本 skill 的活。
-- Gate 1 未過就進 S3 拆解 → STOP——grill gate 是拆解前提。
-- Gate 2 未過就叫任何實作 skill——supervisor / task-loop / task-dag **或任何 tier**（grill Phase 3 直叫 tier 同罪，per audit 修訂）→ STOP。
-- 磁上無 spec、sniff 也沒跑就跳過 grill → STOP。
-- 不可逆標籤在案卻只排 2nd（無 user 否決紀錄）→ STOP。
-- 帶著未收斂的審計 disagreement 開工 → STOP。
-- 發現自己正在發明流程表以外的階段或 ask → STOP——流程表是閉集：S0–S5 + 兩個 gate，其餘交給被叫的 skill。
-- `longrun` 旗標下，session 正在親自偵查（S3 前讀整片 code）或重組 S4 brief 全文 → STOP——旗標的目的正在被自己吃掉（digest / claims 附錄就是為此存在）。
+- Writing an acceptance test, dispatching an implementer, deep-reading deliverables → STOP — not this skill's job.
+- Entering S3's breakdown before Gate 1 passes → STOP — the grill gate is the breakdown's premise.
+- Invoking any implementation skill before Gate 2 passes — supervisor / task-loop / task-dag **or any tier** (grill Phase 3 invoking a tier directly is equally guilty, per the audit's revision) → STOP.
+- No spec on disk and no sniff run, skipping grill → STOP.
+- An irreversible tag on record but only a 2nd scheduled (no user veto on record) → STOP.
+- Starting work with an unconverged audit disagreement → STOP.
+- Catching yourself inventing a stage or an ask outside the running order → STOP — the running order is a closed set: S0–S5 + two gates; everything else belongs to the invoked skills.
+- Under the `longrun` flag, the session personally doing recon (reading whole swaths of code before S3) or reassembling the S4 brief's full text → STOP — the flag's purpose is being eaten by its own hands (the digest / claims annex exist exactly for this).

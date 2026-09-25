@@ -1,6 +1,6 @@
 ---
 name: spec-tdd-quickfix
-description: Use when the user is LIVE-TESTING the product (UAT, 場測) and streaming small fix requests — "快修一下", "quick fix", "小修", "這裡改個字" — one at a time or a handful, while they keep testing. Triggers on time-pressed small defects, cosmetic/string/config tweaks, wiring restorations too small for spec-tdd-lite's write-test-first cycle. NOT for anything needing an acceptance test.
+description: Use when the user is LIVE-TESTING the product (UAT, live field testing) and streaming small fix requests — "quick fix", "small tweak", "change a word here" — one at a time or a handful, while they keep testing. Triggers on time-pressed small defects, cosmetic/string/config tweaks, wiring restorations too small for spec-tdd-lite's write-test-first cycle. NOT for anything needing an acceptance test.
 ---
 
 # spec-tdd-quickfix
@@ -11,7 +11,7 @@ description: Use when the user is LIVE-TESTING the product (UAT, 場測) and str
 
 The user is testing the product and finding small defects in real time. Speed is the requirement; **the user's own live testing is the acceptance net** — that is what makes skipping test-first honest rather than a green lie. The orchestrator:
 
-1. **One-sentence fix plan first, never code** — file + intent. The user's "好 / go" is the only gate (their standing never-code-before-approval rule; there is no doc, no Gate 2).
+1. **One-sentence fix plan first, never code** — file + intent. The user's "go" is the only gate (their standing never-code-before-approval rule; there is no doc, no Gate 2).
 2. **Dispatches ONE subagent per fix (MID tier, stated on the dispatch — I19).** Brief = scope fence (exact files/regions) + decisions already made (the agent must NOT re-litigate; unknowns → report, never guess-code).
 3. **Verifies personally** — reads every hunk of the diff, compiles, and per the tiering below may re-run scoped tests. NEVER trusts the agent's self-report.
 

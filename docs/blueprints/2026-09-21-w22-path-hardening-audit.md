@@ -1,82 +1,82 @@
-# 2026-09-21 — W22 絕對路徑靜默成功事故:PHASE BOUNDARIES 路徑硬規範(受審計畫)
+# 2026-09-21 — W22 silent-success absolute-path incident: the PHASE BOUNDARIES path hard rule (the plan under audit)
 
-**Status**: 已施工(2026-09-21)— user 決策:1 = **全改(類級退役,六檔)**、2 = **A(不加幻影樹偵測)**、3 = **授權施工**;完工後 spawn subagent audit,**雙方同意 → commit(簡短)+ tag v1.24.0 + release + push + 本地安裝**(user 明示授權的條件式 release 鏈)。
+**Status**: implemented (2026-09-21) — user decisions: 1 = **change them all (class-level retirement, six files)**, 2 = **A (no phantom-tree detection added)**, 3 = **implementation authorized**; after completion, spawn a subagent audit; **both sides agree → commit (short) + tag v1.24.0 + release + push + local install** (the conditional release chain explicitly authorized by the user).
 
-**Orchestrator tier 披露**:本 session 跑非頂層模型(`glm-5.3-flash`);I21 ask 已問,使用者答 **ignore** — recorded decline,依 skill 規定列入最終報告披露。
+**Orchestrator tier disclosure**: this session runs a non-top model (`glm-5.3-flash`); the I21 ask was surfaced and the user answered **ignore** — recorded decline, listed in the final report's disclosures per the skill's rules.
 
 ---
 
-## 1. Background(背景與既成事實,各附證據)
+## 1. Background (context and established facts, each with evidence)
 
-### 事故(2026-09-18,dtms-core repo)
+### The incident (2026-09-18, dtms-core repo)
 
-> 事實來源:另一 session 的事故報告。dtms-core 為外部 repo,本 repo(spec-tdd-skill)無法重驗其現場 — auditor 取信即可,並在報告中聲明「incident facts taken as given」。
+> Source of facts: another session's incident report. dtms-core is an external repo; this repo (spec-tdd-skill) cannot re-verify the scene — the auditor takes the facts as given and states "incident facts taken as given" in the report.
 
-- W22 re-test 批次由 `spec-tdd-task-loop` 派工;level-1 實作 subagent 開工第一條指令把 repo 根目錄手打成 `E:/sourceCode/...`(正確為 `E:/@sourceCode` — 掉了 `@`)。
-- 指令形如:`mkdir -p "E:/sourceCode/.../.spec-tdd/W22" && date > ".../W22/HEARTBEAT"`。
-- `mkdir -p` + 輸出重定向讓任何路徑「靜默成功」→ 整棵平行目錄樹憑空被建,HEARTBEAT 寫進錯誤位置(watchdog 若查正確路徑會看到 stale 心跳)。
-- 同一條指令以 `2>/dev/null` 讀 `POLICY-W22.md`,因同樣的錯誤路徑得到 ABSENT 假陰性(該次碰巧結論正確 — 真實路徑本來就沒有 POLICY 檔)。
-- 當批其餘產物全落在正確路徑,零資料損失。
+- The W22 re-test batch was dispatched by `spec-tdd-task-loop`; the level-1 implementation subagent's very first instruction hand-typed the repo root as `E:/sourceCode/...` (correct: `E:/@sourceCode` — the `@` was dropped).
+- The instruction looked like: `mkdir -p "E:/sourceCode/.../.spec-tdd/W22" && date > ".../W22/HEARTBEAT"`.
+- `mkdir -p` + output redirection make any path "silently succeed" → an entire parallel directory tree was materialized out of thin air, the HEARTBEAT written to the wrong location (a watchdog checking the correct path would see a stale heartbeat).
+- The same instruction read `POLICY-W22.md` with `2>/dev/null`, getting an ABSENT false negative from the same wrong path (which happened to be the correct conclusion that time — the real path had no POLICY file to begin with).
+- The rest of that batch's artifacts all landed at the correct paths; zero data loss.
 
-### 根因判定(提案 session 的主張)
+### Root-cause finding (the proposing session's claim)
 
-SKILL.md 的 heartbeat 指示寫的是相對形式,但沒有禁止 agent 自行組絕對路徑;「create the directory if missing」+ `mkdir -p` 把打錯的路徑 materialize 成真。
+SKILL.md's heartbeat instruction was written in relative form but never banned the agent from composing absolute paths itself; "create the directory if missing" + `mkdir -p` materializes the typo'd path into reality.
 
-### 現況事實(orchestrator 2026-09-21 讀檔建立;auditor 重驗)
+### Current-state facts (established by the orchestrator's 2026-09-21 file reads; re-verified by the auditor)
 
-- `skills/spec-tdd-task-loop/SKILL.md` L144–151:PHASE BOUNDARIES 段(level-1 dispatch template 內),heartbeat 指示 = L146–147「1) touch `.spec-tdd/<task>/HEARTBEAT` (create the directory if missing; touch or an equivalent write)…」;同段 item 2 = POLICY-<task>.md 重讀。
-- `skills/spec-tdd-supervisor/SKILL.md` L161–168:同形狀段落,`<unit>` 版;heartbeat 指示 = L163–164。
-- 兩段現況均為相對路徑形式,無任何絕對路徑禁令文字。
-- 相鄰教義(與本修法互動,非修法對象):task-loop L73、supervisor L57 均要求 dispatch prompt 內「doc 路徑縮寫/template `{family root}` 還原為**絕對路徑**(sub-agent 的 cwd 不可依賴)」;兩 template 並有 `TASK DOC: {absolute path}` / `REQUIREMENT DOC: {absolute path}` 欄位。
+- `skills/spec-tdd-task-loop/SKILL.md` L144–151: the PHASE BOUNDARIES block (inside the level-1 dispatch template); the heartbeat instruction = L146–147 "1) touch `.spec-tdd/<task>/HEARTBEAT` (create the directory if missing; touch or an equivalent write)…"; item 2 in the same block = the POLICY-<task>.md re-read.
+- `skills/spec-tdd-supervisor/SKILL.md` L161–168: the same-shaped block, the `<unit>` version; heartbeat instruction = L163–164.
+- Both blocks are currently in relative-path form, with no absolute-path ban wording anywhere.
+- Adjacent doctrine (interacting with this fix, not its object): task-loop L73 and supervisor L57 both require that the dispatch prompt restore "doc path shorthands / the template's `{family root}` to **absolute paths** (the sub-agent's cwd cannot be relied on)"; both templates also carry `TASK DOC: {absolute path}` / `REQUIREMENT DOC: {absolute path}` fields.
 
-## 2. The plan under audit(受審計畫,原樣,不預辯護)
+## 2. The plan under audit (verbatim, no pre-defense)
 
-兩處同樣的 PHASE BOUNDARIES 段,同樣修法:
+Two identical PHASE BOUNDARIES blocks, one fix:
 
-1. `skills/spec-tdd-task-loop/SKILL.md`(~L146,heartbeat 指示緊後)
-2. `skills/spec-tdd-supervisor/SKILL.md`(~L163,heartbeat 指示緊後)
+1. `skills/spec-tdd-task-loop/SKILL.md` (~L146, immediately after the heartbeat instruction)
+2. `skills/spec-tdd-supervisor/SKILL.md` (~L163, immediately after the heartbeat instruction)
 
-修法內容:加一句硬性規範,建議英文措辭(與 template 語言一致):
+The fix: add one hard rule, proposed English wording (consistent with the template's language):
 
 > ~~"Resolve `.spec-tdd/...` against the repo-root cwd and use this RELATIVE form verbatim for the touch, the POLICY re-read, and every scratch write; NEVER hand-compose an absolute path — mkdir -p plus output-redirect makes a typo'd absolute path silently succeed, materializing a parallel tree whose heartbeat the watchdog never sees (2026-09-18 W22 incident)."~~
 >
-> **[已取代 — audit #1 C5(ii) refuted:「resolve against the repo-root cwd」倚賴家族教義宣告不可靠的 cwd,wrong-cwd 洞未關且 dag worktree 模式錨點錯誤;後續五項修正見第 7 節,定稿見第 8 節]**
+> **[Superseded — audit #1 C5(ii) refuted: "resolve against the repo-root cwd" leans on the very cwd the family doctrine declares unreliable; the wrong-cwd hole stays open and the dag worktree mode gets the wrong anchor; the five follow-up amendments are in section 7, the final text in section 8]**
 
-提案者自述的重點:須涵蓋同一個 phase-boundary 區塊裡的 POLICY 重讀與**所有 scratch 寫入**,不只 heartbeat 本身。
+The proposer's own emphasis: it must cover the POLICY re-read and **all scratch writes** in the same phase-boundary block, not just the heartbeat itself.
 
-## 3. Claims to verify(可證偽主張,各附指標)
+## 3. Claims to verify (falsifiable, each with an indicator)
 
-- **C1(task-loop 現況)**:`skills/spec-tdd-task-loop/SKILL.md` 的 PHASE BOUNDARIES 段位於 L144–151,heartbeat 指示文字如第 1 節所引,段內無絕對路徑禁令。
-- **C2(supervisor 現況)**:`skills/spec-tdd-supervisor/SKILL.md` 的對應段位於 L161–168,同形狀 `<unit>` 版。
-- **C3(根因對應)**:現行兩段文字確實存在「agent 可自行組絕對路徑且 `mkdir -p`/重定向使 typo 靜默成功」的空間 — 即提案指出的根因在文本層面成立。
-- **C4(涵蓋面)**:上述兩檔是否為此 hazard 在本家族 repo 的(唯一)承載面?至少檢查:`skills/spec-tdd-task-dag/SKILL.md`(平行 overlay,含 worktree 波次)、`skills/PROTOCOL.md`、其餘 skills 中同型 heartbeat / `.spec-tdd/` scratch 寫入指示(如 task-loop template RETURN 的 "full logs to scratch files under `.spec-tdd/`"、supervisor template 的 "WRITE the full report to `.spec-tdd/<unit>/REPORT.md`")。修法只改兩檔是否留下兄弟洞?
-- **C5(措辭副作用)**:提案措辭與既有「路徑縮寫還原為絕對路徑(cwd 不可依賴)」教義的互動 — "NEVER hand-compose an absolute path" 的管轄範圍是否清楚限於 `.spec-ttd/…`(否則與 TASK DOC / FAMILY FILES 欄位的絕對路徑指示衝突);「resolve against the repo-root cwd」的前提與「sub-agent cwd 不可依賴」教義是否自洽(cwd 非 repo root 時,相對形式 + mkdir -p 仍會在錯誤位置 materialize);插入位置(「緊後」= item 1 之後 vs 整段尾)對 C4/涵蓋重點的影響。
-- **C6(drift)**:行號與引文 vs 兩檔磁碟現況;`git log` 近期 commit 是否動過這兩段(本 repo 最近 v1.23.0 動過 supervisor)。
+- **C1 (task-loop current state)**: the PHASE BOUNDARIES block of `skills/spec-tdd-task-loop/SKILL.md` sits at L144–151, the heartbeat instruction reads as quoted in section 1, and the block contains no absolute-path ban.
+- **C2 (supervisor current state)**: the corresponding block of `skills/spec-tdd-supervisor/SKILL.md` sits at L161–168, the same-shaped `<unit>` version.
+- **C3 (root-cause correspondence)**: the two current blocks genuinely leave room for "the agent may compose absolute paths itself and `mkdir -p`/redirection makes the typo silently succeed" — i.e. the proposed root cause holds at the text level.
+- **C4 (coverage)**: are those two files the (only) carriers of this hazard in the family repo? At minimum check: `skills/spec-tdd-task-dag/SKILL.md` (the parallel overlay, worktree waves), `skills/PROTOCOL.md`, and heartbeat / `.spec-tdd/` scratch-write instructions of the same type in the other skills (e.g. task-loop's template RETURN "full logs to scratch files under `.spec-tdd/`", supervisor's template "WRITE the full report to `.spec-tdd/<unit>/REPORT.md`"). Does fixing only two files leave a sibling hole?
+- **C5 (wording side-effects)**: the proposal's interaction with the existing "restore path shorthands to absolute paths (cwd unreliable)" doctrine — is the jurisdiction of "NEVER hand-compose an absolute path" clearly limited to `.spec-tdd/…` (otherwise it collides with the TASK DOC / FAMILY FILES fields' absolute-path instructions); is "resolve against the repo-root cwd" consistent with the "sub-agent cwd is unreliable" doctrine (when cwd ≠ repo root, relative form + mkdir -p still materializes in the wrong place); the insertion point ("immediately after" = after item 1 vs. the block's end) and its effect on C4 / the coverage emphasis.
+- **C6 (drift)**: line numbers and quotations vs. the two files' on-disk state; whether recent `git log` commits touched these blocks (this repo's recent v1.23.0 touched supervisor).
 
-## 4. Checklist(auditor 至少執行)
+## 4. Checklist (the auditor executes at minimum)
 
-(a) 逐主張驗證;(b) blueprint-vs-code drift(日期/commit 對照);(c) cross-item 互動風險(含 C5 的教義張力、worktree 模式若相關);(d) 對修法整體的 verdict + 最強反論(例:指示文本是否為正確的修補層 — 相對形式是否仍有 wrong-cwd 洞;有無更強形狀如 template 直接給出逐字指令);(e) 一個無人列過的風險。
+(a) verify each claim; (b) blueprint-vs-code drift (dates/commits cross-checked); (c) cross-item interaction risks (incl. C5's doctrinal tension, worktree mode if relevant); (d) a verdict on the fix as a whole + the strongest counter-argument (e.g. is instruction text the right repair layer — does the relative form still have a wrong-cwd hole; is there a stronger shape, like the template handing over a verbatim instruction directly); (e) one risk nobody listed.
 
-## 5. Pending user decisions(auditor 只可標註後果,不代判)
+## 5. Pending user decisions (the auditor may only annotate consequences, never decide)
 
-- 是否採用本修法,以及最終措辭/插入位置(含 audit 修正案的取捨)。
-- 版本號與 commit:一律 user 手動;本 session 永不 git commit。
+- Whether to adopt this fix, and the final wording / insertion point (incl. choosing among the audit's amendments).
+- Version number and commit: always the user's manual act; this session never git-commits.
 
-## 6. Audit record(回填區)
+## 6. Audit record (fill-in section)
 
-- 2026-09-21 **Audit #1 完成**(read-only TOP,背景)。判決:C1/C2/C3/C6 confirmed;C3 且被評為 understated(家族 cwd 教義正向推向手組絕對路徑);C4 partially — heartbeat/POLICY 文字僅在兩檔,但同類表面另存(supervisor L267 FINAL-AUDIT 寫入、spec-tdd L82、coverage L75、adversarial L94/L100;task-dag L42 沿用 template 故編輯自動流入,L49 worktree 模式構成陷阱);C5(i) partially(NEVER 未限域)、C5(ii) refuted(cwd-resolution 與「cwd 不可依賴」教義矛盾 + wrong-cwd 洞 + dag worktree 錨點錯誤)、C5(iii) partially(item 1 內放置誤導管轄)。Position:方向與兩處錨點同意、措辭 as-is 不同意 — 五項必要修正。**Orchestrator 仲裁:五項全採納**(見第 7 節修正後文本)。
-- 2026-09-21 **Re-audit #2 已派**(fresh,read-only TOP,scoped to 修正後文本 + 分歧史)。結果待通知。
-- 2026-09-21 **Re-audit #2 完成**。判決:R1/R2/R4 confirmed(雙洞關閉、與絕對路徑欄位零衝突、bare-relative 讀法被三重訊號擋下、ABSENT 語意可執行且保留 fast path);R3/R5/R6 partially — dag wave 模式文本正確但缺 dispatcher 側填充規則(雙重故障靜默路徑)、L261 brief inventory 未擴充(死結風險)、分離符與 join 未言明。**新風險(e)**:PATH RULE 的 "in this prompt" 結構性停在 nesting 邊界 — level-1 組 level-2 brief 用的是 tier SKILL.md 的 handoff template,其 `.spec-tdd/` shorthand 仍無錨,write-heavy 層正是事故面。**Position:endorse the amended plan** — A1 必要(dispatcher 填充規則:task-loop L73 / supervisor L57 / dag L42)、A2 強烈建議(item 3 加向下攜帶句)、A3 建議(L261 inventory 加 FINAL-AUDIT 路徑)、A4 cosmetic("; 3)" 分離符 + "joined with a `/`")。**Orchestrator 仲裁:A1–A4 全採納。Audit bound 已達(audit + 一次 re-audit),不再有下一輪。**
+- 2026-09-21 **Audit #1 complete** (read-only TOP, background). Verdict: C1/C2/C3/C6 confirmed; C3 moreover rated understated (the family's cwd doctrine actively pushes toward hand-composed absolute paths); C4 partially — the heartbeat/POLICY wording lives in only two files, but same-species surfaces exist elsewhere (supervisor L267 FINAL-AUDIT write, spec-tdd L82, coverage L75, adversarial L94/L100; task-dag L42 reuses the template so the edit flows in automatically, and its L49 worktree mode constitutes a trap); C5(i) partially (NEVER unscoped), C5(ii) refuted (cwd-resolution contradicts the "cwd unreliable" doctrine + the wrong-cwd hole + the wrong dag worktree anchor), C5(iii) partially (placement inside item 1 misleads jurisdiction). Position: agree with the direction and the two anchor points, disagree with the wording as-is — five required amendments. **Orchestrator arbitration: all five adopted** (see the amended text in section 7).
+- 2026-09-21 **Re-audit #2 dispatched** (fresh, read-only TOP, scoped to the amended text + the disagreement history). Results pending notification.
+- 2026-09-21 **Re-audit #2 complete**. Verdict: R1/R2/R4 confirmed (both holes closed, zero conflict with the absolute-path fields, the bare-relative reading blocked by three signals, ABSENT semantics executable with the fast path preserved); R3/R5/R6 partially — the dag wave-mode text correct but missing the dispatcher-side fill rule (a double-fault silent path), the L261 brief inventory not extended (deadlock risk), the separator and join left unstated. **New risk (e)**: PATH RULE's "in this prompt" structurally stops at the nesting boundary — the level-1 brief for level-2 uses the tier SKILL.md's handoff template, whose `.spec-tdd/` shorthand is still unanchored, and the write-heavy layer is exactly the incident's surface. **Position: endorse the amended plan** — A1 required (dispatcher fill rule: task-loop L73 / supervisor L57 / dag L42), A2 strongly recommended (item 3 gains a carry-down sentence), A3 recommended (L261 inventory gains the FINAL-AUDIT path), A4 cosmetic ("; 3)" separator + "joined with a `/`"). **Orchestrator arbitration: A1–A4 all adopted. The audit bound is reached (audit + one re-audit); no further round.**
 
-## 6.5 施工後 audit(audit #3,2026-09-21)
+## 6.5 Post-implementation audit (audit #3, 2026-09-21)
 
-- 施工後 read-only TOP audit(審工作樹 vs 藍圖 §7/§8 + user 全改範圍):**P1–P5 全部 confirmed;position = agree-to-release**。兩處與藍圖字面的偏差經獨立驗證為 substance-preserving 且更正確(supervisor 欄位不可能有 dag-wave 模式故刪子句;dag WAVE 行補理由)。CHANGELOG under-claim nit(ABSENT 硬化只歸 loop、漏 supervisor)——**已依 audit 指正修正**(commit 前)。
-- **P6 殘餘風險(記錄在案,下個版本處理)**:tier skill 的 multi-unit wave scratch-copy 位置未釘死 — 若 copy 切在 repo 工作樹**內**,`git rev-parse --show-toplevel` 自 copy 內會對父 repo 成功,handoff 的分支條件("in a git repo/worktree: rev-parse must equal it; otherwise pwd-inside")產生歧義:字面讀者會對**正確填寫**的 SCRATCH ROOT STOP(該波每張卡 fail-stop 死鎖)。最壞是 fail-stop 或 run.log 落錯,不是本修法針對的靜默幻影樹,故不阻擋本版。**廉價修法(留給 future release)**:一句釘死 wave copies 切在 repo 工作樹外,或把分支條件改為 "SCRATCH ROOT carries no `.git` of its own → pwd branch"。次要想(弱):task-loop 的唯讀 top-side dispatch(Phase 0 plan-review、收盤批次審查)的 heartbeat 訊號無文字層錨定的路徑 — 非本次改動的退化,同屬「未錨定的被派工寫入者」物種。
-- **Release 鏈執行**:雙方同意(auditor agree-to-release + orchestrator 同意,含兩文件修正)→ commit(簡短)+ tag v1.24.0 + GitHub release + push + `cp -r skills/* ~/.claude/skills/`(user 於決策 3 明示授權)。
+- Post-implementation read-only TOP audit (working tree vs. blueprint §7/§8 + the user's change-them-all scope): **P1–P5 all confirmed; position = agree-to-release**. Two deviations from the blueprint's letter were independently verified as substance-preserving and more correct (the supervisor field can never carry a dag-wave mode, so the clause was dropped; the dag WAVE line gained its rationale). CHANGELOG under-claim nit (the ABSENT hardening attributed to loop only, supervisor omitted) — **fixed per the audit's correction** (before commit).
+- **P6 residual risk (on the record, next release)**: the tier skills' multi-unit wave scratch-copy location is not pinned — if a copy is cut **inside** the repo working tree, `git rev-parse --show-toplevel` from inside the copy succeeds against the parent repo, and the handoff's branch condition ("in a git repo/worktree: rev-parse must equal it; otherwise pwd-inside") turns ambiguous: a literal reader would STOP on a **correctly filled** SCRATCH ROOT (every card of that wave fail-stop deadlocks). The worst case is fail-stop or a run.log in the wrong place — not the silent phantom tree this fix targets — so it doesn't block this release. **Cheap fix (left for a future release)**: one sentence pinning wave copies outside the repo working tree, or changing the branch condition to "SCRATCH ROOT carries no `.git` of its own → pwd branch". Secondary thought (weak): the top-side read-only dispatches' (Phase 0 plan-review, closing batch review) heartbeat signal has no text-level anchored path — not a regression of this change, but the same species of "unanchored dispatched writer".
+- **Release chain executed**: both sides agreed (auditor agree-to-release + orchestrator agreement, incl. the two document fixes) → commit (short) + tag v1.24.0 + GitHub release + push + `cp -r skills/* ~/.claude/skills/` (explicitly authorized in the user's decision 3).
 
-## 7. 修正後計畫文本(audit #1 五項修正整合後;re-audit #2 標的)
+## 7. Amended plan text (after audit #1's five amendments integrated; the re-audit #2 target)
 
-### 7.1 SCRATCH ROOT 欄位(兩 template 各一,鄰 TASK DOC / REQUIREMENT DOC)
+### 7.1 The SCRATCH ROOT field (one per template, adjacent to TASK DOC / REQUIREMENT DOC)
 
 ```
 SCRATCH ROOT: {absolute path} — paste-verbatim anchor for EVERY
@@ -84,7 +84,7 @@ SCRATCH ROOT: {absolute path} — paste-verbatim anchor for EVERY
 reuse, the assigned worktree root).
 ```
 
-### 7.2 PHASE BOUNDARIES 段修訂(定稿 = audit #1 五項 + re-audit #2 A2/A4 融入;task-loop 版;supervisor 同形,`<unit>`,item 2 尾無 raising 子句,item 3 列舉加 REPORT.md)
+### 7.2 The amended PHASE BOUNDARIES block (final = audit #1's five + re-audit #2's A2/A4 folded in; the task-loop version; supervisor the same shape, `<unit>`, no raising clause at item 2's end, item 3's enumeration adds REPORT.md)
 
 ```
 PHASE BOUNDARIES (before/after each nested dispatch, when ENTERING a wait
@@ -111,55 +111,55 @@ brief you compose (implementer, reviewer, attacker): their templates'
 cwd.
 ```
 
-> A4(per re-audit #2):分離符統一 "; 3)"、join 明言 "joined with a `/`"(naive 字串拼接少 `/` 會重現靜默 materialization,rev-parse 門只驗根不驗接縫)。
-> A2(per re-audit #2):末段向下攜帶句 — 關掉「PATH RULE 停在 nesting 邊界」的新洞(level-2 implementer / attacker 的 `.spec-tdd/` shorthand 由 level-1 的貼上錨接管)。
+> A4 (per re-audit #2): the separator unified to "; 3)", the join stated as "joined with a `/`" (a naive string concat missing the `/` reproduces the silent materialization; the rev-parse gate checks only the root, not the seam).
+> A2 (per re-audit #2): the final carry-down sentence — closes the new hole of "PATH RULE stops at the nesting boundary" (the level-2 implementer / attacker's `.spec-tdd/` shorthand is taken over by level-1's pasted anchor).
 
-### 7.3 supervisor 總複審 2「產出與證據規則」bullet 修訂(L267)+ brief inventory 擴充(L261,per re-audit #2 A3)
+### 7.3 Amendments to supervisor's final review 2 "output and evidence rules" bullet (L267) + brief inventory extension (L261, per re-audit #2 A3)
 
-- L267:findings 全文寫入 `.spec-tdd/<unit>/FINAL-AUDIT.md`(resume substrate)——**brief 內以絕對路徑指明該檔(SCRATCH ROOT 貼上、不重打),auditor 不自行組路徑**;+ 回傳摘要。
-- L261 brief inventory 追加一項:**FINAL-AUDIT.md 的絕對路徑(top 貼上)——auditor 的唯一寫入落點**(不加則嚴格照清單行事的頂層會漏給路徑,與 L267 的禁令死結)。
+- L267: the findings' full text goes to `.spec-tdd/<unit>/FINAL-AUDIT.md` (resume substrate) — **the file named by absolute path in the brief (SCRATCH ROOT pasted, never retyped); the auditor never composes paths itself**; + a returned summary.
+- L261 brief inventory gains one item: **the absolute path of FINAL-AUDIT.md (pasted by the top) — the auditor's only write target** (without it, a top strictly following the checklist would omit the path, deadlocking against L267's ban).
 
-### 7.4 Dispatcher 側填充規則(per re-audit #2 A1 — 必要)
+### 7.4 Dispatcher-side fill rules (per re-audit #2 A1 — required)
 
-- task-loop L73(dispatch 指示)句尾追加:「template 的 **SCRATCH ROOT** 欄填本 run 的 scratch 根目錄絕對路徑(常規 = repo root)」。
-- supervisor L57 同形追加。
-- task-dag L42(WAVE 行)擴充:「SCRATCH ROOT 填該 task 的 worktree 根目錄(頂層所切,絕對路徑已知)。」——關掉 wave 模式雙重故障靜默路徑(頂層填 repo root + agent 留在 real tree 兩錯並存時 rev-parse 反而通過、heartbeat 落錯樹)。
+- task-loop L73 (the dispatch instruction), appended at the sentence end: "the template's **SCRATCH ROOT** field takes this run's absolute scratch root path (the convention = repo root)".
+- supervisor L57: the same addition.
+- task-dag L42 (the WAVE line) extended: "SCRATCH ROOT takes that task's worktree root (cut by the top; the absolute path is known)." — closes the wave-mode double-fault silent path (when "the top fills repo root" + "the agent stays in the real tree" coexist, rev-parse actually passes and the heartbeat lands in the wrong tree).
 
-## 8. FINAL PLAN(定稿;user 已決策 — 施工與範圍如下)
+## 8. FINAL PLAN (settled; the user has decided — implementation and scope below)
 
-**User 決策(2026-09-21)**:1 = 全改(類級退役:3 檔 8 點之外,同批把機制延伸到 spec-tdd / coverage / adversarial 三個 tier skill——「只是要求 absolute path 而已,全改」);2 = A(不加幻影樹偵測——預防面已雙門);3 = 授權施工,完工後 spawn subagent audit,雙方同意才走 release 鏈(commit 簡短 + tag v1.24.0 + release + push + `cp -r skills/* ~/.claude/skills/`)。
+**User decisions (2026-09-21)**: 1 = change them all (class-level retirement: beyond the 3 files / 8 points, extend the mechanism in the same batch to the three tier skills spec-tdd / coverage / adversarial — "it's just requiring an absolute path; change them all"); 2 = A (no phantom-tree detection — the prevention side is already double-gated); 3 = implementation authorized; after completion spawn a subagent audit; the release chain runs only when both sides agree (short commit + tag v1.24.0 + release + push + `cp -r skills/* ~/.claude/skills/`).
 
-**編輯清單(3 檔 8 點,列序即施工序):**
+**Edit list (3 files, 8 points, listed in implementation order):**
 
 1. `skills/spec-tdd-task-loop/SKILL.md`
-   - a. L73:SCRATCH ROOT 填充規則(7.4)
-   - b. L101 TASK DOC 段後:SCRATCH ROOT 欄位(7.1)
-   - c. L144–151:PHASE BOUNDARIES 段重寫(7.2 定稿,task 版)
+   - a. L73: the SCRATCH ROOT fill rule (7.4)
+   - b. after the L101 TASK DOC section: the SCRATCH ROOT field (7.1)
+   - c. L144–151: the PHASE BOUNDARIES block rewritten (7.2 final, task version)
 2. `skills/spec-tdd-supervisor/SKILL.md`
-   - a. L57:SCRATCH ROOT 填充規則(7.4)
-   - b. L105 REQUIREMENT DOC 段後:SCRATCH ROOT 欄位(7.1)
-   - c. L161–168:PHASE BOUNDARIES 段重寫(7.2 定稿,unit 版)
-   - d. L261 brief inventory 追加 FINAL-AUDIT 路徑項(7.3)+ L267 bullet 子句(7.3)
+   - a. L57: the SCRATCH ROOT fill rule (7.4)
+   - b. after the L105 REQUIREMENT DOC section: the SCRATCH ROOT field (7.1)
+   - c. L161–168: the PHASE BOUNDARIES block rewritten (7.2 final, unit version)
+   - d. L261 brief inventory gains the FINAL-AUDIT path item (7.3) + the L267 bullet clause (7.3)
 3. `skills/spec-tdd-task-dag/SKILL.md`
-   - a. L42 WAVE 行:SCRATCH ROOT = worktree 根目錄(7.4)
+   - a. L42 WAVE line: SCRATCH ROOT = the worktree root (7.4)
 
-**Rationale**:W22 根因 = 被派工 agent 手組絕對路徑 + `mkdir -p`/重向靜默成功。修法把家族既有的可靠性錨(dispatcher 填絕對路徑,cwd 不可依賴教義)延伸到 scratch 命名空間:SCRATCH ROOT 貼上不重打(關 typo 洞)、不靠 cwd 解析 + rev-parse 門(關 wrong-cwd 洞,兼攔 dispatcher 自身填錯)、向下攜帶(關 nesting 邊界洞)、ABSENT 語意硬化(關 `2>/dev/null` 假陰性)。
+**Rationale**: W22's root cause = the dispatched agent hand-composing an absolute path + `mkdir -p`/redirection succeeding silently. The fix extends the family's existing reliability anchor (the dispatcher fills absolute paths; the cwd-unreliable doctrine) to the scratch namespace: SCRATCH ROOT pasted verbatim, never retyped (closes the typo hole), no cwd resolution + the rev-parse gate (closes the wrong-cwd hole and also intercepts a dispatcher that fills it wrong itself), carry-down (closes the nesting-boundary hole), hardened ABSENT semantics (closes the `2>/dev/null` false negative).
 
-**Attribution**:提案 = 原 session(措辭已被取代,見 §2 劃線);五項修正 = audit #1;A1–A4 = re-audit #2;仲裁與整合 = orchestrator。
+**Attribution**: proposal = the original session (wording superseded, see the strikethrough in §2); the five amendments = audit #1; A1–A4 = re-audit #2; arbitration and integration = the orchestrator.
 
-**Pending user decisions(見對話呈現;不代判)**
-1. 類級範圍:standalone tier run(escalate → spec-tdd L82 / coverage L75 / adversarial L94/L100)的 template 仍為無錠相對 shorthand — 本次修法 + A2 只覆蓋 loop/supervisor/dag 形狀下的 nested brief。是否同批做類級退役、或列 tech-debt。
-2. 幻影樹偵測加項:要/不要。
-3. 本計畫採用與施工授權(明示同意後才動 SKILL.md)。
-4. 版本號與 commit(user 手動)。
+**Pending user decisions (presented in conversation; not decided here)**
+1. Class-level scope: the standalone tier run templates (escalate → spec-tdd L82 / coverage L75 / adversarial L94/L100) still use unanchored relative shorthand — this fix + A2 covers only the nested briefs under the loop/supervisor/dag shapes. Do the class-level retirement in the same batch, or list it as tech debt?
+2. The phantom-tree detection add-on: yes / no.
+3. Adoption of this plan and implementation authorization (SKILL.md is touched only after explicit consent).
+4. Version number and commit (user manual).
 
-**Residual risks(audits 揭露但不阻擋)**
-- 頂層側 `.spec-tdd/` 寫入(RUN-STATE supervisor L59、POLICY 寫入 task-loop L227 / supervisor L276)不受貼上規範管轄 — 既有範圍,註記備查。
-- rev-parse 門為一次性(首寫前);後續重打漂移僅靠指示。
-- `test -f` 對 EACCES 邊角會誤判 not-found — scratch 情境可忽略。
-- 幻影樹一旦生成,gate 的 `git status` 永遠看不到(repo 外)——偵測屬 pending decision 2。
+**Residual risks (surfaced by the audits, not blocking)**
+- Top-side `.spec-tdd/` writes (RUN-STATE supervisor L59, POLICY writes task-loop L227 / supervisor L276) are outside the paste rule's jurisdiction — pre-existing scope, noted for the record.
+- The rev-parse gate is one-shot (before the first write); later re-typing drift is guarded only by instruction.
+- `test -f` misreads EACCES corners as not-found — negligible in the scratch scenario.
+- Once a phantom tree exists, the gate's `git status` never sees it (outside the repo) — detection is pending decision 2.
 
 **Disclosures**
-- Orchestrator tier decline:本 session 非頂層(`glm-5.3-flash`),I21 ask 使用者答 ignore — 審查判斷由 TOP-pinned auditor dispatch 執行,orchestrator 僅 brief 蒸餾/仲裁/整合。
-- Audit bound:audit #1 + re-audit #2(audit-plus-one,I16 形狀),已達上限。
-- 事故事實(dtms-core,2026-09-18)取信自外部 session 報告,未重驗(兩 auditor 均已聲明)。
+- Orchestrator tier decline: this session is non-top (`glm-5.3-flash`); the I21 ask was answered ignore by the user — the review judgment ran in a TOP-pinned auditor dispatch; the orchestrator only distilled the brief / arbitrated / integrated.
+- Audit bound: audit #1 + re-audit #2 (audit-plus-one, I16's shape); the cap is reached.
+- The incident's facts (dtms-core, 2026-09-18) were taken as given from an external session's report, not re-verified (both auditors so stated).
