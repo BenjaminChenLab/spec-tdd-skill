@@ -5,6 +5,14 @@ All notable changes to the `spec-tdd` skill family are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.30.1] - 2026-10-06
+
+### Added
+- **manager longrun going-dark coverage** (closes the scope note recorded in v1.30.0's standing-rule note; maintainer's pick of the pointer-bullet option over the broader spec-2nd/3rd-opinion fan-out): one pointer bullet in `spec-tdd-manager`'s longrun section, placed after the silent-death discipline — the user announcing leaving/sleeping/going offline with any delegated dispatch in flight (grounding / drafter / runner) loads `{family root}/skills/GOING-DARK.md` and runs the gate, in the manager dialect: the batched ask shrinks to expected return / recovery actions (incl. the runner's ONE fresh re-dispatch and different-pool overrides, per the existing longrun letters) / open Gate-1/Gate-2 decisions pre-ruled or explicitly deferred; commit authority is structurally N/A before Gate 2 (no implementation has started); same unreadable-file fallback. **The gates themselves (Gate 1's approval, Gate 2) never run unattended — user-owned, they wait for the return.** spec-2nd/3rd-opinion standalone runs remain uncovered (minutes-to-tens-of-minutes scale, overnight rare — recorded knob).
+
+### Standing-rule note
+One existing skill file changed (`skills/spec-tdd-manager/SKILL.md`, one bullet inside the longrun section — flag-scoped body text, inert without the flag), README version header 1.30.0 → 1.30.1, this changelog. **No routing text touched** (frontmatter byte-identical) — no fixture rerun under the standing rule's letter.
+
 ## [1.30.0] - 2026-10-06
 
 ### Added
