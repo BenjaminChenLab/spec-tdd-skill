@@ -33,6 +33,8 @@ Present the wave structure (e.g. "3 waves: [T01,T03] → [T02,T04,T05] → [T06]
 
 A chain-shaped DAG (nothing parallelizable) → this ask is silently skipped. **Concurrency cap 3 (user-adjustable)**: at most 3 tasks running per wave (each task internally still has 2–3 nested dispatches, at most ≈9 agent streams); an overflowing wave rotates in batches.
 
+**Pre-ruled mode rulings (v1.31.0).** Entry may arrive with pre-ruled unattended rulings aboard — a manager going-dark gate's batched rulings carried on the `<phase>` hand-off; task-loop's amended pre-flight (inherited via the REQUIRED BASE above) honors the asks it covers. For THIS ask: a pre-ruled mode answer counts as answered, never re-asked, disclosed on the board's opening rows — **auto time band only, and the peak/off-peak bands themselves must ride the hand-off** (the bands are the user's quota experience; this skill presets nothing); **per-wave choice cannot be pre-ruled** (it asks at every wave boundary — unanswerable while away). Rulings cover THIS absence only, never carrying over.
+
 **Authorization coupling (task-loop pre-flight 2)**: without top-commit authorization → **parallel mode is unavailable, automatically degrading to all-serial** — the DAG's task commits are top-executed `git merge`s; there is no "pause and hand to the user for a manual commit" counterpart shape; the degradation is disclosed.
 
 ## Parallel wave execution (worktree isolation)

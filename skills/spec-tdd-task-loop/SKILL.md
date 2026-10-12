@@ -60,7 +60,9 @@ On entry, if there is only a settled requirement or a plan/blueprint, **not yet 
 
 ## Pre-flight
 
-1. **Orchestrator tier check (I21).** Before any work, check the model THIS session runs as. A run's judgment executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier in use, or no higher tier exists → silent, move on.** Otherwise surface this ONE ask and stop for the answer:
+**Pre-ruled entry rulings (v1.31.0).** Entry may arrive with pre-ruled unattended rulings aboard — a manager going-dark gate's batched rulings carried on the `<phase>` hand-off. The asks they cover (this skill's session commit authorization, item 2; the I21 tier check, item 1 — a carried decline pre-answers it) are treated as answered, never re-asked; the status section's opening rows disclose which asks were pre-ruled and by which gate. Those rulings cover THIS absence only — per-window, never carrying over (GOING-DARK item 1's shape).
+
+1. **Orchestrator tier check (I21).** Before any work, check the model THIS session runs as. A run's judgment executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
 
    > ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
 

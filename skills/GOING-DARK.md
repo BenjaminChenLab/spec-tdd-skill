@@ -1,6 +1,6 @@
 # Unattended Window (the Going-Dark Protocol)
 
-For: `spec-tdd-task-loop` / `spec-tdd-task-dag` / `spec-tdd-supervisor` (and any future driver). Loaded at the moment the user announces leaving / sleeping / going offline with work in flight. Dialect mapping: "the top" means the driving top session (under supervisor, the session itself); "the board" means the plan-doc status board (under supervisor, `RUN-STATE.md`); tier pins are the driving skill's (supervisor's stay MID).
+For: `spec-tdd-manager` / `spec-tdd-task-loop` / `spec-tdd-task-dag` / `spec-tdd-supervisor` (and any future driver or front door). Loaded at the moment the user announces leaving / sleeping / going offline with work in flight. Dialect mapping: "the top" means the driving top session (under supervisor, the session itself); "the board" means the plan-doc status board (under supervisor, `RUN-STATE.md`; under manager pre-S5, the plan trio / spec doc); tier pins are the driving skill's (supervisor's stay MID). The gates' pre-approval shape lives in manager's own text.
 
 Work in flight + the user unreachable — asleep, out, in a long meeting: any window where an ask cannot be answered is dead on arrival. Overnight is the sharpest case (task-dag's auto time band routes full-speed waves there; field 2026-10-05/06: a 429-killed card with a known 02:56 reset sat dead ~4.5 h because the session-only insurance had no live session to fire it), but a two-hour absence hits the same wall at smaller scale.
 
