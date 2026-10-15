@@ -52,7 +52,7 @@ Never include expected verdicts or your confidence — that's contamination, not
 ### Step 2 — Dispatch ONE auditor, read-only
 - Agent type: general-purpose (or equivalent). **Read-only**: the brief says so explicitly (no file modifications, no git writes).
 - Model: **TOP tier** (I19(a) — this is a review dispatch).
-- Background mode; announce to the user what is being audited and that results arrive by notification. **You know nothing about its results until the completion notification arrives — never report, assume, or predict them.**
+- Background mode; announce to the user what is being audited, that results arrive by notification, and the coarse wall-clock estimate — the same minutes-to-tens bound that governs the death re-dispatch below (expectation management, not a promise). **You know nothing about its results until the completion notification arrives — never report, assume, or predict them.**
 - **The notification never comes?** A background child can die silently (the family's twice-learned lesson) — a dispatch that shows failed, or sits silent past a coarse bound (read-only plan audits run minutes-to-tens), gets **ONE fresh re-dispatch** (nothing is inherited), disclosed; still nothing → report the stall to the user. A silently-dead audit is not an agreed one.
 - **No dispatch tool available?** STOP and disclose: the plan may be presented only marked **UNAUDITED** — a silent self-audit is worthless by this skill's own thesis (adversarial-grill's rule); whether to proceed on an unaudited plan is the user's call (I12).
 

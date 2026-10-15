@@ -25,7 +25,7 @@ description: Use when driving a multi-task feature phase whose WALL-CLOCK matter
 
 ## Pre-flight: the mode ask (after task-loop's asks, one more question)
 
-Present the wave structure (e.g. "3 waves: [T01,T03] → [T02,T04,T05] → [T06]"), four options:
+Present the wave structure (e.g. "3 waves: [T01,T03] → [T02,T04,T05] → [T06]") with the phase's estimated wall-clock — serial ≈ the per-card estimates summed; parallel ≈ the longest wave's span + wave-end merge/union-run overhead, plus each cold worktree's first build (an interval while calibration is thin; never the budget — a kill cap per task-loop watchdog rule 4) — four options:
 
 - **All-parallel** — recommended for off-peak hours; **all-serial** — behavior identical to task-loop, the safe choice in 429-prone hours;
 - **Per-wave choice** — ask at every wave boundary, parallel or serial;

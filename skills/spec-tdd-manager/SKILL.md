@@ -98,7 +98,7 @@ Presented at once:
 
 1. **The final plan** — multi-task: the task table (id + plain-language name + one line each) + pulled/external marks; one unit: the unit scope in one line. Irreversible tags named.
 2. **The audit verdict** — verdict, folded amendments (attributed "per audit: …", never silently absorbed), residual risks.
-3. **The implementation route + one-line rationale** (the S5 table).
+3. **The implementation route + one-line rationale + the estimated wall-clock** (the S5 table; cards × per-card tier estimate + audit/build overhead — an interval while calibration is thin; expectation management, never the tier budget, which is a kill cap).
 4. **The go-ahead approval.**
 
 - **On the discussed-entry lane** the presentation additionally carries the spec-direction approval (the merged stop covers it — the pass stamp notes so when the lane stamp is on file).

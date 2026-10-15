@@ -26,7 +26,7 @@ Two independent eyes are better than one — unless both share a lens. `spec-3rd
   - Same evidence rules: per-item VERDICT + `file:line`; every "OK" names the attack attempted.
 
 ### Step 2 — Dispatch BOTH, concurrently, in the same turn
-Both read-only, both **TOP tier** (I19(a)), both background. Dispatch them together — a hunter briefed after the verifier's report lands is just an echo with angrier adjectives. Announce both lenses to the user; **report nothing until BOTH notifications have arrived** (a partial merge is a biased merge — you'll rationalize the missing opinion toward the one you've read). One notification lands, the other's dispatch dead or stalled → re-dispatch the dead **lens** fresh, never both (the arrived verdict is real output), disclosed; spec-2nd-opinion's coarse bound applies.
+Both read-only, both **TOP tier** (I19(a)), both background. Dispatch them together — a hunter briefed after the verifier's report lands is just an echo with angrier adjectives. Announce both lenses to the user, with the wall-clock estimate — the concurrent pair stays at spec-2nd-opinion's minutes-to-tens bound (token cost doubles; wall-clock does not); **report nothing until BOTH notifications have arrived** (a partial merge is a biased merge — you'll rationalize the missing opinion toward the one you've read). One notification lands, the other's dispatch dead or stalled → re-dispatch the dead **lens** fresh, never both (the arrived verdict is real output), disclosed; spec-2nd-opinion's coarse bound applies.
 
 ### Step 3 — Merge three positions (the gate hardens)
 - **All three agree** (and no critical claim refuted by either auditor) → final plan.
