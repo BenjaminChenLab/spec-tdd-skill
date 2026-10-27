@@ -54,6 +54,8 @@ ACCEPTANCE TEST (RED): {file}
 INTENT: {1–3 sentences}
 READ FIRST: {entity/service/repo/pattern paths}
 
+FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
+
 SCRATCH ROOT: {absolute path of the tree you work in} — every `.spec-tdd/`
 path you write (your run log) is this prefix joined with a `/`, PASTED
 VERBATIM — never retype it, never resolve it against your own cwd, never

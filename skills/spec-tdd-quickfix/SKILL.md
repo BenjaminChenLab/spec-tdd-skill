@@ -32,6 +32,7 @@ The user is testing the product and finding small defects in real time. Speed is
 
 - Scope fence: exact files/regions it may touch; **hard hands-off list** for anything else in flight in the tree.
 - Pinned decisions from the one-sentence plan; unknowns → report, never guess-code.
+- Standing file-tools rule (verbatim in every brief): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
 - Standing discipline: NO git of any kind (the orchestrator commits per fix only on explicit user go, explicit paths, never `-A`); gradle lock = wait, never kill daemons; build/test output redirected to a file (pipes swallow exit codes); foreign compile failures = wait 90s ×2 then report honestly; comments in English, report in the user's language.
 - Report format: files + line anchors, what was changed, problems seen but not touched.
 

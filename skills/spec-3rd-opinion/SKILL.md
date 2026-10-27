@@ -17,7 +17,7 @@ Two independent eyes are better than one — unless both share a lens. `spec-3rd
 
 ### Step 1 — Distill TWO briefs, not one
 - **Brief A (standard verifier)**: exactly `spec-2nd-opinion`'s Step-1 brief.
-- **Brief B (adversarial hunter)**: same background and same plan-under-audit (identical raw material — different questions). Its checklist is reframed adversarially:
+- **Brief B (adversarial hunter)**: same background and same plan-under-audit (identical raw material — different questions). Its checklist is reframed adversarially (both briefs carry spec-2nd-opinion's Step-1 item 6 — the standing file-tools rule — unchanged):
   - "Assume the plan is flawed until proven otherwise."
   - Hunt hidden risks, blueprint-vs-reality drift, unstated assumptions — especially ones the planner has no incentive to check (fields the plan's predicates depend on being reliably populated; watermarks/queues/state another item silently mutates; a skip-flag colliding with a force-requeue).
   - **Hunt the question nobody asked** — a materially-relevant dimension the plan has NO decision on (grill-coverage gap, the standard lens's (f)); surface it as a pending decision with its consequence, never propose-and-settle (I12).

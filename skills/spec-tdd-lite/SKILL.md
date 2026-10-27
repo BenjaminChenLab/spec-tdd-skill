@@ -60,6 +60,8 @@ REQUIREMENT: {spec doc path — persisted at Phase 1 (A15); READ it, it holds th
 verbatim. Paste only when persistence was declined}
 Impl (may read, to judge what's tested — the TEST is the subject): {paths}
 
+FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
+
 Answer two questions with concrete cases:
 1. TEST vs IMPL — name a subtly-WRONG implementation that still passes every test,
    or show none exists. Probe untested dimensions: boundaries, error paths, input shapes,

@@ -37,6 +37,7 @@ Two recorded opt-ins (the shape's known costs; they hold the moment the user inv
 - Multi-task phase → `spec-tdd-task-loop` (serial) / `spec-tdd-task-dag` (parallel). Under many tasks the top's context is the scarce resource; sinking the deep review contradicts this skill's shape.
 - Multi-unit batch (bug list / a feature in slices) → `spec-tdd`'s multi-unit run (main session runs it) — this skill's one-shot dispatch shape doesn't carry multiple units (the template's band carve-out is the second interception; entry routing blocks first).
 - One very small unit, a session you'll clear right after → `spec-tdd-lite` (in-session, 1 review dispatch). The lite-vs-supervisor fork: does the session have other things to do afterward — yes → supervisor (protect the context); no → lite.
+- A live-testing small-fix stream (the user live-testing the product, streaming wiring/cosmetic/config fixes below lite's test-first cycle; outside quickfix's exclusions) → `spec-tdd-quickfix` — the family's floor tier, below this skill's lite band floor. Pre-flight 1's walk surfaces the suggestion; a manager hand-off carrying an S2 decline of it honors the decline — never re-suggest.
 - Pure-docs deliverable (no production/test code to test) → the tier machinery has no object; don't enter this skill; dispatch a docs-writing task directly or write by hand.
 - A unit against an unsettled upstream dependency, developed against a mock → strictly speaking not settled (the contract isn't fixed); go through grill to converge the contract first. The user explicitly says run it against the mock: verification depth may drop (user's call, disclosed, paid back once the real dependency settles — the unit version of mock-first), not the default.
 - Requirement fuzzy → `grill-spec-tdd`; fuzzy AND blast-radius-critical → `adversarial-grill-spec-tdd`. Grilled and the user wants the full-delegation shape → then this skill.
@@ -122,6 +123,9 @@ prompt):
 {family root}/skills/PROTOCOL.md (invariants I1–I21), and the chosen
 tier's {family root}/skills/<tier-name>/SKILL.md.
 
+FILE TOOLS (standing rule, carries into every nested brief you compose):
+local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
+
 DOC EDITS: report proposed requirement-doc edits; do not edit the doc
 yourself — the top-level session owns decision writeback.
 
@@ -179,9 +183,9 @@ mkdir -p plus output-redirect makes a typo'd absolute path silently
 succeed, materializing a parallel tree whose heartbeat the watchdog
 never sees (2026-09-18 W22 incident). Before the first such write:
 `git rev-parse --show-toplevel` must equal SCRATCH ROOT — a mismatch is
-a STOP-and-report, never a best-effort guess. Carry SCRATCH ROOT and
-this PATH RULE verbatim into every nested brief you compose
-(implementer, reviewer, attacker): their templates' `.spec-tdd/`
+a STOP-and-report, never a best-effort guess. Carry SCRATCH ROOT, this
+PATH RULE, and the FILE TOOLS rule verbatim into every nested brief you
+compose (implementer, reviewer, attacker): their templates' `.spec-tdd/`
 shorthand is anchored by YOUR pasted root, never their own cwd.
 
 NESTED DISPATCHES (any nested child — your implementer on tiers above
@@ -277,7 +281,7 @@ Session break / context corruption, the run stopped mid-way. This skill has no b
 
 **2. The deep review — an outsourced TOP auditor dispatch (this skill's value-add; the in-session deep review retired as of v1.23.0).**
    - **Dispatch spec**: **TOP**-pinned (I19(a) orthodox — the review dispatch names top), read-only, background mode; at dispatch announce to the user (what is being audited; results arrive by notification), and before the notification arrives, know nothing about the findings — no reporting, no predicting. RUN-STATE records the audit dispatch moment and the auditor's identity (the resume account for a session break).
-   - **Brief = fixed checklist + doc paths, no summaries, no pre-digestion** (I19(c) — evidence as files; framing power taken out of any-tier session hands): the requirement doc path, the acceptance test path, level-1's `REPORT.md`, the JUnit XML directory, the created/modified file list, the hash pair (the lite route carries a "no hash pair" note), **the absolute path of `FINAL-AUDIT.md` (pasted by the top — the auditor's only write target)**. The checklist is verbatim items a–d below.
+   - **Brief = fixed checklist + doc paths, no summaries, no pre-digestion** (I19(c) — evidence as files; framing power taken out of any-tier session hands): the requirement doc path, the acceptance test path, level-1's `REPORT.md`, the JUnit XML directory, the created/modified file list, the hash pair (the lite route carries a "no hash pair" note), **the absolute path of `FINAL-AUDIT.md` (pasted by the top — the auditor's only write target)**, plus the standing file-tools rule verbatim — local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser (dispatched contexts receive no global CLAUDE.md — the brief is the carrier). The checklist is verbatim items a–d below.
    - **Auditor checklist (four items, fixed order)**:
      a. **Acceptance-test encoding-fidelity re-read** (the all-MID compensation control, fixed first item): does every requirement line have a discriminating assertion? Can you name one wrong-but-plausible implementation that would pass? Over-assertion / silent interpretation? — the landing point, in this shape, of the encoding audit I19(a) originally pinned to TOP (the review duty defined in I13).
      b. **Impl diff correctness + SPEC-DEFECT sweep (I15)**: any production changes bent to accommodate the tests (test-defect traces); is the diff inside the deliverable scope only.
@@ -315,6 +319,7 @@ The user downgrades the tier mid-run under time pressure → **dual channel**: S
 | Scheduling only one-shot checkpoints in-flight | ONE session-scoped RECURRING schedule, create-if-missing + verified at every dispatch (v1.32.1) — a one-shot chain's re-arm premise collapses on the first 429 (field ×2); the recurring ring re-fires with no successful turn (trial 2026-10-21) |
 | Starting the run with the requirement only in the conversation | I17: land it first (requirement verbatim + decisions); the handoff uses the doc path |
 | A bug list / multi-unit doc entering this skill directly | Entry routing blocks first (When-NOT); if it slips through → the template's band carve-out STOPs and reports; exit to a `spec-tdd` multi-unit run — the one-shot dispatch shape doesn't multiply by unit count |
+| A quickfix-shaped live-testing stream entering the full-delegation shape | Entry routing (pre-flight 1) walks the When-NOT row — suggest `spec-tdd-quickfix`, the user decides |
 | After a session break, digging state out of a dead conversation | `RUN-STATE.md` + `REPORT.md` + git are the trace base — the conversation died, the ledger lives; see "Half-finished-work resume" |
 
 ## Red Flags — STOP

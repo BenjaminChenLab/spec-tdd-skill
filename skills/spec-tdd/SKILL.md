@@ -48,6 +48,7 @@ Arrived from a front-end that already surfaced this check? Skip it — never re-
    SETTLED SPEC: {spec doc path — READ it; it holds the requirement verbatim + decisions (A15). Paste only when persistence was declined}
    ACCEPTANCE TEST (+ property tests), currently RED: {file or paste}
    READ FIRST: {codebase paths}
+   FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
    1. Does every spec line have an assertion with discriminating power? Name a
       wrong-but-plausible reading of the spec this test still satisfies.
    2. Surface anything asserted BEYOND the spec, and every silent interpretation.
@@ -77,6 +78,8 @@ ACCEPTANCE TEST (written, currently RED):
 INTENT (plain language): {1–3 sentences}
 
 READ FIRST: Entity {path}, Service {path}, Repository {path}, Pattern-to-follow {path}
+
+FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
 
 SCRATCH ROOT: {absolute path of the tree you work in} — every `.spec-tdd/`
 path you write (your run log) is this prefix joined with a `/`, PASTED

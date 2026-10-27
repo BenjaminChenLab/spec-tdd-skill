@@ -27,7 +27,7 @@ Before any work, check the model THIS session runs as. A run's judgment — the 
 Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
 
 ## Phase 1 — Grill the requirement, gate the SPEC (no test yet)
-1. **Ground it first**: read the relevant entities/services/repos/patterns BEFORE the first question; the decisions must fit the real architecture, and so must the test that follows. Grounding continues through the grill — a fact needed mid-round is looked up (or dispatched) on the spot, not deferred.
+1. **Ground it first**: read the relevant entities/services/repos/patterns BEFORE the first question; the decisions must fit the real architecture, and so must the test that follows. Grounding continues through the grill — a fact needed mid-round is looked up (or dispatched) on the spot, not deferred. A dispatched recon brief carries the standing file-tools rule verbatim: local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser.
 2. **Grill in rounds — decisions, not facts** — interrogate EVERY dimension, not just the obvious ones: business logic, boundary/edge cases, state transitions, **NFRs (perf / scale / cost)**, **security / fraud / abuse**, and **deployment/rollout** (migration windows — old code × new schema; environment-gated components; how every runtime object comes to exist in each target environment). Force an explicit decision on each. *If you can't state a decision for a dimension, you haven't grilled it.*
    - **Facts are yours; decisions are the human's.** Never ask the human a question the codebase/docs/config already answers — that is grounding skipped, not grilling. "Don't dig through the code, just ask me — I know the system" is the trap: the human knows their *intent*, not their code's actual shape. Investigate, then decide — or ask a *decision*.
    - **Every question ships its recommended answer.** Number the open decisions and attach your grounded, overridable recommendation to each — the human vetoes instead of composing ("all defaults except 3" is a valid reply). Under time pressure the recommendations are what make ONE short round enough: dropping them "to keep it short" is the failure, not the fix.
@@ -51,6 +51,7 @@ Arrived from a front-end that already surfaced this check? Skip it — never re-
    FINAL SPEC: {spec doc path — persisted at the gate (A15); READ it. Paste the decision list only when persistence was declined}
    ACCEPTANCE TEST (+ property tests), currently RED: {file or paste}
    READ FIRST: {codebase paths}
+   FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
    1. Does every decision have an assertion with discriminating power? Name a
       wrong-but-plausible reading of the spec this test still satisfies.
    2. Surface anything asserted BEYOND the spec, and every silent interpretation.

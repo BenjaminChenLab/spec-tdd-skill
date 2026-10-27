@@ -47,6 +47,7 @@ ATTACK a grill you did not conduct. You are independent: hunt what the author ca
 REQUIREMENT (verbatim, do not paraphrase — pre-gate, no spec doc exists yet; the gate persists it): {paste}
 GRILLED DECISIONS + the STOP-GRILLING calls (what was deemed immaterial): {list}
 READ FIRST (grounding — quote it or it didn't happen): {codebase paths}
+FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
 
 PART A — grill-coverage attack:
 - Hunt UN-GRILLED dimensions that would materially change behavior, state, failure
@@ -86,6 +87,7 @@ the requirement verbatim + the gate-approved decisions, amendments included. Pas
 when persistence was declined}
 ACCEPTANCE TEST (+ property tests) and its recorded RED error list: {file or paste}
 READ FIRST (grounding — quote it or it didn't happen): {codebase paths}
+FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
 
 PART B — test attack (no impl exists):
 - Name a wrong-but-plausible reading of the FINAL SPEC this test would still satisfy —
