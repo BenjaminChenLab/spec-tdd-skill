@@ -19,10 +19,11 @@ One round, no follow-ups.
 
 ## Substrate choice (declared at the same gate)
 
-The recovery machinery needs a live host:
+The recovery machinery needs a live host — or an external lever:
 
 - (a) **Keep this session alive** — machine sleep off, Claude open; the session's recurring watchdog ring re-fires on its own through and after any exhaustion window (no successful turn needed — trial-verified 2026-10-21), and the durable reset+15 point (when armed for this window) covers the named reset; zero new machinery at this gate.
 - (b) **Arm the OS-level fallback** (below).
+- (c) **Peer-session wake (external, user-side; nothing for this session to arm — no gate item)** — the user opens ANOTHER Claude session on the same machine (its own quota state; zero shared context — NOT a fork, no context inheritance; the family's no-fork ruling stands) which reaches THIS session by cross-session SendMessage; the directive must be self-contained and IDEMPOTENT ("already done → report, don't redo") precisely because no context is shared, and an idle-notify one-shot subscription on the peer carries the return signal (field 2026-10-30: a fresh-quota peer woke a busy orchestrator, which reported without duplicating).
 
 A closed session has NO insurance — say so at the gate instead of discovering it at 03:00.
 
