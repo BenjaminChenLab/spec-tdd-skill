@@ -81,6 +81,15 @@ READ FIRST: Entity {path}, Service {path}, Repository {path}, Pattern-to-follow 
 
 FILE TOOLS (standing rule): local files are read ONLY with Read/Glob/Grep (Bash cat as fallback); NEVER open file:// URLs with any browser tool (Playwright MCP, webReader, or similar); if native file tools seem missing or unloadable, STOP and report back 'missing file tools' — never improvise with a browser
 
+TEST-RUN DIET (standing rule): run only the RELATED test classes per
+cycle, never the whole suite mid-cycle (e.g. ./gradlew :Core:test
+--tests 'FooTest' --tests 'BarTest' — your build's equivalent);
+compress run output (-q --console=plain, redirect stdout+stderr to a
+scratch file and tail it — a bare pipe swallows the exit code); failure
+facts come from the JUnit XML summary numbers, never from full console
+dumps; the FINAL verification stays ONE run covering all related test
+classes (that round's XML is the only recheckable one).
+
 SCRATCH ROOT: {absolute path of the tree you work in} — every `.spec-tdd/`
 path you write (your run log) is this prefix joined with a `/`, PASTED
 VERBATIM — never retype it, never resolve it against your own cwd, never

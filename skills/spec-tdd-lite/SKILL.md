@@ -49,6 +49,7 @@ Unit tests one at a time, red→green:
 - Minimal code to GREEN. Test fails → fix the code, not the test.
 - **Test-defect exception (SPEC-DEFECT):** if the failure comes from a defect in the TEST itself — wrong constructor arity, ambiguous overload matchers, unused stubs under strict stubs, assertions contradicting the requirement — fix the TEST, never bend production to make a defective test compile or pass (no compat constructors, no renamed public methods, no logic beyond the spec). A signature change the requirement itself explicitly calls for is not a test defect. Bending production to a test defect = a failed run.
 - Refactor only while green.
+- **Test-run diet (the tiers' standing rule applies in-session too):** run only the related test classes per cycle (`--tests` filters, your build's equivalent), compress output (`-q --console=plain`, redirect to a scratch file and tail — pipes swallow exit codes), read failures from the JUnit XML summary numbers — never full console dumps.
 
 ## Phase 3 — Fresh-context test review (the one structural check)
 Dispatch ONE subagent — TOP-TIER model (I19: review = top tier) — that has seen none of your reasoning:
