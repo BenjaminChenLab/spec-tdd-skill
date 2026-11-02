@@ -8,7 +8,7 @@ Part of `spec-tdd-task-loop` (v1.36.0 progressive split — the SKILL.md's flow 
 
 Session break / context corruption, task stopped mid-way:
 
-1. **Inventory first, never rewrite** — `git status` + the existing diff against the task doc; judge which changes are legitimate half-done work by path-level comparison (content-level judgment sinks — see the principle in the 429 section).
+1. **Inventory first, never rewrite** — `git status` + the existing diff against the task doc; judge which changes are legitimate half-done work by path-level comparison (content-level judgment sinks — see the principle in the 429 paragraphs below).
 2. **spec-defect check** — tests left by the interruption that contradict the task doc → **fix the tests, never bend production** (the spirit of I15: production contorted to accommodate a defective test = a failed run).
 3. **Continuation brief** — when re-dispatching level-1 (hand over any ledger / scratch log the predecessor left) explicitly instruct: **keep existing legitimate changes, fill only the gaps, never rewrite**, and attach the inventory result (diff file list + scope mapping — which diffs belong to this task's scope, at path level).
 4. The status section IS the recovery point — the in-flight task is directly visible (echoing A16's resume semantics: an in-flight row = re-verify, never blindly redo).

@@ -161,7 +161,13 @@ anything; the top exits to a spec-tdd multi-unit run in-session.
 The CEILING is structural: adversarial is not carried in this
 run-shape either (hours-level attack depth contradicts the
 MID-delegation economics). A unit whose stakes would route above
-coverage: STOP and report BEFORE implementing — the top's default
+coverage: STOP and report BEFORE implementing — and the report
+FIRST works the money-adjacent carve-out (escalate's shape): a unit
+that only READS the money system (recheck/lookup sweeps, display,
+reporting) makes the report say so and name the downgrade-to-
+coverage continuation as the recommendation — "it touches money"
+alone never triggers the exit. Only MOVE-money / CHANGE-auth /
+IRREVERSIBLY-corrupt-on-silent-wrongness exits: the top's default
 is to EXIT this skill and run spec-tdd-adversarial standalone
 (re-routing at coverage here would be an unconsented downgrade; on
 exit, the requirement doc plus any already-written test hand over
@@ -263,7 +269,7 @@ Escalate's routing-hygiene asks cannot reach the user from inside a dispatched c
 
 - **Sniff gaps** (the doc only looks settled) → relay the gap list verbatim and ask the user "grill first, or settled and continue": **settled** → re-dispatch with the flag (a fresh level-1; the handoff notes the user's approval + the gap list; the gaps are visible to Phase 1); **grill** → exit this skill into the grill front-end.
 - **Multi-unit true shape** (the doc is really a bug list / a feature in slices — caught by the template's band carve-out) → relay, exit this skill, run a `spec-tdd` multi-unit run in the main session instead.
-- **Above-band stakes** (adversarial grade) → relay the stakes grounds (one line) and ask the user: **Confirm adversarial** → **exit this skill**, run `spec-tdd-adversarial` standalone (a normal standalone tier run — attack rounds are hours-level depth, not carried in MID economics; this shape's session may be any tier, and adversarial's own I21 pre-flight takes over there as usual; the requirement doc and any written test hand over as **reference inputs** — the standalone run runs its own Phase 1 (direct-arrival shape), and the MID-written test is a draft to re-derive / harden, not an intake); **Downgrade → coverage**, re-dispatch with the recorded call, disclosed in the final report. Any other user ruling stands per I12.
+- **Above-band stakes** (adversarial grade) → relay the stakes grounds + the money-adjacent carve-out verdict (one line each — a read-only reader of the money system names the downgrade-to-coverage continuation as the recommendation; per audit v1.37.0, the P0's fourth routing point) and ask the user: **Confirm adversarial** → **exit this skill**, run `spec-tdd-adversarial` standalone (a normal standalone tier run — attack rounds are hours-level depth, not carried in MID economics; this shape's session may be any tier, and adversarial's own I21 pre-flight takes over there as usual; the requirement doc and any written test hand over as **reference inputs** — the standalone run runs its own Phase 1 (direct-arrival shape), and the MID-written test is a draft to re-derive / harden, not an intake); **Downgrade → coverage**, re-dispatch with the recorded call, disclosed in the final report. Any other user ruling stands per I12.
 - **No Agent tool** → fix spawn depth / environment and re-dispatch; never let level-1 self-test in place.
 - **Other terminal reports (catch-all)** — failure reports after the I9 breaker trips (3 failed repairs, a designed normal ending), SPEC-bucket decision needs (I10: re-opening the requirement is the user's call), every non-GREEN terminal not covered above: **relay verbatim (with objective evidence); the user decides**. A user-mandated re-dispatch is a fresh mandate and does not burn the watchdog's re-dispatch cap. **Counting is divided, three separate ledgers**: death re-dispatches (watchdog / recovery procedure) count against the cap of 2; the findings loop's re-dispatch is bounded by the final review's one round; user-mandated re-dispatches rest on the user's explicit call (disclosed) — never borrow across.
 
