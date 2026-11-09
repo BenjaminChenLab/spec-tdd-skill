@@ -5,7 +5,7 @@ description: Use when the user says "spec-tdd-secretary", or wants ONE discussed
 
 # spec-tdd-secretary
 
-**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — in particular the two stations this skill sequences: `spec-2nd-opinion` (whose machinery it runs verbatim) and `spec-tdd-lite` (the in-session tier it fires). This skill adds no new protocol invariant and relaxes none. It is a pure two-station sequencer on `spec-tdd-manager`'s sequence-and-route-only pattern, carrying exactly ONE recorded opt-in (the clean-fire consent, below). All machinery lives in the invoked skills; this skill personally writing an acceptance test, implementing, or reviewing = an out-of-authority deformation.
+**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — in particular the two stations this skill sequences: `spec-2nd-opinion` (whose machinery it runs verbatim) and `spec-tdd-lite` (the in-session tier it fires). This skill adds no new protocol invariant and relaxes none. It is a pure two-station sequencer on `spec-tdd-manager`'s sequence-and-route-only pattern, carrying exactly TWO recorded opt-ins (the clean-fire consent and the invocation-recorded tier decline, below). All machinery lives in the invoked skills; this skill personally writing an acceptance test, implementing, or reviewing = an out-of-authority deformation.
 
 ## Overview
 
@@ -34,13 +34,9 @@ Any miss → the non-clean path. A grill-coverage finding (a dimension the plan 
 - You want the plan audited, not implemented → `spec-2nd-opinion` directly.
 - You are live-testing and streaming fixes below lite's test-first cycle → `spec-tdd-quickfix` (the entry sniff suggests it; your call stands).
 
-## Pre-flight — orchestrator tier check (I21)
+## Pre-flight — no tier ask (the invocation is the recorded decline)
 
-Before any work, check the model THIS session runs as. This skill's entry sniff, the fire decision, and (on the lite route) the entire implementation inner loop execute in the orchestrator's own context; the stations' dispatches are tier-pinned, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
-
-> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
-
-The answer carries downstream: both stations' own checks skip a check already surfaced this conversation (their handoff clauses), and a recorded decline rides into the final report's disclosures.
+This skill surfaces NO orchestrator-tier question — I21 retired on the invocation record, supervisor's v1.23.0 shape. The chain's two judgment-dense dispatches (the plan audit, lite's test review) are TOP-pinned by their own skills whatever the session holds, and invoking this skill is already the recorded consent to the in-session economics — the entry sniff, the fire decision, and (on the lite route) the implementation inner loop run on the session's model, chosen by the person who invoked it. Both stations' own pre-flight checks read the handoff record and skip (their carried-decline clauses); the close report discloses the session's tier and that no ask fired. A scoped exemption, not a protocol change — the I21 asks on everywhere else in the family.
 
 ## Entry sniff (the routing table — every rule is an existing family boundary, none invented here)
 
@@ -79,7 +75,7 @@ Invoke the routed skill **verbatim**; this skill adds nothing to its run and own
 
 ## Close — stamps and resume
 
-After the station's exit, append the close stamp — "secretary pipeline closed (YYYY-MM-DD): audited spec-2nd-opinion, implemented lite|spec-tdd" — and deliver the close report: the station's own final report **plus one line disclosing that the run was fired on the clean-fire consent** (when it was). A run leaving no on-disk trace is byte-identical to never-run after `/clear` — the stamps are the resume state:
+After the station's exit, append the close stamp — "secretary pipeline closed (YYYY-MM-DD): audited spec-2nd-opinion, implemented lite|spec-tdd" — and deliver the close report: the station's own final report **plus one line disclosing that the run was fired on the clean-fire consent** (when it was) **and the session's tier** (no I21 ask fired — the invocation record is the decline). A run leaving no on-disk trace is byte-identical to never-run after `/clear` — the stamps are the resume state:
 
 - **Audit stamp only, no fire stamp** → the session died between the audit close and the fire decision: re-enter Step 2 and verify the four predicate items from the doc (the write-back, the pending-decisions section) — the audit stamp alone covers only items 1–2; never blind-fire on it. Nothing re-audited.
 - **Fire stamp present** → the fire basis is on record (clean-consent = the predicate was verified at fire time; explicit go = the user's decided override): the implementation station was entered. Implementation absent or partial → the station skill's own artifacts and state govern the continuation; this skill re-runs no preamble.
@@ -94,7 +90,7 @@ After the station's exit, append the close stamp — "secretary pipeline closed 
 | Firing on a plan doc edited after the audit close | The doc-state guard: the write-back is the last write — a post-audit edit voids the close (fold + disclose; substantive → ONE targeted re-audit). |
 | This skill writing the test / implementing / reviewing | Sequence-and-route-only — the machinery lives in the two stations. |
 | Extending the audit brief's checklist | Stock checklist fits a single unit's plan; manager's extension is for breakdown trios. |
-| Re-asking lite's persistence prompt, or re-running tier checks | Step 0 persisted the doc; the I21 answer carries (both stations' skip clauses). |
+| Re-asking lite's persistence prompt, or either station's tier check | Step 0 persisted the doc; the invocation record IS the tier decline — both stations' carried-decline clauses read it and skip. |
 | Routing critical / multi-unit / fuzzy into the lane | The sniff's exits are forced referrals — the boundaries belong to the refused skills, not to this skill's discretion. |
 | Upgrading beyond spec-tdd, or stretching the ceiling on a mid-run critical discovery | The ceiling is spec-tdd; a critical discovery STOPs and refers out. |
 | The too-big route becoming an ask | An announced economic route with a one-line rationale (manager S2's pattern) — the audit still gates it. |
