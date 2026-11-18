@@ -35,6 +35,10 @@ Before any work, check the model THIS session runs as. A run's judgment — the 
 
 Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
 
+## Pre-flight — adversarial authorization check (I22)
+
+This skill's auditor dispatches (Parts A and B) are adversarial spend — default DISABLED, launched only on recorded user authorization (I22). **Direct user invocation (`/adversarial-grill-spec-tdd`) = the authorization — proceed, no ask.** Arrived via a referring skill (manager's S1 ask, grill's upgrade ask, escalate's route-out) → the referral must carry the recorded consent on the handoff; it does → proceed. **Neither — entered silently, no consent on record → STOP and ask BEFORE Part A dispatches**: the first auditor token is already adversarial spend. In a dispatched context with no user reach: STOP and report — the report IS the ask, relayed up.
+
 ## The 4 Phases
 
 ### Phase 1 — Grill the requirement (as grill-spec-tdd Phase 1, steps 1–2; NO test yet)
@@ -74,7 +78,7 @@ End with a verdict: proceed / proceed-with-changes / redo. Do NOT edit any file.
 - **No dispatch tool available?** Disclose at the gate that independence was NOT obtained — a self-audit is worthless by this skill's own thesis — and surface the grill decisions for the deeper human read. Never a silent improvised self-audit.
 
 ### Phase 3 — Gate the SPEC (as grill-spec-tdd Phase 1, step 3)
-ONE human OK bundling: the grilled decisions (blast-radius-tagged per grill's gate — IRREVERSIBLE ones need named confirmation each; a blanket OK does not cover them) + Part A findings + residuals + the routing choice + the spec-doc ask (default ON — persist the requirement verbatim + the gate-approved decisions, amendments folded in (A15); only an explicit decline skips). Amendments fold in → **FINAL SPEC**. No human reachable? Grill-spec-tdd's rule: document + persist the decisions and Part A findings, then **STOP at the gate** — no test, no dispatch, until a human approves. Grill's throwaway gate-skip does NOT carry over — this front-end exists because the surface is critical; there is no gate-skip here.
+ONE human OK bundling: the grilled decisions (blast-radius-tagged per grill's gate — IRREVERSIBLE ones need named confirmation each; a blanket OK does not cover them) + Part A findings + residuals + the routing choice (a computed adversarial-tier route carries the I22 authorization line — authorize, or downgrade + the debt line; the gate's approval of the line is the recorded consent) + the spec-doc ask (default ON — persist the requirement verbatim + the gate-approved decisions, amendments folded in (A15); only an explicit decline skips). Amendments fold in → **FINAL SPEC**. No human reachable? Grill-spec-tdd's rule: document + persist the decisions and Part A findings, then **STOP at the gate** — no test, no dispatch, until a human approves. Grill's throwaway gate-skip does NOT carry over — this front-end exists because the surface is critical; there is no gate-skip here.
 
 ### Phase 4 — Write the test FROM the final spec, audit it, route
 1. **Derive the acceptance test from the FINAL spec** (as grill-spec-tdd Phase 2): behavioral black-box, property/invariant tests for domain logic, every gate amendment included; a decision neither grill nor gate made goes back to the human, never silently into the test. **Run it — MUST be RED with the full-list RED-purity check** (incl. the breaking-change exception).
@@ -105,7 +109,7 @@ End with a verdict: proceed / proceed-with-changes / redo. Do NOT edit any file.
 ```
 3. **Reconcile:** adopt every BLOCKER/MAJOR → fix the TEST, and re-confirm RED (full-list purity) after EVERY edit. A finding that requires deciding something the requirement/gate didn't decide is a **SPEC-level residual** → surface it to the human (the gate approved an ambiguous spec — a follow-up ask, never a silent decision); test-level residuals ride the tier handoff. Substantial revision → ONE re-audit (same bound: audit + one re-audit), then stop and carry residuals.
    - **No dispatch tool available?** Disclose in the handoff that the test audit was not independent — the tier's own Phase 3 (the attacker) is the backstop. Never a silent self-audit.
-4. **Route** (as grill-spec-tdd Phase 3): invoke the tier BY NAME (fuzzy+critical typically → `spec-tdd-adversarial`; never `spec-tdd-lite` on a critical surface). The tier treats you as a grill arrival — it skips its Phase 1 (expect the adversarial tier's property-test check) and does not re-litigate locked decisions. Hand off: the test + the final spec + Part B residuals.
+4. **Route** (as grill-spec-tdd Phase 3): invoke the tier BY NAME (fuzzy+critical typically → `spec-tdd-adversarial` — only on the gate line's recorded I22 authorization; a declined authorization routes the band below with the debt line; never `spec-tdd-lite` on a critical surface). The tier treats you as a grill arrival — it skips its Phase 1 (expect the adversarial tier's property-test check) and does not re-litigate locked decisions. Hand off: the test + the final spec + Part B residuals.
 
 **Scope note (multi-unit):** Part A covered the grilled decisions (pre-gate — there is no unit plan yet: the tier writes A13 after routing, and it is HOW, surfaced not gated). Part B covers the specs the front-end wrote post-gate (writable NOW); later just-in-time specs are covered by the tier's own Phase 3 (the adversarial attacker, where the unit routes there) — not by I16. In the degenerate case no spec was written, Part B has no subject — say so; the tier's Phase 3 is the coverage.
 
@@ -130,5 +134,6 @@ End with a verdict: proceed / proceed-with-changes / redo. Do NOT edit any file.
 - About to write the acceptance test before the spec gate has approved the decisions.
 - The auditor's report has no quotes and no attempted counterexamples.
 - A materiality stop survived un-attacked.
+- Entered via a referral with no recorded consent — Part A is about to dispatch unheard (I22).
 - The gate is about to route a critical surface to `spec-tdd-lite`.
 - Part B findings still being re-litigated past one re-audit, or a spec-level residual decided silently.

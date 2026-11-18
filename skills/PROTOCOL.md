@@ -1,6 +1,6 @@
 # Spec-TDD Protocol
 
-**Version 1.18.3**
+**Version 1.40.0**
 
 > *A protocol for preventing correlated test/implementation failure in AI-generated software.*
 
@@ -77,6 +77,8 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 
 **I21 — The orchestrator runs the top tier, or the human knowingly declined.** A run's judgment — the acceptance spec, the verification (the adversarial read, the SPEC-DEFECT sweep, the re-run), the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but the session itself is pinned by how it was started and no dispatch can upgrade it. So every entry point (front-ends and tiers alike) pre-flights the model its own session runs as BEFORE any work: top tier — or any tier above it — in use, or no higher tier exists → silent, zero interaction (tier map per I19(a): top = the opus-class workhorse; the flagship-experimental tier above it is never required for a pin); a non-top session → ONE ask — upgrade (the human runs `/model`, picks the top tier, continues the same conversation) or ignore (continue at this tier; the decline is disclosed in the final report, as any degraded mode is). The check cannot switch the model itself — the harness gives skills no such lever; the upgrade path routes through the human. A front-end that surfaced the check notes it in the handoff; the tier never re-asks, and a recorded decline rides into the tier's final-report disclosure. `spec-tdd-lite`'s ask may reasonably be answered "ignore" (the deliberately-cheap tier); either answer is honored without re-litigating.
 
+**I22 — Adversarial machinery is authorization-gated (default off).** The family's three adversarial spend kinds — the adversarial verification tier (`spec-tdd-adversarial`), the grill-auditor dispatches (`adversarial-grill-spec-tdd` Parts A/B), and the adversarial audit brief (`spec-3rd-opinion`'s second auditor) — launch only on recorded user authorization; default DISABLED (maintainer ruling 2026-11-19). Direct user invocation of the skill itself IS the authorization. Where a front-end's machinery computes one of the three, the stakes assessment runs UP FRONT and the ask rides the nearest existing entry stop — escalate's routing moment (a computed adversarial route), manager's entry scans (adversarial-grill selection, the 3rd-upgrade on irreversible shapes), grill's spec-gate routing line, a loop's pull-out list at its double-consent gate — never mid-run: a mid-run discovery is the degraded fallback (STOP and report; the report IS the ask, relayed by the top), never a silent launch. A decline is a downgrade WITH a debt record, not a dead end: the band-below machinery runs (the lighter tier / plain grill / `spec-2nd-opinion`) and the decline persists an **adversarial-debt record** — unit, one-line predicate basis, what ran instead, date (the spec doc, or a board section on loops) — surfaced in the final report's residuals, so the user can order the adversarial pass later as a catch-up (the order is the authorization). An unattended window launches none of the three unless the going-dark gate granted it as a named item (GOING-DARK).
+
 ## Scope per tier
 
 | Invariant | lite | spec-tdd | +coverage | +adversarial |
@@ -95,6 +97,7 @@ SPEC vs TEST: a defect fixable by consulting artifacts already held (the require
 | I19 (dispatch economy: model tiers, evidence as files, spec by doc path, run ledger, batched verification runs) | ✅ (review dispatch top-tier; no implementer dispatch) | ✅ | ✅ | ✅ |
 | I20 (escalate fuzziness sniff) | via `spec-tdd-escalate` front-end | via `spec-tdd-escalate` | via `spec-tdd-escalate` | via `spec-tdd-escalate` |
 | I21 (orchestrator tier check — every entry point incl. front-ends; handoff suppresses the re-ask) | ✅ (ignore is a reasonable answer) | ✅ | ✅ | ✅ |
+| I22 (adversarial authorization gate — the three adversarial spend kinds; decline = downgrade + debt record) | via the routing front-ends (escalate / grill / manager / the drivers) | via front-ends | via front-ends | ✅ + entry self-check (no recorded consent → STOP and ask) |
 
 `spec-tdd-lite` implements in-session — no implementer dispatch; its only boundary crossing is the I13 review.
 

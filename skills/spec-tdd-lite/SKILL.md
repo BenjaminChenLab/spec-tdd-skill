@@ -96,7 +96,7 @@ Then, in session: **verify each finding yourself** (re-run; don't trust the repo
 | Resolve an ambiguous requirement alone | Baseline failure #2. Ask the human — the reviewer surfaces it, the human decides it. |
 | Grind a stuck repair loop | Stall breaker fires → promote to `spec-tdd` or ask. |
 | Lite ×N in one session (a bug list, a batch of small items) | Pollution scales with N. The second unit belongs to a `spec-tdd` multi-unit run. |
-| Lite on a money/auth/data-loss feature | Wrong tier — `spec-tdd-adversarial`. |
+| Lite on a money/auth/data-loss feature | Wrong tier — refer out to `spec-tdd-adversarial` (the referral surfaces the I22 authorization ask; lite never invokes it directly). |
 
 ## Red Flags — STOP
 - About to report done with no Phase-3 review on record (dispatch, or a disclosed degraded mode).

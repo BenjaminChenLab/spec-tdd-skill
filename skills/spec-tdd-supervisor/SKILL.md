@@ -5,7 +5,7 @@ description: Use when the user says "spec-tdd-supervisor", or wants ONE settled 
 
 # spec-tdd-supervisor
 
-**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — the front-ends (`grill-spec-tdd`, `spec-tdd-escalate`), the tiers (`spec-tdd-lite` / `spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`), and [PROTOCOL.md](../PROTOCOL.md) (I1–I21). This skill adds no new invariant and relaxes none: the tier machinery sinks to level-1 unchanged; what this file defines is the run **shape** layered on the family's outside — who sits at which layer, where judgment tokens are spent, and two recorded opt-ins (all-MID deviating from I19(a); the final review outsourced to a TOP auditor with the I21 ask retired — the session tier is no longer a premise of the shape). The outer drivers have three **parallel peers**: `spec-tdd-task-loop` (multi-task serial), `spec-tdd-task-dag` (multi-task parallel DAG), and this skill (single-unit full delegation) — the three never reference or dispatch each other: loop / dag level-1 runs the escalate machinery and never dispatches a sub-agent executing this skill; this skill likewise doesn't depend on their bodies (the monitoring and recovery machinery is self-contained in this file).
+**REQUIRED BACKGROUND:** Understand the `spec-tdd` family first — the front-ends (`grill-spec-tdd`, `spec-tdd-escalate`), the tiers (`spec-tdd-lite` / `spec-tdd` / `spec-tdd-coverage` / `spec-tdd-adversarial`), and [PROTOCOL.md](../PROTOCOL.md) (I1–I22). This skill adds no new invariant and relaxes none: the tier machinery sinks to level-1 unchanged; what this file defines is the run **shape** layered on the family's outside — who sits at which layer, where judgment tokens are spent, and two recorded opt-ins (all-MID deviating from I19(a); the final review outsourced to a TOP auditor with the I21 ask retired — the session tier is no longer a premise of the shape). The outer drivers have three **parallel peers**: `spec-tdd-task-loop` (multi-task serial), `spec-tdd-task-dag` (multi-task parallel DAG), and this skill (single-unit full delegation) — the three never reference or dispatch each other: loop / dag level-1 runs the escalate machinery and never dispatches a sub-agent executing this skill; this skill likewise doesn't depend on their bodies (the monitoring and recovery machinery is self-contained in this file).
 
 ## Overview
 
@@ -120,7 +120,7 @@ FAMILY FILES (if the skill is not invocable in your runtime, READ these
 from disk and follow them — the machinery lives there, not in this
 prompt):
 {family root}/skills/spec-tdd-escalate/SKILL.md (the routing you run),
-{family root}/skills/PROTOCOL.md (invariants I1–I21), and the chosen
+{family root}/skills/PROTOCOL.md (invariants I1–I22), and the chosen
 tier's {family root}/skills/<tier-name>/SKILL.md.
 
 FILE TOOLS (standing rule, carries into every nested brief you compose):
@@ -167,13 +167,16 @@ that only READS the money system (recheck/lookup sweeps, display,
 reporting) makes the report say so and name the downgrade-to-
 coverage continuation as the recommendation — "it touches money"
 alone never triggers the exit. Only MOVE-money / CHANGE-auth /
-IRREVERSIBLY-corrupt-on-silent-wrongness exits: the top's default
-is to EXIT this skill and run spec-tdd-adversarial standalone
-(re-routing at coverage here would be an unconsented downgrade; on
-exit, the requirement doc plus any already-written test hand over
-as REFERENCE INPUTS — the standalone run executes its own Phase 1,
-treating a MID-written test as a draft to re-derive or harden, not
-an intake).
+IRREVERSIBLY-corrupt-on-silent-wrongness exits: the top surfaces
+the I22 authorization ask at ITS entry, before any dispatch —
+authorize → exit this skill and run spec-tdd-adversarial
+standalone (the requirement doc plus any already-written test hand
+over as REFERENCE INPUTS — the standalone run executes its own
+Phase 1, treating a MID-written test as a draft to re-derive or
+harden, not an intake); decline → this skill proceeds at coverage
+WITH the adversarial-debt line persisted (a consented downgrade —
+the un-asked re-route is the unconsented one; the residual
+surfaces in the final report, I22).
 
 ASKS YOU CANNOT REACH (escalate's routing-hygiene asks, dispatched):
 the fuzziness-sniff ask (gaps in the "settled" doc) and the top-tier
@@ -259,7 +262,7 @@ Stacked failure modes can burn a whole afternoon: hard-fail (429 terminates dire
 
 6. **Freeze auto-recovery (freeze SOP)** — the first successful turn's three duties (record the 429 event, pool, reset moment, and freeze start into `RUN-STATE.md`; schedule the reset+15 insurance point — future resets only, durable when the reset falls outside the session's expected attended life; disclose the freeze) + collect-before-judge (a card finished during the freeze presents as a total-freeze shape — check closure before the three states) + the freeze-window deduction from output-age/budget + the post-first-429 dispatch discipline (later dispatches never silently land in the exhausted pool): `references/recovery-and-resume.md`, read at the breakpoint.
 
-**Unattended window (going-dark).** The user announces leaving/sleeping/going offline with the unit in flight → read `{family root}/skills/GOING-DARK.md` and execute it NOW (the batched pre-approval ask — expected return, recovery actions, tier ceiling, open decisions, commit handling — plus substrate choice and optional OS-level fallback arming; tier pins stay MID); the full batched-ask item list and the unreadable-file fallback: `references/recovery-and-resume.md`, read at the gate.
+**Unattended window (going-dark).** The user announces leaving/sleeping/going offline with the unit in flight → read `{family root}/skills/GOING-DARK.md` and execute it NOW (the batched pre-approval ask — expected return, commit authority (the no-commit close here; cross-repo/sibling-checkout lines still named), adversarial authority (I22, default none), parallel-impact operations (default none), recovery actions, tier ceiling, open decisions — plus substrate choice and optional OS-level fallback arming; tier pins stay MID); the full batched-ask item list and the unreadable-file fallback: `references/recovery-and-resume.md`, read at the gate.
 
 7. **This skill's degraded closing (the last rung): exit, never run it yourself.** Re-dispatch also unavailable (pools dead / harness broken) → report to the user and run `/spec-tdd-escalate` in-session instead. The top personally taking over the machinery (writing tests / dispatching implementers) destroys this skill's two opt-in premises; that option does not exist.
 
@@ -318,7 +321,7 @@ The user downgrades the tier mid-run under time pressure → **dual channel**: S
 | Level-1 stopping to ask about a tier upgrade / switching tiers on its own | The template pre-resolves it (ORCHESTRATOR TIER CHECK + MODEL PIN); restate the handoff on re-dispatch |
 | Taking level-1's verbal test numbers on faith | Read the JUnit XML and recheck per class; only after unit conversion (methods vs invocations) still mismatching is it an anomaly |
 | The top fixing findings by hand | SendMessage to resume, or re-dispatch — the top only hands over facts; fixing by hand = the agent boundary collapsing |
-| A computed adversarial route making do at coverage inside this skill | Exit and run `spec-tdd-adversarial` standalone — attack rounds aren't carried in MID economics; the doc and any written test hand over as reference inputs (the standalone run runs its own Phase 1) |
+| A computed adversarial route making do at coverage inside this skill | The I22 ask at entry decides: authorize → exit and run `spec-tdd-adversarial` standalone — attack rounds aren't carried in MID economics; the doc and any written test hand over as reference inputs (the standalone run runs its own Phase 1). Decline → the one legal coverage continuation: debt line persisted + disclosed (I22) |
 | To save one dispatch, the top deep-reviews in-session itself | The deep review is a TOP dispatch — absorbing it = the judgment tier falling back into the session (the pre-v1.23.0 decline hole revives); the only exception: the no-dispatch degradation path (I21 ask revived, disclosed) |
 | The top silently overruling an auditor finding | Arbitration defaults to adopt; a rejection must carry the evidence the auditor lacked and surface to the user — a session of any tier never silently overrules a TOP auditor |
 | Writing summaries / pre-digested conclusions into the audit brief | Fixed checklist + doc paths (I19(c)) — a summary hands the session framing power; the auditor reads originals |

@@ -28,7 +28,7 @@ Any miss → the non-clean path. A grill-coverage finding (a dimension the plan 
 
 **When NOT to use — route elsewhere:**
 - The requirement is still fuzzy (un-grilled decision gaps) → grill family first; auditing fuzz certifies fuzz (2nd-opinion's own refusal).
-- Critical predicate — a silent wrong result MOVES money / CHANGES authorization / IRREVERSIBLY corrupts data (money-adjacent display/reporting does NOT qualify) — or IRREVERSIBLE shapes (DDL/migration, external contracts, security posture, money-movement semantics) → out of this pipeline: `spec-tdd-escalate` (picks the adversarial tier, its own confirm ask) or `spec-tdd-manager` (the full pipeline).
+- Critical predicate — a silent wrong result MOVES money / CHANGES authorization / IRREVERSIBLY corrupts data (money-adjacent display/reporting does NOT qualify) — or IRREVERSIBLE shapes (DDL/migration, external contracts, security posture, money-movement semantics) → out of this pipeline: `spec-tdd-escalate` (picks the adversarial tier, its own I22 authorization ask) or `spec-tdd-manager` (the full pipeline — its entry scans carry the same ask, I22).
 - A multi-unit batch or split feature → `spec-tdd`'s multi-unit run.
 - You want the whole feature's pipeline (breakdown, gates, routed drivers) → `spec-tdd-manager`.
 - You want the plan audited, not implemented → `spec-2nd-opinion` directly.

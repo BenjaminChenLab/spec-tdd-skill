@@ -35,6 +35,10 @@ Before any work, check the model THIS session runs as. A run's judgment — the 
 
 Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
 
+## Pre-flight — adversarial authorization check (I22)
+
+The tier runs on recorded user authorization only (I22): **direct user invocation (`/spec-tdd-adversarial`) = the authorization**; arrived from a front-end (escalate's confirm ask, grill/adversarial-grill's gate line, supervisor's exit ask, a loop's pull-out ask) with the consent recorded on the handoff → proceed. **No consent on record and no direct invocation → STOP and ask** — the backstop against an upstream text that forgot to ask; the tier never launches on the machine's say-so alone. In a dispatched context with no user reach: STOP and report — the report IS the ask, relayed up.
+
 ## The 3 Phases (delta vs spec-tdd-coverage in **bold**)
 
 ### Phase 1 — Orchestrator writes the acceptance test
@@ -193,3 +197,4 @@ This IS the top tier: blast-radius-critical units get full phases + mandatory pr
 - About to declare done with no terminal dry-loop on record — or the dry-loop is being extended by MINORs, or re-finding a deduped known residual — or the cap was hit with live findings and the human was never asked.
 - A multi-unit batch is running (or about to run) a full attack loop + dry-loop per unit — consolidate (dispatch as the final wave dispatches) instead.
 - Used on non-critical code — or on the whole fintech codebase because everything touches money.
+- Entered with no user authorization on record and no direct invocation — the I22 backstop: STOP and ask.

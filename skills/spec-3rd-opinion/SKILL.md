@@ -13,6 +13,10 @@ Two independent eyes are better than one — unless both share a lens. `spec-3rd
 
 **Core principle: lens diversity, concurrent dispatch.** The two auditors never see each other, never run sequentially (a second brief written after reading the first report inherits its blind spots through you), and never share a template. What stays correlated is what gets asked in the first place — the adversarial brief exists to widen exactly that.
 
+## Pre-flight — adversarial authorization check (I22)
+
+Brief B (the adversarial hunter) is adversarial spend — default DISABLED, launched only on recorded user authorization (I22). **Direct user invocation (`/spec-3rd-opinion`) = the authorization — proceed, no ask.** Loaded by an orchestrator's escalation (manager's IRREVERSIBLE scan) → the handoff must carry the recorded consent; it does → proceed. **No consent on record → STOP and ask before dispatching Brief B** — or, user truly unreachable mid-chain, degrade to `spec-2nd-opinion`'s single-auditor flow with the 3rd booked on the adversarial-debt line (I22), disclosed.
+
 ## The flow — deltas from spec-2nd-opinion
 
 ### Step 1 — Distill TWO briefs, not one
@@ -53,3 +57,4 @@ Attribute amendments to their source lens ("per the standard audit: …", "per t
 - About to soften the gate because "two of three basically agree" — the gate is all three, or the disagreement is disclosed and arbitrated.
 - The hunter's report agrees with everything and names no attempted attack — that's a rubber stamp wearing a scary brief; demand the evidence or re-dispatch.
 - About to write Brief B by editing Brief A's text lightly — rewrite the questions, not the adjectives.
+- Brief B about to dispatch on an escalation handoff with no recorded consent (I22).
