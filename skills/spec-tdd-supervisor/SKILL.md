@@ -16,7 +16,7 @@ Contrast with task-loop (the two converge to the same deep-review shape): task-l
 Two recorded opt-ins (the shape's known costs; they hold the moment the user invokes this skill, and the final report must disclose them):
 
 1. **All MID (an explicit deviation from I19(a)).** level-1, the nested implementer, the encoding audit, and the lite fresh review run **all MID** — the run's only TOP judgment point is the final review. The cost, recorded honestly: a weak test first drives a full implementation and is only caught at the final review; the fix rides a findings re-dispatch (more expensive than I19(a)'s pre-implementation interception). The compensation control: the final review's first deep-check item is fixed as the **acceptance-test encoding-fidelity re-read** — the original TOP encoding audit's duty is taken over by the final review (the auditor dispatch); it does not vanish because a dispatch was saved.
-2. **The final review is outsourced to a TOP auditor; the I21 ask is retired (its second repositioning).** The deep review becomes a TOP-pinned dispatch, and **the session tier is no longer a premise of the shape** — there is no judgment-dense act left in-session: the top's remaining duties are either mechanical (running the objective items personally; the brief as a fixed checklist of doc paths — I19(c), no summaries, no pre-digestion) or user-owned (findings arbitration **default-adopt**; a rejection must carry the evidence the auditor lacked and surface to the user; ambiguities depending on grilling intent always go up — I12). Consent is invocation-based (same source as opt-in 1): the user invoking this skill consents to the review running in a TOP dispatch rather than in the session. Known cost: the auditor sees only persisted docs, not the grilling conversation — intent must already live in the doc (I17's standing claim; a doc that doesn't carry it is itself a finding), and the top manages one more resumable background child. Degradation path: at review time dispatching is impossible (Agent tool broken) → fall back to an in-session final review, **the I21 ask revives at that moment** (asked once), disclosed. **It is a convergence, not a relaxation**: the old shape's weakest legal configuration (non-top decline → MID session self-review) does not exist in the new shape.
+2. **The final review is outsourced to a TOP auditor; the I21 ask is retired (its second repositioning).** The deep review becomes a TOP-pinned dispatch, and **the session tier is no longer a premise of the shape** — there is no judgment-dense act left in-session: the top's remaining duties are either mechanical (running the objective items personally; the brief as a fixed checklist of doc paths — I19(c), no summaries, no pre-digestion) or user-owned (findings arbitration **default-adopt**; a rejection must carry the evidence the auditor lacked and surface to the user; ambiguities depending on grilling intent always go up — I12). Consent is invocation-based (same source as opt-in 1): the user invoking this skill consents to the review running in a TOP dispatch rather than in the session. Known cost: the auditor sees only persisted docs, not the grilling conversation — intent must already live in the doc (I17's standing claim; a doc that doesn't carry it is itself a finding), and the top manages one more resumable background child. Degradation path: at review time dispatching is impossible (Agent tool broken) → fall back to an in-session final review, **the session's tier announced at that moment** (no ask — I21 never asks anywhere, v1.41.0), disclosed. **It is a convergence, not a relaxation**: the old shape's weakest legal configuration (non-top decline → MID session self-review) does not exist in the new shape.
 
 | Layer | Who | Does | Forbidden |
 |---|---|---|---|
@@ -82,14 +82,12 @@ reviewer (lite route), implementer — is ALSO the MID tier. Name the MID
 tier explicitly in every Agent call; never let a dispatch silently
 inherit the session model.
 
-ORCHESTRATOR TIER CHECK — PRE-RESOLVED: treat the I21 pre-flight of
-escalate AND of the chosen tier as already answered-decline. No ask
-was surfaced to any user, and none was needed: the user's explicit
-invocation of the supervisor skill-shape IS the recorded decline
-(the machinery runs MID on purpose; a TOP-tier final-audit DISPATCH
-backstops judgment — not the session, whose own tier is irrelevant
-in this shape). Do NOT stop to ask about upgrading;
-carry "I21 decline recorded (supervisor all-MID opt-in, at
+ORCHESTRATOR TIER CHECK — PRE-RESOLVED: the I21 check never asks
+anywhere (family-wide, v1.41.0) — and least of all here, where the
+machinery runs MID on purpose and a TOP-tier final-audit DISPATCH
+backstops judgment (the session, any tier, is irrelevant to this
+shape). Do NOT stop to ask about upgrading;
+carry "session tier disclosed (supervisor all-MID opt-in, at
 invocation)" into your report disclosures.
 
 No self-testing OUTSIDE the lite tier. Same-context test+implementation
@@ -240,7 +238,7 @@ and post-run hashes (the bit-identical pair; on the lite route,
 state "solo re-RED discipline applies — no hash pair")  5)
 prior-test adaptations with per-file rationale (per SCOPE)  6)
 disclosures: tier actually used (+ any mid-run downgrade or band
-cap; the all-MID opt-in and the I21 recorded decline), deviations
+cap; the all-MID opt-in and the session-tier disclosure), deviations
 from the requirement doc (DDL deltas, naming/structure), locally
 decided rule details, and your proposed requirement-doc edits for
 the top's writeback.
@@ -268,11 +266,11 @@ Stacked failure modes can burn a whole afternoon: hard-fail (429 terminates dire
 
 ## Report handling (the top only relays, never judges in level-1's place)
 
-Escalate's routing-hygiene asks cannot reach the user from inside a dispatched context — I21 was pre-resolved by the handoff (not relayed); the sniff and the adversarial confirm follow **the v1.20.3 general rule: the report IS the ask, relayed by the top**. Level-1's STOP reports:
+Escalate's routing-hygiene asks cannot reach the user from inside a dispatched context — the tier check asks nowhere and relays nothing (I21, v1.41.0); the sniff and the adversarial confirm follow **the v1.20.3 general rule: the report IS the ask, relayed by the top**. Level-1's STOP reports:
 
 - **Sniff gaps** (the doc only looks settled) → relay the gap list verbatim and ask the user "grill first, or settled and continue": **settled** → re-dispatch with the flag (a fresh level-1; the handoff notes the user's approval + the gap list; the gaps are visible to Phase 1); **grill** → exit this skill into the grill front-end.
 - **Multi-unit true shape** (the doc is really a bug list / a feature in slices — caught by the template's band carve-out) → relay, exit this skill, run a `spec-tdd` multi-unit run in the main session instead.
-- **Above-band stakes** (adversarial grade) → relay the stakes grounds + the money-adjacent carve-out verdict (one line each — a read-only reader of the money system names the downgrade-to-coverage continuation as the recommendation; per audit v1.37.0, the P0's fourth routing point) and ask the user: **Confirm adversarial** → **exit this skill**, run `spec-tdd-adversarial` standalone (a normal standalone tier run — attack rounds are hours-level depth, not carried in MID economics; this shape's session may be any tier, and adversarial's own I21 pre-flight takes over there as usual; the requirement doc and any written test hand over as **reference inputs** — the standalone run runs its own Phase 1 (direct-arrival shape), and the MID-written test is a draft to re-derive / harden, not an intake); **Downgrade → coverage**, re-dispatch with the recorded call, disclosed in the final report. Any other user ruling stands per I12.
+- **Above-band stakes** (adversarial grade) → relay the stakes grounds + the money-adjacent carve-out verdict (one line each — a read-only reader of the money system names the downgrade-to-coverage continuation as the recommendation; per audit v1.37.0, the P0's fourth routing point) and ask the user: **Confirm adversarial** → **exit this skill**, run `spec-tdd-adversarial` standalone (a normal standalone tier run — attack rounds are hours-level depth, not carried in MID economics; this shape's session may be any tier, and adversarial's own tier disclosure applies there as usual (never asks, v1.41.0); the requirement doc and any written test hand over as **reference inputs** — the standalone run runs its own Phase 1 (direct-arrival shape), and the MID-written test is a draft to re-derive / harden, not an intake); **Downgrade → coverage**, re-dispatch with the recorded call, disclosed in the final report. Any other user ruling stands per I12.
 - **No Agent tool** → fix spawn depth / environment and re-dispatch; never let level-1 self-test in place.
 - **Other terminal reports (catch-all)** — failure reports after the I9 breaker trips (3 failed repairs, a designed normal ending), SPEC-bucket decision needs (I10: re-opening the requirement is the user's call), every non-GREEN terminal not covered above: **relay verbatim (with objective evidence); the user decides**. A user-mandated re-dispatch is a fresh mandate and does not burn the watchdog's re-dispatch cap. **Counting is divided, three separate ledgers**: death re-dispatches (watchdog / recovery procedure) count against the cap of 2; the findings loop's re-dispatch is bounded by the final review's one round; user-mandated re-dispatches rest on the user's explicit call (disclosed) — never borrow across.
 
@@ -284,7 +282,7 @@ Session break / context corruption, the run stopped mid-way → **read `referenc
 
 ## The final review (review gate — this skill's core)
 
-**0. Review-gate tier check — retired (v1.23.0).** With the deep review outsourced, the shape has no in-session judgment-dense act left: the objective items are mechanical, the deep review lives in the TOP dispatch, arbitration defaults to adopt with objections escalated — the I21 ask's object is gone (opt-in 2's account, invocation-based). **The only revival point**: at review time dispatching is impossible (Agent tool broken) → fall back to an in-session final review; the I21 ask is asked once at that moment, disclosed.
+**0. Review-gate tier check — retired (v1.23.0).** With the deep review outsourced, the shape has no in-session judgment-dense act left: the objective items are mechanical, the deep review lives in the TOP dispatch, arbitration defaults to adopt with objections escalated — the I21 ask's object is gone (opt-in 2's account, invocation-based). **The only revival point**: at review time dispatching is impossible (Agent tool broken) → fall back to an in-session final review; the session's tier is announced once at that moment (no ask — I21 never asks, v1.41.0), disclosed.
 
 **1. Objective items (mechanical and cheap, run first — numbers failing means no TOP audit dispatch is spent).**
    (a) **Compile** — run the main module's compile + compileTestJava once personally; green or it doesn't count;
@@ -322,7 +320,7 @@ The user downgrades the tier mid-run under time pressure → **dual channel**: S
 | Taking level-1's verbal test numbers on faith | Read the JUnit XML and recheck per class; only after unit conversion (methods vs invocations) still mismatching is it an anomaly |
 | The top fixing findings by hand | SendMessage to resume, or re-dispatch — the top only hands over facts; fixing by hand = the agent boundary collapsing |
 | A computed adversarial route making do at coverage inside this skill | The I22 ask at entry decides: authorize → exit and run `spec-tdd-adversarial` standalone — attack rounds aren't carried in MID economics; the doc and any written test hand over as reference inputs (the standalone run runs its own Phase 1). Decline → the one legal coverage continuation: debt line persisted + disclosed (I22) |
-| To save one dispatch, the top deep-reviews in-session itself | The deep review is a TOP dispatch — absorbing it = the judgment tier falling back into the session (the pre-v1.23.0 decline hole revives); the only exception: the no-dispatch degradation path (I21 ask revived, disclosed) |
+| To save one dispatch, the top deep-reviews in-session itself | The deep review is a TOP dispatch — absorbing it = the judgment tier falling back into the session (the pre-v1.23.0 decline hole revives); the only exception: the no-dispatch degradation path (in-session review, tier disclosed — no ask, v1.41.0) |
 | The top silently overruling an auditor finding | Arbitration defaults to adopt; a rejection must carry the evidence the auditor lacked and surface to the user — a session of any tier never silently overrules a TOP auditor |
 | Writing summaries / pre-digested conclusions into the audit brief | Fixed checklist + doc paths (I19(c)) — a summary hands the session framing power; the auditor reads originals |
 | After fixes, dispatching a fresh auditor to re-check the delta | The adoption check needs memory (I16) — the SAME auditor re-checks via SendMessage; only when unresumable, fresh (re-reads everything from FINAL-AUDIT.md, disclosed) |

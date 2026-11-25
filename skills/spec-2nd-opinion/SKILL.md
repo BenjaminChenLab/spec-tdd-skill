@@ -23,13 +23,9 @@ Same-context blind spots are the failure mode this skill exists to catch: the se
 - Implementation is done and needs verification → the tier ladder (`spec-tdd` …), not this.
 - The user wants a third adversarial opinion too → `spec-3rd-opinion` (this skill + a second, adversarial auditor).
 
-## Pre-flight — orchestrator tier check (I21)
+## Pre-flight — orchestrator tier disclosure (I21)
 
-Before any work, check the model THIS session runs as. A run's judgment — here: distilling the falsifiable brief, merging the verdicts, arbitrating the disagreements — executes entirely in the orchestrator's own context; I19 pins the auditor dispatch TOP, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
-
-> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
-
-Already surfaced earlier in this conversation (typically by the grill that settled the plan)? Skip it — never re-ask; a recorded decline rides into the final plan's disclosure.
+Before any work, check the model THIS session runs as. A run's judgment — here: distilling the falsifiable brief, merging the verdicts, arbitrating the disagreements — executes entirely in the orchestrator's own context; I19 pins the auditor dispatch TOP, but nothing can upgrade the session itself. **The check never asks and never stops** (maintainer ruling 2026-11-25): **top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) A non-top session → ONE announcement line — "non-top session — proceeding at this tier; disclosed in the final plan's disclosure" — then continue; the run never sits waiting on a tier answer (upgrading is the human's own `/model` decision).
 
 ## The flow
 

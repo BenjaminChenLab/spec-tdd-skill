@@ -19,13 +19,9 @@ Two-tier TDD split across the agent boundary: **the orchestrator writes the acce
 - MULTIPLE independent units — a bug list, several separate fixes, or a feature split into slices? Stay HERE: **Multi-unit runs** (`references/multi-unit.md`) loops the phases per unit. **Count before you run:** if the task names more than one bug/fix, you are multi-unit — do NOT write one acceptance suite over the whole batch, and do NOT `spec-tdd-lite` ×N.
 - Any stack. Risk-tier how much verification you run (see below).
 
-## Pre-flight — orchestrator tier check (I21)
+## Pre-flight — orchestrator tier disclosure (I21)
 
-Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
-
-> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
-
-Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself — which is why the disclosure exists. **The check never asks and never stops** (maintainer ruling 2026-11-25): **top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) A non-top session → ONE announcement line — "non-top session — proceeding at this tier; disclosed in the final report" — then continue; the run never sits waiting on a tier answer (upgrading is the human's own `/model` decision).
 
 ## The 3 Phases
 
@@ -34,7 +30,7 @@ Arrived from a front-end that already surfaced this check? Skip it — never re-
 
 > **About to write one suite covering SEVERAL bugs/fixes at once?** STOP — that is the mega-collapse. A task naming more than one independent fix is a **multi-unit run**: go to Multi-unit runs (`references/multi-unit.md`) and loop per unit.
 
-> **Spec not a doc — settled only in this conversation, nothing on disk?** Prompt once: "persist a spec doc?" — default **YES**. A conversation is not durable recall (sessions get cleared/compacted); the doc survives. After the test is RED, write the requirement verbatim + your interpretation decisions + the acceptance-test path to `docs/specs/YYYY-MM-DD-<feature>.md` (follow the project's convention if it has one) — it is what later recall reads (SPEC-bucket re-opens, PR review, audits). Only an explicit "no" skips it — an unanswered prompt is not a no. Arrived from either grill front-end? The final decision spec was already persisted at the gate — skip this.
+> **Spec not a doc — settled only in this conversation, nothing on disk?** Persist it — no prompt (v1.41.0): a conversation is not durable recall (sessions get cleared/compacted); the doc survives. After the test is RED, write the requirement verbatim + your interpretation decisions + the acceptance-test path to `docs/specs/YYYY-MM-DD-<feature>.md` (follow the project's convention if it has one) — it is what later recall reads (SPEC-bucket re-opens, PR review, audits) — and announce the path in one line. Only an explicit user "don't persist" skips it; silence is never a skip. Arrived from either grill front-end? The final decision spec was already persisted at the gate — skip this.
 
 1. Requirement unclear? **Ask, don't guess.** (Can't write the test = the spec is unclear — that's the signal, surfaced before coding.)
 2. **Ground it**: read relevant entities/services/repos/existing patterns first; the test must fit the real architecture.

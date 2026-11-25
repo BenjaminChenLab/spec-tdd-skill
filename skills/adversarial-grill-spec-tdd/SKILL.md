@@ -27,13 +27,9 @@ grill-spec-tdd, plus: an **independent adversarial subagent attacks the grill it
 
 > **Not to be confused:** `spec-tdd-adversarial` = the verification TIER (attacker at Phase 3, after impl exists). THIS = the front-end (auditor before the gate on decisions, and pre-dispatch on the test — no impl exists). Fuzzy+critical → run THIS first; it routes into that tier.
 
-## Pre-flight — orchestrator tier check (I21)
+## Pre-flight — orchestrator tier disclosure (I21)
 
-Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
-
-> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
-
-Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself — which is why the disclosure exists. **The check never asks and never stops** (maintainer ruling 2026-11-25): **top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) A non-top session → ONE announcement line — "non-top session — proceeding at this tier; disclosed in the final report" — then continue; the run never sits waiting on a tier answer (upgrading is the human's own `/model` decision).
 
 ## Pre-flight — adversarial authorization check (I22)
 

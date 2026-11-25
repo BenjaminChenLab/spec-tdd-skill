@@ -34,9 +34,9 @@ Any miss → the non-clean path. A grill-coverage finding (a dimension the plan 
 - You want the plan audited, not implemented → `spec-2nd-opinion` directly.
 - You are live-testing and streaming fixes below lite's test-first cycle → `spec-tdd-quickfix` (the entry sniff suggests it; your call stands).
 
-## Pre-flight — no tier ask (the invocation is the recorded decline)
+## Pre-flight — tier disclosure (no ask anywhere, family-wide v1.41.0)
 
-This skill surfaces NO orchestrator-tier question — I21 retired on the invocation record, supervisor's v1.23.0 shape. The chain's two judgment-dense dispatches (the plan audit, lite's test review) are TOP-pinned by their own skills whatever the session holds, and invoking this skill is already the recorded consent to the in-session economics — the entry sniff, the fire decision, and (on the lite route) the implementation inner loop run on the session's model, chosen by the person who invoked it. Both stations' own pre-flight checks read the handoff record and skip (their carried-decline clauses); the close report discloses the session's tier and that no ask fired. A scoped exemption, not a protocol change — the I21 asks on everywhere else in the family.
+This skill surfaces NO orchestrator-tier question — and since v1.41.0 (maintainer ruling 2026-11-25) neither does anything else in the family: every entry point's I21 check announces a non-top session in one line and never stops. The chain's two judgment-dense dispatches (the plan audit, lite's test review) are TOP-pinned by their own skills whatever the session holds, and the in-session economics — the entry sniff, the fire decision, and (on the lite route) the implementation inner loop — run on the session's model, chosen by the person who invoked it. The close report discloses the session's tier.
 
 ## Entry sniff (the routing table — every rule is an existing family boundary, none invented here)
 
@@ -50,7 +50,7 @@ Announce the verdict in one line + one-line rationale; every exit is a referral,
 
 ## Step 0 — persist the plan
 
-The audit's precondition is a plan on disk (I17: settled only in conversation = not auditable). Plan already a doc → use it. Conversation-only → persist it now per project convention (family default `docs/specs/YYYY-MM-DD-<feature>.md`), announced in one line — this same doc satisfies lite's Phase-1 persistence, so that prompt never fires. Pending user decisions, if any, are enumerated as pending, never silently defaulted.
+The audit's precondition is a plan on disk (I17: settled only in conversation = not auditable). Plan already a doc → use it. Conversation-only → persist it now per project convention (family default `docs/specs/YYYY-MM-DD-<feature>.md`), announced in one line — this same doc satisfies lite's Phase-1 persistence (auto-persisted family-wide; there is no prompt to fire, v1.41.0). Pending user decisions, if any, are enumerated as pending, never silently defaulted.
 
 ## Step 1 — the audit station
 
@@ -69,13 +69,13 @@ Run `spec-2nd-opinion` **verbatim**: brief assembly (its Step 1 — background w
 
 Invoke the routed skill **verbatim**; this skill adds nothing to its run and owns none of its asks (its SPEC-bucket questions, its exit rules, its final surface-WHAT report — all its own):
 
-- **Default — `spec-tdd-lite`**: Phase 1 writes the acceptance test against the persisted spec doc (RED; no persistence prompt — Step 0 satisfied it), Phase 2 implements in-session, Phase 3 dispatches the fresh TOP test review (the second of the chain's two dispatches). Its exit rules govern: solo re-RED, the SPEC-DEFECT sweep, the stall breaker.
+- **Default — `spec-tdd-lite`**: Phase 1 writes the acceptance test against the persisted spec doc (RED; persistence already satisfied by Step 0), Phase 2 implements in-session, Phase 3 dispatches the fresh TOP test review (the second of the chain's two dispatches). Its exit rules govern: solo re-RED, the SPEC-DEFECT sweep, the stall breaker.
 - **Upgrade route — `spec-tdd`** (entry-sniffed too-big, or lite's stall breaker promoting mid-run): its three-phase machinery (acceptance test → delegated implementer → orchestrator verification) runs unchanged. This is the ceiling — never beyond spec-tdd on this pipeline.
 - **A critical surface discovered mid-run** (the litmus hits during implementation) → STOP and refer out — lite refuses critical units and so does this pipeline; the ceiling does not stretch.
 
 ## Close — stamps and resume
 
-After the station's exit, append the close stamp — "secretary pipeline closed (YYYY-MM-DD): audited spec-2nd-opinion, implemented lite|spec-tdd" — and deliver the close report: the station's own final report **plus one line disclosing that the run was fired on the clean-fire consent** (when it was) **and the session's tier** (no I21 ask fired — the invocation record is the decline). A run leaving no on-disk trace is byte-identical to never-run after `/clear` — the stamps are the resume state:
+After the station's exit, append the close stamp — "secretary pipeline closed (YYYY-MM-DD): audited spec-2nd-opinion, implemented lite|spec-tdd" — and deliver the close report: the station's own final report **plus one line disclosing that the run was fired on the clean-fire consent** (when it was) **and the session's tier** (no tier ask exists — I21 discloses family-wide, v1.41.0). A run leaving no on-disk trace is byte-identical to never-run after `/clear` — the stamps are the resume state:
 
 - **Audit stamp only, no fire stamp** → the session died between the audit close and the fire decision: re-enter Step 2 and verify the four predicate items from the doc (the write-back, the pending-decisions section) — the audit stamp alone covers only items 1–2; never blind-fire on it. Nothing re-audited.
 - **Fire stamp present** → the fire basis is on record (clean-consent = the predicate was verified at fire time; explicit go = the user's decided override): the implementation station was entered. Implementation absent or partial → the station skill's own artifacts and state govern the continuation; this skill re-runs no preamble.
@@ -90,7 +90,7 @@ After the station's exit, append the close stamp — "secretary pipeline closed 
 | Firing on a plan doc edited after the audit close | The doc-state guard: the write-back is the last write — a post-audit edit voids the close (fold + disclose; substantive → ONE targeted re-audit). |
 | This skill writing the test / implementing / reviewing | Sequence-and-route-only — the machinery lives in the two stations. |
 | Extending the audit brief's checklist | Stock checklist fits a single unit's plan; manager's extension is for breakdown trios. |
-| Re-asking lite's persistence prompt, or either station's tier check | Step 0 persisted the doc; the invocation record IS the tier decline — both stations' carried-decline clauses read it and skip. |
+| Re-asking lite's persistence, or either station's tier check | Step 0 persisted the doc (persistence is automatic family-wide, v1.41.0) and the tier check never asks — there is nothing to re-ask. |
 | Routing critical / multi-unit / fuzzy into the lane | The sniff's exits are forced referrals — the boundaries belong to the refused skills, not to this skill's discretion. |
 | Upgrading beyond spec-tdd, or stretching the ceiling on a mid-run critical discovery | The ceiling is spec-tdd; a critical discovery STOPs and refers out. |
 | The too-big route becoming an ask | An announced economic route with a one-line rationale (manager S2's pattern) — the audit still gates it. |

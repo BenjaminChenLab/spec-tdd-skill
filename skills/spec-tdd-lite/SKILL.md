@@ -26,20 +26,14 @@ Observed baseline: a diligent plain-TDD agent, on a small coupon feature, shippe
 
 **When NOT to use** — correctness-critical → `spec-tdd-adversarial`; need coverage evidence → `spec-tdd-coverage`; the work is big enough that delegation pays for itself → `spec-tdd`.
 
-## Pre-flight — orchestrator tier check (I21)
+## Pre-flight — orchestrator tier disclosure (I21)
 
-Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
-
-> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
-
-Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
-
-("Ignore" is a reasonable answer at this deliberately-cheap tier — honor it without re-litigating.)
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself — which is why the disclosure exists. **The check never asks and never stops** (maintainer ruling 2026-11-25): **top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) A non-top session → ONE announcement line — "non-top session — proceeding at this tier; disclosed in the final report" — then continue; the run never sits waiting on a tier answer (upgrading is the human's own `/model` decision). A non-top session here is the designed case — this tier is deliberately cheap; the announcement line is the whole ceremony.
 
 ## Phase 1 — Write the acceptance test
 > **Arrived from `grill-spec-tdd`?** The acceptance test is already written and RED — skip this phase, start at Phase 2 (keep the grill's interpretation notes; Phase 3 re-examines them).
 
-> **Spec not a doc — settled only in this conversation (and not a grill arrival)?** Prompt once whether to persist one — default **YES** (as `spec-tdd` Phase 1): requirement verbatim + your interpretation decisions + acceptance-test path → `docs/specs/YYYY-MM-DD-<feature>.md` (project convention wins). This session will be cleared/compacted after — the doc is what survives. Only an explicit "no" skips it.
+> **Spec not a doc — settled only in this conversation (and not a grill arrival)?** Persist one — no prompt (v1.41.0, as `spec-tdd` Phase 1): requirement verbatim + your interpretation decisions + acceptance-test path → `docs/specs/YYYY-MM-DD-<feature>.md` (project convention wins), announced in one line. This session will be cleared/compacted after — the doc is what survives. Only an explicit user "don't persist" skips it; silence is never a skip.
 
 As `spec-tdd` Phase 1: ground it in the real architecture; behavioral black-box (WHAT, not HOW); run it — **MUST be RED** (a not-yet-existing module erroring is a valid first RED; GREEN — even intermittent, fails-then-passes on a re-run — is the only invalid state: pre-impl the flake is test-side; pin seed/clock before implementing). **RED-purity check:** scan the FULL error list, not just the tail — every error must point at symbols the feature will create; any error about EXISTING symbols (wrong constructor arity, ambiguous method overloads, unused imports) is a defect in YOUR test, not feature absence (unless the spec itself explicitly changes that symbol — then the RED is good). Fix the test before implementing — a defective RED masquerades as "feature missing" and you will bend the impl to accommodate it. Domain logic: add 1–3 property/invariant tests. **Write down every interpretation you make of ambiguous requirement wording** — Phase 3 re-examines them.
 

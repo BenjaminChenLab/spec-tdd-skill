@@ -5,7 +5,7 @@ description: Use when the user says "spec-3rd-opinion", or a settled plan needs 
 
 # spec-3rd-opinion
 
-**REQUIRED BACKGROUND:** You MUST know `spec-2nd-opinion` first — this skill is that entire flow (preconditions, the I21 pre-flight, brief discipline, dispatch rules incl. the no-dispatch stop and the dead-dispatch re-dispatch, merge gate, final-plan format incl. the doc write-back, Common Mistakes, Red Flags all apply unchanged) **plus one more auditor and a harder gate**. Only the deltas are written here.
+**REQUIRED BACKGROUND:** You MUST know `spec-2nd-opinion` first — this skill is that entire flow (preconditions, the I21 tier disclosure, brief discipline, dispatch rules incl. the no-dispatch stop and the dead-dispatch re-dispatch, merge gate, final-plan format incl. the doc write-back, Common Mistakes, Red Flags all apply unchanged) **plus one more auditor and a harder gate**. Only the deltas are written here.
 
 ## Overview
 

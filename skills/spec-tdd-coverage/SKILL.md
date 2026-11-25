@@ -17,20 +17,16 @@ spec-tdd, plus: the subagent **declares a case-list BEFORE implementing** and **
 
 spec-tdd's handoff says *"add your own unit tests"* — no case-list, no coverage report. Observed baseline: a diligent subagent wrote **18 green tests and hit 100% branch coverage, yet reported none of it.** Coverage was *luck*, not *evidence*, and the orchestrator had no case-list to audit. A less-diligent subagent on a branchier function leaves holes with nobody the wiser — spec-tdd Phase 3 audits only the acceptance test, so unit coverage is a blind spot.
 
-## Pre-flight — orchestrator tier check (I21)
+## Pre-flight — orchestrator tier disclosure (I21)
 
-Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
-
-> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
-
-Arrived from a front-end that already surfaced this check? Skip it — never re-ask (a handoff-recorded decline rides into your final-report disclosure).
+Before any work, check the model THIS session runs as. A run's judgment — the test/spec, the verification, the failure routing — executes entirely in the orchestrator's own context; I19 pins every dispatch tier, but nothing can upgrade the session itself — which is why the disclosure exists. **The check never asks and never stops** (maintainer ruling 2026-11-25): **top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) A non-top session → ONE announcement line — "non-top session — proceeding at this tier; disclosed in the final report" — then continue; the run never sits waiting on a tier answer (upgrading is the human's own `/model` decision).
 
 ## The 3 Phases (delta vs spec-tdd in **bold**)
 
 ### Phase 1 — Orchestrator writes the acceptance test
 > **Arrived from `grill-spec-tdd` / `adversarial-grill-spec-tdd`?** The acceptance test is already written and RED — skip to Phase 2 (still note the branch/exception surface for your gap-check).
 
-As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED — incl. the RED-purity check and the Phase-1 encoding-audit dispatch** (fresh-context review of the test vs the settled spec, before Phase 2; skip for grill arrivals) — and spec-tdd's **spec-doc persistence prompt** applies (no spec/plan/blueprint doc → ask once, default YES). **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
+As spec-tdd: ground it, write behavioral black-box tests, **MUST be RED — incl. the RED-purity check and the Phase-1 encoding-audit dispatch** (fresh-context review of the test vs the settled spec, before Phase 2; skip for grill arrivals) — and spec-tdd's **spec-doc persistence** applies (no spec/plan/blueprint doc → persist one automatically, no prompt — v1.41.0; announce the path in one line). **Note the branch/exception surface you expect** — it feeds your Phase-3 gap-check.
 
 ### Phase 2 — Delegate to subagent (extended handoff)
 **SPEC-INTEGRITY snapshot (before dispatch):** hash the acceptance test (`sha256sum <file>` / `certutil -hashfile <file> SHA256` / `git hash-object <file>`) and record it — the immutability baseline you verify in Phase 3.

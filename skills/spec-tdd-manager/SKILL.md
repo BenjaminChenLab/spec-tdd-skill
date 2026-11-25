@@ -22,7 +22,7 @@ Four design pillars:
 
 **Stage boundaries = session boundaries.** Every stage's output is an on-disk document (spec doc, trio, audit write-back): between any two stages you can `/clear`, switch sessions, and re-invoke this skill — S0 resumes from the documents on disk, nothing redone (the spirit of I17: existing only in the conversation = does not exist).
 
-**Ask ledger (the honest list).** Gate 1 (grill's; on the discussed-entry lane its stop rides Gate 2), Gate 2 (owned), the I21 tier check (asked once on this skill's entry, suppressed downstream along the handoff — the drivers' v1.31.0 entry clauses honor a carried answer, closing the former no-skip-clause friction), the target skill's own asks (dag's commit authorization + time-band mode — pre-ruled at a going-dark gate and carried on the hand-off when S5 fires unattended, per the going-dark pre-approval (`references/going-dark-window.md`)), the S2 quickfix exit suggestion (only on a predicate hit — one line, the user decides quickfix vs continue). Everything else is automatic — every automatic decision gets a one-line announcement + a one-line rationale, never an ask (the `longrun` flag adds no ask; dispatch ≠ ask).
+**Ask ledger (the honest list).** Gate 1 (grill's; on the discussed-entry lane its stop rides Gate 2), Gate 2 (owned), the target skill's own asks (dag's commit authorization + time-band mode — pre-ruled at a going-dark gate and carried on the hand-off when S5 fires unattended, per the going-dark pre-approval (`references/going-dark-window.md`)), the S2 quickfix exit suggestion (only on a predicate hit — one line, the user decides quickfix vs continue). The I21 tier check is not an ask — it announces a non-top session in one line and never stops (v1.41.0). Everything else is automatic — every automatic decision gets a one-line announcement + a one-line rationale, never an ask (the `longrun` flag adds no ask; dispatch ≠ ask).
 
 ## When to Use
 
@@ -39,13 +39,9 @@ Four design pillars:
 - The whole feature is adversarial-grade → grill still runs, but implementation **exits the pipeline** to a standalone tier run (grill Phase 3's routing and confirmation machinery stays as-is) — hours-level attack depth is not carried by the eco economics or this pipeline.
 - Exploratory / throwaway code → no skill needed.
 
-## Pre-flight — orchestrator tier check (I21)
+## Pre-flight — orchestrator tier disclosure (I21)
 
-Before any work, check the model THIS session runs as. This skill's S3 breakdown, S4 brief assembly and arbitration, and S2/S5 routing judgments all execute in the orchestrator's own context (**with the `longrun` flag, S3 drafting and S4 audit-running judgment move into TOP-pinned dispatches — the flag's invocation = recorded consent; the judgment the session keeps: the grill conversation, Gates 1/2, routing, user-finding relays**); I19 pins every dispatch's tier, but nothing can upgrade the session itself. **Top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) Otherwise surface this ONE ask and stop for the answer:
-
-> ⚠ **Orchestrator tier check** — this session runs a non-top model, and a run's planning / verification / routing all execute on it. **Upgrade** → run `/model`, pick the top tier, say "go" (the same conversation continues). **Ignore** → continue at this tier; the decline is disclosed in the final report.
-
-Already asked in this conversation (by this skill or an invoked skill) → skip, never re-ask; the handoff record carries it along, and the decline goes into the final report's disclosures.
+Before any work, check the model THIS session runs as. This skill's S3 breakdown, S4 brief assembly and arbitration, and S2/S5 routing judgments all execute in the orchestrator's own context (**with the `longrun` flag, S3 drafting and S4 audit-running judgment move into TOP-pinned dispatches — the flag's invocation = recorded consent; the judgment the session keeps: the grill conversation, Gates 1/2, routing, user-finding relays**); I19 pins every dispatch's tier, but nothing can upgrade the session itself. **The check never asks and never stops** (maintainer ruling 2026-11-25): **top tier — or any tier above it — in use, or no higher tier exists → silent, move on.** (Tier map, maintainer ruling 2026-10-13: TOP = the top workhorse tier — opus-class; the flagship-experimental tier above it, fable-class, is never required for a pin.) A non-top session → ONE announcement line — "non-top session — proceeding at this tier; disclosed in the final report" — then continue; the run never sits waiting on a tier answer (upgrading is the human's own `/model` decision).
 
 ## S0 — entry inventory (the resume starting point)
 
